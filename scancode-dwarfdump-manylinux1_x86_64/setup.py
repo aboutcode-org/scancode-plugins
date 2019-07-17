@@ -16,7 +16,7 @@ from setuptools import setup
 desc = '''A ScanCode path provider plugin to provide a prebuilt native dwarf binary.'''
 
 setup(
-    name='scancode-dwarf',
+    name='scancode-dwarfdump',
     version='1.0.0',
     license='gpl and lgpl',
     description=desc,
@@ -36,11 +36,11 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[
-        'open source', 'scancode', 'dwarf'
+        'open source', 'scancode', 'dwarf', 'dwarfdump'
     ],
     entry_points={
         'scancode_location_provider': [
-            'scancode-dwarf = scancode_dwarf:DwarfDumpPaths',
+            'scancode-dwarfdump= scancode_dwarfdump:DwarfDumpPaths',
         ],
     },
 )

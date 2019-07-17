@@ -40,9 +40,7 @@ from plugincode.location_provider import location_provider_impl
 class DwarfDumpPaths(LocationProviderPlugin):
     def get_locations(self):
         curr_dir = dirname(abspath(__file__))
-        lib_dir = join(curr_dir, 'bin')
         locations = {
-            'scancode.dwarf.libdir': lib_dir,
-            'scancode.dwarf.exe': join(lib_dir, 'dwarfdump2'),
+            'scancode.dwarfdump.exe': join(curr_dir, 'bin', 'dwarfdump2'),
         }
         return locations
