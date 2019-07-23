@@ -13,17 +13,17 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-desc = '''A ScanCode post-scan plugin to return filesets for different types of codebase summarization.'''
+desc = '''A ScanCode post-scan plugin to return components for different types of codebase consolidation.'''
 
 setup(
-    name='scancode-origin-summary',
+    name='scancode-consolidate-scan',
     version='1.0.0',
     license='Apache-2.0 with ScanCode acknowledgment',
     description=desc,
     long_description=desc,
     author='nexB',
     author_email='info@aboutcode.org',
-    url='https://github.com/nexB/scancode-toolkit/plugins/scancode-origin-summary',
+    url='https://github.com/nexB/scancode-toolkit/plugins/scancode-consolidate-scan',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -39,16 +39,14 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[
-        'open source', 'scancode', 'filesets', 'summarization'
+        'open source', 'scancode', 'components', 'summarization'
     ],
     install_requires=[
         'scancode-toolkit',
     ],
     entry_points={
         'scancode_post_scan': [
-            'origin-summary = plugin_origin_summary:OriginSummary',
+            'consolidate = plugin_consolidate:Consolidate',
         ],
     }
-
-
 )
