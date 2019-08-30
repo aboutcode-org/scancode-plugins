@@ -13,17 +13,17 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-desc = '''A ScanCode scan plugin to get Linux lkmclue info.'''
+desc = '''A ScanCode path provider plugin to provide a prebuilt native readelf binary.'''
 
 setup(
-    name='scancode-lkmclue',
+    name='scancode-readelf',
     version='1.0.0',
-    license='Apache-2.0 with ScanCode acknowledgment',
+    license='gpl',
     description=desc,
     long_description=desc,
     author='nexB',
     author_email='info@aboutcode.org',
-    url='https://github.com/nexB/scancode-toolkit/plugins/scancode-lkmclue',
+    url='https://github.com/nexB/scancode-toolkit/plugins',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -31,28 +31,16 @@ setup(
     zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Topic :: Utilities',
     ],
     keywords=[
-        'open source', 'scancode', 'lkmclue'
-    ],
-    install_requires=[
-        'scancode-toolkit',
-        'attr',
-        'scancode-ctags',
+        'open source', 'scancode', 'readelf'
     ],
     entry_points={
-        'scancode_scan': [
-            'scancode-lkmclue = lkmclue:LKMClueScanner',
-            'scancode-elf = elf:ELFScanner',
-
+        'scancode_location_provider': [
+            'scancode-readelf = scancode_readelf:ReadelfPaths',
         ],
-    }
-
-
+    },
 )
