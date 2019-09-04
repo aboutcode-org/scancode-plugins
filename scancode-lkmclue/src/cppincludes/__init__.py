@@ -25,56 +25,62 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import re
 from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
 import attr
 
-from commoncode import fileutils
+from textcode import analysis
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
 from scancode import CommandLineOption
 from scancode import SCAN_GROUP
 from typecode import contenttype
 
-from elf.elf import Elf
-
 
 @scan_impl
-class ELFScanner(ScanPlugin):
+class CPPIncludesScanner(ScanPlugin):
     """
-    Collect the names of shared objects/libraries needed by an Elf binary file.
+    Collect the #includes statements in a C/C++ file.
     """
     resource_attributes = OrderedDict(
-        elf_needed_library=attr.ib(default=attr.Factory(list), repr=False),
+        cpp_includes=attr.ib(default=attr.Factory(list), repr=False),
     )
 
     options = [
-        CommandLineOption(('--elf',),
+        CommandLineOption(('--cpp-includes',),
             is_flag=True, default=False,
-            help='Collect the names of shared objects/libraries needed by an Elf binary file.',
+            help='Collect the #includes statements in a C/C++ file.',
             help_group=SCAN_GROUP,
             sort_order=100),
     ]
 
-    def is_enabled(self, elf, **kwargs):
-        return elf
+    def is_enabled(self, cpp_includes, **kwargs):
+        return cpp_includes
 
     def get_scanner(self, **kwargs):
-        return get_elf_needed_library
+        return cpp_includes
 
 
-def get_elf_needed_library(location, **kwargs):
-    """
-    Return a list of needed_libraries 
-    """
-    
+def cpp_includes_re():
+    return re.compile(
+        '(?:[\t ]*#[\t ]*'
+        '(?:include|import)'
+        '[\t ]+)'
+        '''(["'<][a-zA-Z0-9_\-/\. ]*)'''
+        '''(?:["'>"])'''
+    )
+
+
+def cpp_includes(location, **kwargs):
+    """Collect the #includes statements in a C/C++ file."""
     T = contenttype.get_type(location)
-    if not T.is_elf:
+    if not T.is_c_source:
         return
-    elfie = elf.Elf(location)
-    results =[]
-    for needed_library in  elfie.needed_libraries:
-        results.append(needed_library)
-    return dict(elf_needed_library=results)
+    results = []
+    for line in analysis.unicode_text_lines(location):
+        for inc in cpp_includes_re().findall(line):
+            results.append(inc)
+    return dict(cpp_includes=results)

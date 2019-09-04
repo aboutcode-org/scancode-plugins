@@ -23,58 +23,27 @@
 #  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
 
 from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import print_function
 
 from collections import OrderedDict
-from functools import partial
-from itertools import chain
+import json
+import os
 
-import attr
+from scancode.cli_test_utils import check_json_scan
+from scancode.cli_test_utils import run_scan_click
 
-from commoncode import fileutils
-from plugincode.scan import ScanPlugin
-from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
-from typecode import contenttype
-
-from elf.elf import Elf
+from commoncode.testcase import FileBasedTesting
 
 
-@scan_impl
-class ELFScanner(ScanPlugin):
-    """
-    Collect the names of shared objects/libraries needed by an Elf binary file.
-    """
-    resource_attributes = OrderedDict(
-        elf_needed_library=attr.ib(default=attr.Factory(list), repr=False),
-    )
+class TestScanPluginCPPIncludesScan(FileBasedTesting):
 
-    options = [
-        CommandLineOption(('--elf',),
-            is_flag=True, default=False,
-            help='Collect the names of shared objects/libraries needed by an Elf binary file.',
-            help_group=SCAN_GROUP,
-            sort_order=100),
-    ]
-
-    def is_enabled(self, elf, **kwargs):
-        return elf
-
-    def get_scanner(self, **kwargs):
-        return get_elf_needed_library
-
-
-def get_elf_needed_library(location, **kwargs):
-    """
-    Return a list of needed_libraries 
-    """
+    test_data_dir = os.path.join(os.path.dirname(__file__), 'data')
     
-    T = contenttype.get_type(location)
-    if not T.is_elf:
-        return
-    elfie = elf.Elf(location)
-    results =[]
-    for needed_library in  elfie.needed_libraries:
-        results.append(needed_library)
-    return dict(elf_needed_library=results)
+    def test_cpp_includes(self):
+        test_dir = self.get_test_loc('cppincludes')
+        result_file = self.get_temp_file('json')
+        args = ['--cpp-includes', test_dir, '--json', result_file]
+        run_scan_click(args)
+        test_loc = self.get_test_loc('cppincludes/expected.json')
+        check_json_scan(test_loc, result_file, regen=False)
+
