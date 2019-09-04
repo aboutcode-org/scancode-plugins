@@ -38,8 +38,8 @@ from scancode import CommandLineOption
 from scancode import SCAN_GROUP
 from typecode import contenttype
 
-from scandwarf import dwarf
-from scandwarf import dwarf2
+from dwarf import dwarf
+from dwarf import dwarf2
 
 
 @scan_impl

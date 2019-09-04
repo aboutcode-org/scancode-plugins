@@ -34,7 +34,7 @@ from commoncode.testcase import FileBasedTesting
 from commoncode.system import on_mac
 from commoncode.system import on_windows
 
-from scandwarf import dwarf2
+from dwarf import dwarf2
 
 
 @skipIf(on_mac, 'Mac is not yet supported: nm needs to be built first')

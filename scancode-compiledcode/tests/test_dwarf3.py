@@ -34,7 +34,7 @@ from commoncode.testcase import FileBasedTesting
 from commoncode.system import on_mac
 from commoncode.system import on_windows
 
-import scandwarf
+import dwarf
 
 
 @skipIf(on_mac, 'Mac is not yet supported: nm needs to be built first')
@@ -43,7 +43,7 @@ class TestDwarf3(FileBasedTesting):
 
     def check_dwarf3(self, test_file, expected_file, regen=False):
         test_loc = self.get_test_loc(test_file, self.test_data_dir, exists=False)
-        result = list(scandwarf.dwarf_source_path(test_loc))
+        result = list(dwarf.dwarf_source_path(test_loc))
         expected_loc = self.get_test_loc(expected_file, self.test_data_dir, exists=False)
 
         if regen:

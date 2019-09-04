@@ -29,11 +29,11 @@ from collections import OrderedDict
 import json
 import os
 
+from commoncode.testcase import FileBasedTesting
 from scancode.cli_test_utils import check_json_scan
 from scancode.cli_test_utils import run_scan_click
 
-from scandwarf.dwarf import Dwarf
-from commoncode.testcase import FileBasedTesting
+from dwarf.dwarf import Dwarf
 
 
 class TestDwarf(FileBasedTesting):
