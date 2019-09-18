@@ -35,15 +35,15 @@ from scancode.cli_test_utils import run_scan_click
 from commoncode.testcase import FileBasedTesting
 
 
-class TestScanPluginJavaClassScan(FileBasedTesting):
+class TestCodeCommentLinesScan(FileBasedTesting):
 
     test_data_dir = os.path.join(os.path.dirname(__file__), 'data')
     
-    def test_javaclass_scan(self):
-        test_dir = self.get_test_loc('javaclass')
+    def test_codecommentlines(self):
+        test_dir = self.get_test_loc('sourcecode/input')
         result_file = self.get_temp_file('json')
-        args = ['--javaclass', test_dir, '--json', result_file]
+        args = ['--codecommentlines', test_dir, '--json', result_file]
         run_scan_click(args)
-        test_loc = self.get_test_loc('javaclass/expected.json')
-        check_json_scan(test_loc, result_file, regen=True)
+        test_loc = self.get_test_loc('sourcecode/expected.json')
+        check_json_scan(test_loc, result_file, regen=False)
 
