@@ -13,12 +13,12 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-desc = '''A ScanCode path provider plugin to provide a prebuilt native libarchive binary.'''
+desc = '''A ScanCode path provider plugin to provide a prebuilt native libmagic binary and database.'''
 
 setup(
-    name='extractcode-libarchive',
-    version='3.1.4',
-    license='bsd-simplified AND other',
+    name='typecode_libmagic',
+    version='5.22.3',
+    license='bsd-simplified AND other-permissive AND other-copyleft',
     description=desc,
     long_description=desc,
     author='nexB',
@@ -40,11 +40,11 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[
-        'open source', 'extractcode', 'libarchive'
+        'open source', 'typecode', 'libmagic'
     ],
     entry_points={
         'scancode_location_provider': [
-            'extractcode-libarchive = extractcode_libarchive:LibarchivePaths',
+            'typecode_libmagic = typecode_libmagic:LibmagicPaths',
         ],
     },
 )

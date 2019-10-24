@@ -13,12 +13,12 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-desc = '''A ScanCode path provider plugin to provide system package provided sevenzip binary.'''
+desc = '''A ScanCode path provider plugin to provide a system package provided libmagic binary and database.'''
 
 setup(
-    name='extractcode-7z-system-provided',
-    version='9.38.3',
-    license='lgpl-2.1 and unrar and brian-gladman-3-clause',
+    name='typecode_libmagic-system-provided',
+    version='5.22.3',
+    license='bsd-simplified',
     description=desc,
     long_description=desc,
     author='nexB',
@@ -33,14 +33,18 @@ setup(
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
+        #'TODO'
+        'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
         'Topic :: Utilities',
     ],
     keywords=[
-        'open source', 'extractcode', 'libarchive'
+        'open source', 'typecode', 'libmagic'
     ],
     entry_points={
         'scancode_location_provider': [
-            'extractcode-7zip = extractcode_7z:SevenzipPaths',
+            'typecode_libmagic = typecode_libmagic:LibmagicPaths',
         ],
     },
 )

@@ -16,7 +16,7 @@ from setuptools import setup
 desc = '''A ScanCode path provider plugin to provide a prebuilt native libarchive binary.'''
 
 setup(
-    name='extractcode-libarchive',
+    name='extractcode_libarchive',
     version='3.1.4',
     license='bsd-simplified AND other',
     description=desc,
@@ -44,7 +44,7 @@ setup(
     ],
     entry_points={
         'scancode_location_provider': [
-            'extractcode-libarchive = extractcode_libarchive:LibarchivePaths',
+            'extractcode_libarchive = extractcode_libarchive:LibarchivePaths',
         ],
     },
 )
