@@ -8,13 +8,13 @@
 set -e
 
 # un-comment to trace execution
-# set -x
+set -x
 
 
-here=`pwd`
+here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 mkdir -p $here/dist
 
-for root in "builtins misc binary-analysis"
+for root in builtins misc binary-analysis
   do
     for i in `ls $root`
       do 

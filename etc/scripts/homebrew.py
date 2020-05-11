@@ -688,7 +688,7 @@ PRESETS = {
         'fullversion': '3.4.2_1',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'builtins/extractcode_libarchive-macosx_10_9_intel/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-macosx_10_13/src/extractcode_libarchive',
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -746,7 +746,7 @@ PRESETS = {
 
     ('p7zip', 'high_sierra'): {
         'fullversion': '16.02_2',
-        'install_dir': 'builtins/extractcode_7z-macosx_10_9_intel/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-macosx_10_13/src/extractcode_7z',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -786,7 +786,7 @@ PRESETS = {
     },
     ('libmagic', 'high_sierra'): {
         'fullversion': '5.38',
-        'install_dir': 'builtins/typecode_libmagic-macosx_10_9_intel/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-macosx_10_13/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {

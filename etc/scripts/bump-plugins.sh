@@ -8,10 +8,9 @@
 set -e
 
 # un-comment to trace execution
-# set -x
+set -x
 
-
-for root in "builtins misc binary-analysis"
+for root in builtins
   do
     for i in `ls $root`
       do 
