@@ -79,20 +79,40 @@ class Repository:
         # a collection of {binary_package_name: BinaryPackage object}
         self.packages = {}
 
-    def fetch_packages_index(self):
+
+    def fetch_packages_index(self, cache_dir):
+        """
+        Populate BinaryPackage and SourcePackage in this repo.
+        Caches the data for the duration of the session.
+        """
+        if self.packages:
+            return self.packages
+        print('Loading Repo from %r' % self.db_url)
+        packages = self.packages = {}
+        index_loc = os.path.join(cache_dir, f'formula-{self.name}.json')
+        req = requests.get(self.db_url, timeout=REQUEST_TIMEOUT)
+        with open(index_loc, 'wb') as o:
+            o.write(req.content)
+        items = req.json()
+
+    def fetch_packages_index(self, cache_dir):
         """
         Populate BinaryPackage and SourcePackage in this repo.
         Caches the fetched index for the duration of the session.
         """
-        if self.sources and self.binaries:
-            return self.sources, self.binaries
-
+        if self.packages:
+            return self.sources, self.packages
         print('Loading Repo from %r' % self.db_url)
-
-        data = requests.get(self.db_url, timeout=REQUEST_TIMEOUT).content
 
         sources = self.sources = {}
         binaries = self.packages = {}
+
+        data = requests.get(self.db_url, timeout=REQUEST_TIMEOUT).content
+
+
+        db_loc = os.path.join(cache_dir, f'{self.name}.db')
+        with open(db_loc, 'wb') as o:
+            o.write(data)
 
         with io.BytesIO(data) as f:
             with tarfile.open(fileobj=f, mode='r:gz') as tar:
@@ -672,7 +692,7 @@ def fetch_package(name, version=None, repo='mingw64', cache_dir=None,
             os.remove(deletable)
 
     repo = REPOSITORIES[repo]
-    _source_packages, binary_packages = repo.fetch_packages_index()
+    _source_packages, binary_packages = repo.fetch_packages_index(cache_dir=cache_dir)
 
     root_package = binary_packages[name]
 
@@ -765,12 +785,13 @@ def main(argv):
         print('deletes:', deletes)
 
     if args.build_all:
-        fetch_package(name='mingw-w64-x86_64-libarchive', repo='mingw64', cache_dir='msys-cache')
-        fetch_package(name='mingw-w64-i686-libarchive', repo='mingw32', cache_dir='msys-cache')
-        fetch_package(name='mingw-w64-x86_64-file', repo='mingw64', cache_dir='msys-cache')
-        fetch_package(name='mingw-w64-i686-file', repo='mingw32', cache_dir='msys-cache')
-        fetch_package(name='p7zip', repo='msys64', cache_dir='msys-cache')
-        fetch_package(name='p7zip', repo='msys32', cache_dir='msys-cache')
+        cache_dir = cache_dir or 'src-msys2'
+        fetch_package(name='mingw-w64-x86_64-libarchive', repo='mingw64', cache_dir=cache_dir)
+        fetch_package(name='mingw-w64-i686-libarchive', repo='mingw32', cache_dir=cache_dir)
+        fetch_package(name='mingw-w64-x86_64-file', repo='mingw64', cache_dir=cache_dir)
+        fetch_package(name='mingw-w64-i686-file', repo='mingw32', cache_dir=cache_dir)
+        fetch_package(name='p7zip', repo='msys64', cache_dir=cache_dir)
+        fetch_package(name='p7zip', repo='msys32', cache_dir=cache_dir)
     else:
         fetch_package(name=name, version=version, repo=repo, cache_dir=cache_dir,
             install_dir=install_dir, ignore_deps=ignore_deps,
@@ -780,7 +801,7 @@ def main(argv):
 PRESETS = {
     ('p7zip', 'msys64'): {
         'version': '16.02-1',
-        'install_dir': 'plugins-builtin/extractcode_7z-win_amd64/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-win_amd64/src/extractcode_7z',
         'ignore_deps': ['bash', ],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -811,7 +832,7 @@ PRESETS = {
     ('p7zip', 'msys32'): {
         'version': '16.02-1',
         'ignore_deps': ['bash', ],
-        'install_dir': 'plugins-builtin/extractcode_7z-win32/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-win32/src/extractcode_7z',
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
             'usr/lib/p7zip/7z.exe': 'bin/',
@@ -842,7 +863,7 @@ PRESETS = {
         'version': '3.4.2-3',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'plugins-builtin/extractcode_libarchive-win_amd64/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-win_amd64/src/extractcode_libarchive',
         'copies': {
             'mingw64/share/licenses/': 'licenses/',
             'mingw64/bin/libarchive-13.dll': 'lib/libarchive.dll',
@@ -926,7 +947,7 @@ PRESETS = {
         'version': '3.4.2-3',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'plugins-builtin/extractcode_libarchive-win32/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-win32/src/extractcode_libarchive',
         'copies': {
 
             'mingw32/share/licenses/': 'licenses/',
@@ -1009,7 +1030,7 @@ PRESETS = {
     ('mingw-w64-x86_64-file', 'mingw64') : {
         'version': '5.37-1',
         'ignore_deps': [],
-        'install_dir': 'plugins-builtin/typecode_libmagic-win_amd64/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-win_amd64/src/typecode_libmagic',
         'deletes': ['licenses', 'lib', 'data'],
         'copies': {
             'mingw64/share/licenses/': 'licenses/',
@@ -1056,7 +1077,7 @@ PRESETS = {
     ('mingw-w64-i686-file', 'mingw32') : {
         'version': '5.37-1',
         'ignore_deps': [],
-        'install_dir': 'plugins-builtin/typecode_libmagic-win32/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-win32/src/typecode_libmagic',
         'deletes': ['licenses', 'lib', 'data'],
         'copies': {
             'mingw32/share/licenses/': 'licenses/',
@@ -1101,7 +1122,7 @@ PRESETS = {
 
     ('mingw-w64-x86_64-universal-ctags-git', 'mingw64'): {
         'version': 'r7253.7492b90e-1',
-        'install_dir': 'plugins/scancode-ctags-win_amd64/src/scancode_ctags',
+        'install_dir': 'binary-analysis/scancode-ctags-win_amd64/src/scancode_ctags',
         'ignore_deps': [],
         'deletes': ['licenses', 'bin', 'lib', ],
         'copies': {
@@ -1137,7 +1158,7 @@ PRESETS = {
     },
     ('mingw-w64-i686-universal-ctags-git', 'mingw32'): {
         'version': 'r7253.7492b90e-1',
-        'install_dir': 'plugins/scancode-ctags-win32/src/scancode_ctags',
+        'install_dir': 'binary-analysis/scancode-ctags-win32/src/scancode_ctags',
         'ignore_deps': [],
         'deletes': ['licenses', 'bin', 'lib', ],
         'copies': {
@@ -1172,7 +1193,7 @@ PRESETS = {
     },
     ('mingw-w64-cross-binutils', 'msys64'): {
         'version': '2.34-1',
-        'install_dir': 'plugins/scancode-readelf-win_amd64/src/scancode_readelf',
+        'install_dir': 'binary-analysis/scancode-readelf-win_amd64/src/scancode_readelf',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -1183,7 +1204,7 @@ PRESETS = {
     ('mingw-w64-cross-binutils', 'msys32'): {
         'version': '2.34-1',
         'ignore_deps': [],
-        'install_dir': 'plugins/scancode-readelf-win32/src/scancode_readelf',
+        'install_dir': 'binary-analysis/scancode-readelf-win32/src/scancode_readelf',
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
 #            'usr/share/licenses': 'licenses',

@@ -1,10 +1,9 @@
 #!/bin/bash
 #
-# Copyright (c) 2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+# Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #
 
-# ScanCode release script
-# This script builds wheels for plugins in th this repository
+# This script builds wheels for all the plugins
 
 set -e
 
@@ -12,14 +11,17 @@ set -e
 # set -x
 
 
-mkdir -p dist
+here=`pwd`
+mkdir -p $here/dist
 
-for i in `ls *code*`
-  do 
-    pushd plugins-builtin/$i
-    rm -rf dist build
-    python setup.py release
-    cp `find dist/ -type f` ../../thirdparty/
-    cp `find dist/ -type f` ../../dist/
-    popd
+for root in "builtins misc binary-analysis"
+  do
+    for i in `ls $root`
+      do 
+        pushd $root/$i
+        rm -rf dist build
+        python setup.py release
+        cp dist/* $here/dist/
+        popd
+      done
   done

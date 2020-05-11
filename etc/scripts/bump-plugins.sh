@@ -3,8 +3,7 @@
 # Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #
 
-# ScanCode release script
-# This script uses bumpversion to update the version of plugins in the plugins-builtin/ directory
+# This script uses bumpversion to update the minor version of all plugins
 
 set -e
 
@@ -12,10 +11,13 @@ set -e
 # set -x
 
 
-for i in `ls *code*`
-  do 
-    echo "Bumping $i"
-    pushd plugins-builtin/$i
-    bumpversion patch
-    popd
+for root in "builtins misc binary-analysis"
+  do
+    for i in `ls $root`
+      do 
+        pushd $root/$i
+        echo "Bumping $i"
+        bumpversion patch
+        popd
+      done
   done

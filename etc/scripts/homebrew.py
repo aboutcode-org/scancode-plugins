@@ -579,6 +579,8 @@ def main(argv):
              'install directory (such as in foo=bar/data). Repeat for more copies.')
     parser.add_argument('--deletes', type=str, action='append',
         help='Delete this path before installing. Repeat for more paths.')
+    parser.add_argument('--build-all', action='store_true',
+        help='Build all default packages.')
 
     args = parser.parse_args()
     name = args.package
@@ -602,12 +604,13 @@ def main(argv):
         print('deletes:', deletes)
 
     if args.build_all:
-        fetch_package(name='libarchive', osarch='x86_64_linux', cache_dir='homebrew-cache')
-        fetch_package(name='p7zip', osarch='x86_64_linux', cache_dir='homebrew-cache')
-        fetch_package(name='libmagic', osarch='x86_64_linux', cache_dir='homebrew-cache')
-        fetch_package(name='libarchive', osarch='high_sierra', cache_dir='homebrew-cache')
-        fetch_package(name='p7zip', osarch='high_sierra', cache_dir='homebrew-cache')
-        fetch_package(name='libmagic', osarch='high_sierra', cache_dir='homebrew-cache')
+        cache_dir = cache_dir or 'src-homebrew'
+        fetch_package(name='libarchive', osarch='x86_64_linux', cache_dir=cache_dir)
+        fetch_package(name='p7zip', osarch='x86_64_linux', cache_dir=cache_dir)
+        fetch_package(name='libmagic', osarch='x86_64_linux', cache_dir=cache_dir)
+        fetch_package(name='libarchive', osarch='high_sierra', cache_dir=cache_dir)
+        fetch_package(name='p7zip', osarch='high_sierra', cache_dir=cache_dir)
+        fetch_package(name='libmagic', osarch='high_sierra', cache_dir=cache_dir)
 
     else:
 
@@ -622,7 +625,7 @@ PRESETS = {
         'fullversion': '3.4.2_1',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'extractcode_libarchive-manylinux1_x86_64/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-manylinux1_x86_64/src/extractcode_libarchive',
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.so': 'lib/',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -685,7 +688,7 @@ PRESETS = {
         'fullversion': '3.4.2_1',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'extractcode_libarchive-macosx_10_9_intel/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-macosx_10_9_intel/src/extractcode_libarchive',
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -722,7 +725,7 @@ PRESETS = {
 
     ('p7zip', 'x86_64_linux'): {
         'fullversion': '16.02_2',
-        'install_dir': 'extractcode_7z-manylinux1_x86_64/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-manylinux1_x86_64/src/extractcode_7z',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -743,7 +746,7 @@ PRESETS = {
 
     ('p7zip', 'high_sierra'): {
         'fullversion': '16.02_2',
-        'install_dir': 'extractcode_7z-macosx_10_9_intel/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-macosx_10_9_intel/src/extractcode_7z',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -763,7 +766,7 @@ PRESETS = {
 
     ('libmagic', 'x86_64_linux'): {
         'fullversion': '5.38',
-        'install_dir': 'typecode_libmagic-manylinux1_x86_64/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-manylinux1_x86_64/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -783,7 +786,7 @@ PRESETS = {
     },
     ('libmagic', 'high_sierra'): {
         'fullversion': '5.38',
-        'install_dir': 'typecode_libmagic-macosx_10_9_intel/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-macosx_10_9_intel/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
