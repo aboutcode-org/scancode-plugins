@@ -17,8 +17,8 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native libarchiv
 
 setup(
     name='extractcode_libarchive',
-    version='3.4.2.2',
-    license='bsd-simplified AND other',
+    version='3.4.2.3',
+    license='bsd-simplified AND other-permissive AND other-copyleft',
     description=desc,
     long_description=desc,
     author='nexB',
