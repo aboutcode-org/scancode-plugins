@@ -1,20 +1,27 @@
-These are various scancode plugins.
+ScanCode plugins 
+================
+
+https://github.com/nexB/scancode-plugins
+
+These are various scancode plugins, some are builtins and some are extras. 
 Several of them contain pre-built binaries. 
 
-To re-provision prebuilt binaries, follow these instructions:
+Each plugin is under its own license.
 
-- For windows, see msys2.py::
+The src-* directories contain the source code of pre-built plugins that contain
+native binaries.
 
-    pip install requests
-    python etc/msys2.py --build-all --cache-dir msys-cache
-    clamscan *
+See also:
 
-- For Linux and macOS, see homebrew.py::
+ - https://github.com/nexB/scancode-toolkit
+ - https://github.com/nexB/scancode-thirdparty-src (source for some plugins being transitioned)
 
-    pip install requests
-    python etc/homebrew.py --build-all --cache-dir homebrew-cache
-    clamscan *
 
+To re-provision pre-built binaries, follow these instructions (only on Linux)::
+
+    ./configure
+    etc/scripts/fetch-plugins.sh
+    clamscan -v *
         
 In all cases, run clamscan or an up to date antivirus scanner before pushing
 a new release.
@@ -22,5 +29,4 @@ a new release.
 
 To build the wheels for all the plugins::
 
-    
-
+    etc/scripts/build-plugins.sh
