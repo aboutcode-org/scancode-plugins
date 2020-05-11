@@ -12,7 +12,8 @@ set -x
 
 
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-mkdir -p $here/dist
+dist=$here/../../dist
+mkdir -p $dist
 
 for root in builtins misc binary-analysis
   do
@@ -21,7 +22,7 @@ for root in builtins misc binary-analysis
         pushd $root/$i
         rm -rf dist build
         python setup.py release
-        cp dist/* $here/dist
+        cp dist/* $dist
         popd
       done
   done
