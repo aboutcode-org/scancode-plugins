@@ -24,7 +24,7 @@ fi
 
 function setup {
     # create a virtualenv on Python
-    mkdir $CONFIGURE_ROOT_DIR/tmp
+    mkdir -p $CONFIGURE_ROOT_DIR/tmp
     wget -O $CONFIGURE_ROOT_DIR/tmp/virtualenv.pyz https://bootstrap.pypa.io/virtualenv.pyz
     $PYTHON_EXE $CONFIGURE_ROOT_DIR/tmp/virtualenv.pyz $CONFIGURE_ROOT_DIR/tmp
     source $CONFIGURE_ROOT_DIR/tmp/bin/activate
