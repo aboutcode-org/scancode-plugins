@@ -17,12 +17,32 @@ mkdir -p $dist
 
 for root in builtins misc binary-analysis
   do
-    for i in `ls $root`
+    for plugin in `ls $root`
       do 
-        pushd $root/$i
+        pushd $root/$plugin
         rm -rf dist build
         python setup.py release
-        cp dist/* $dist
+        if [[ "$plugin" == extractcode_libarchive-linux ]]
+        then
+            # fix the wheel .so rpaths and copy to the top level dist
+            LD_LIBRARY_PATH=$(pwd)/src/extractcode_libarchive/lib \
+                auditwheel repair \
+                --lib-sdir /lib \
+                --plat manylinux2014_x86_64 \
+                --wheel-dir $dist \
+                dist/$(ls -1 dist) 
+        elif [[ "$plugin" == typecode_libmagic-linux ]]
+        then
+            # fix the wheel .so rpaths and copy to the top level dist
+            LD_LIBRARY_PATH=$(pwd)/src/typecode_libmagic/lib \
+                auditwheel repair \
+                --lib-sdir /lib \
+                --plat manylinux2014_x86_64 \
+                --wheel-dir $dist \
+                dist/$(ls -1 dist) 
+        else
+            cp dist/* $dist
+        fi
         popd
       done
   done
