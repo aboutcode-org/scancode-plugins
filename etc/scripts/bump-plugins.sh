@@ -12,10 +12,10 @@ set -x
 
 for root in builtins
   do
-    for i in `ls $root`
+    for plugin in `ls $root`
       do 
-        pushd $root/$i
-        echo "Bumping $i"
+        pushd $root/$plugin
+        echo "Bumping plugin $plugin"
         bumpversion patch
         popd
       done
