@@ -1,2 +1,4 @@
 requests
 bumpversion
+delocate
+auditwheel
