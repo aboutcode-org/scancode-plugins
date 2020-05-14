@@ -17,7 +17,11 @@ See also:
  - https://github.com/nexB/scancode-thirdparty-src (source for some plugins being transitioned)
 
 
-To re-provision pre-built binaries, follow these instructions (only on Linux)::
+To re-provision pre-built binaries, follow these instructions (only on Linux):
+
+- install clamav and patchelf
+
+- then run::
 
     ./configure
     etc/scripts/fetch-plugins.sh
