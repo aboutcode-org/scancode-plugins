@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2020 nexB Inc.
-# Copyright 2016-2019 Christoph Reiter
+# Copyright (c) 2016-2019 Christoph Reiter
 #
 # Based on MSYS2 web application code.
 # download_url: https://raw.githubusercontent.com/msys2/msys2-web/628ec96975ab84b4e13567c8d4bdc25ad1a8f937/main.py
@@ -801,7 +801,7 @@ def main(argv):
 PRESETS = {
     ('p7zip', 'msys64'): {
         'version': '16.02-1',
-        'install_dir': 'builtins/extractcode_7z-win_amd64/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-win64/src/extractcode_7z',
         'ignore_deps': ['bash', ],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -863,7 +863,7 @@ PRESETS = {
         'version': '3.4.2-3',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'builtins/extractcode_libarchive-win_amd64/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-win64/src/extractcode_libarchive',
         'copies': {
             'mingw64/share/licenses/': 'licenses/',
             'mingw64/bin/libarchive-13.dll': 'lib/libarchive.dll',
@@ -1030,7 +1030,7 @@ PRESETS = {
     ('mingw-w64-x86_64-file', 'mingw64') : {
         'version': '5.37-1',
         'ignore_deps': [],
-        'install_dir': 'builtins/typecode_libmagic-win_amd64/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-win64/src/typecode_libmagic',
         'deletes': ['licenses', 'lib', 'data'],
         'copies': {
             'mingw64/share/licenses/': 'licenses/',
@@ -1122,7 +1122,7 @@ PRESETS = {
 
     ('mingw-w64-x86_64-universal-ctags-git', 'mingw64'): {
         'version': 'r7253.7492b90e-1',
-        'install_dir': 'binary-analysis/scancode-ctags-win_amd64/src/scancode_ctags',
+        'install_dir': 'binary-analysis/scancode-ctags-win64/src/scancode_ctags',
         'ignore_deps': [],
         'deletes': ['licenses', 'bin', 'lib', ],
         'copies': {
@@ -1193,7 +1193,7 @@ PRESETS = {
     },
     ('mingw-w64-cross-binutils', 'msys64'): {
         'version': '2.34-1',
-        'install_dir': 'binary-analysis/scancode-readelf-win_amd64/src/scancode_readelf',
+        'install_dir': 'binary-analysis/scancode-readelf-win64/src/scancode_readelf',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {

@@ -159,8 +159,8 @@ class Download:
         # prefer revision over tag
         commitish = revision or tag
         download_url = f'{url}/archive/{commitish}.tar.gz'
-        _, _, repo_name = url.rpartition('/')
-        file_name = f'{repo_name}-{commitish}.tar.gz'
+        _, _, ghrepo_name = url.rpartition('/')
+        file_name = f'{ghrepo_name}-{commitish}.tar.gz'
         return cls(url=download_url, file_name=file_name,)
 
     def verify(self):
@@ -625,7 +625,7 @@ PRESETS = {
         'fullversion': '3.4.2_1',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'builtins/extractcode_libarchive-manylinux1_x86_64/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-linux/src/extractcode_libarchive',
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.so': 'lib/',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -688,7 +688,7 @@ PRESETS = {
         'fullversion': '3.4.2_1',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
-        'install_dir': 'builtins/extractcode_libarchive-macosx_10_13/src/extractcode_libarchive',
+        'install_dir': 'builtins/extractcode_libarchive-macosx/src/extractcode_libarchive',
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -725,7 +725,7 @@ PRESETS = {
 
     ('p7zip', 'x86_64_linux'): {
         'fullversion': '16.02_2',
-        'install_dir': 'builtins/extractcode_7z-manylinux1_x86_64/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-linux/src/extractcode_7z',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -746,7 +746,7 @@ PRESETS = {
 
     ('p7zip', 'high_sierra'): {
         'fullversion': '16.02_2',
-        'install_dir': 'builtins/extractcode_7z-macosx_10_13/src/extractcode_7z',
+        'install_dir': 'builtins/extractcode_7z-macosx/src/extractcode_7z',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -766,7 +766,7 @@ PRESETS = {
 
     ('libmagic', 'x86_64_linux'): {
         'fullversion': '5.38',
-        'install_dir': 'builtins/typecode_libmagic-manylinux1_x86_64/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-linux/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -786,7 +786,7 @@ PRESETS = {
     },
     ('libmagic', 'high_sierra'): {
         'fullversion': '5.38',
-        'install_dir': 'builtins/typecode_libmagic-macosx_10_13/src/typecode_libmagic',
+        'install_dir': 'builtins/typecode_libmagic-macosx/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
