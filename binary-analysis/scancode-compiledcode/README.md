@@ -12,7 +12,7 @@ A ScanCode scan plugin to get lkmclue, dwarf, gwt, cpp includes, code/comments l
 To start the test case, please run:
 1. ./configure
 2. source bin/activate
-3. pip install -e plugins/scancode-dwarfdump-manylinux1_x86_64  -e plugins/scancode-ctags-manylinux1_x86_64 -e plugins/scancode-readelf-manylinux1_x86_64 -e plugins/scancode-compiledcode
+3. pip install -e plugins/scancode-dwarfdump-manylinux2014_x86_64  -e plugins/scancode-ctags-manylinux2014_x86_64 -e plugins/scancode-readelf-manylinux2014_x86_64 -e plugins/scancode-compiledcode
 4. pytest -vvs plugins/scancode-compiledcode/tests/test_lkmclue.py
    pytest -vvs plugins/scancode-compiledcode/tests/test_elf.py
    pytest -vvs plugins/scancode-compiledcode/tests/test_cpp_includes.py
