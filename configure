@@ -13,6 +13,8 @@ CONFIGURE_ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ "$1" == "--clean" ]]; then
     rm -rf "$CONFIGURE_ROOT_DIR/tmp"
+    find "$CONFIGURE_ROOT_DIR" -type d -name dist | xargs rm -rf
+    find "$CONFIGURE_ROOT_DIR" -type d -name build | xargs rm -rf
     exit
 fi
 
