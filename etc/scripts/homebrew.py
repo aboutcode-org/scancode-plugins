@@ -6,6 +6,7 @@ Utility to keep linux and macOS prebuilt ScanCode toolkit plugins up to date.
 """
 
 import argparse
+import contextlib
 from distutils.dir_util import copy_tree
 import hashlib
 import os
@@ -14,6 +15,7 @@ import sys
 import tarfile
 
 import requests
+import subprocess
 
 
 REQUEST_TIMEOUT = 60
@@ -358,10 +360,12 @@ def extract_tar(location, target_dir):
     """
     Extract a tar archive at `location` in the `target_dir` directory.
     """
-
     with open(location, 'rb') as input_tar:
         with tarfile.open(fileobj=input_tar) as tar:
-            tar.extractall(target_dir)
+            members = tar.getmembers()
+            for tarinfo in members:
+                tarinfo.mode = 0o755
+            tar.extractall(target_dir, members=members)
 
 
 def install_files(extracted_dir, install_dir, package_name, package_fullversion, copies=None):
@@ -399,6 +403,71 @@ def install_files(extracted_dir, install_dir, package_name, package_fullversion,
                 if isdir:
                     os.makedirs(dst, exist_ok=True)
                 shutil.copy2(src, dst)
+
+
+def patchelf(*args):
+    """
+    Run patchelf with the provided `args` arguments to patch an ELF file. The
+    primary use is to set a proper RPATH to load needed shared objects and avoid
+    the dependency on LD_LIBRARY_PATH.
+    """
+    cmdline = ['patchelf'] + list(args)
+    subprocess.check_call(cmdline)
+
+
+def patchmacho(exe_path):
+    """
+    Patch a Mach-O file by rewriting loader path using macholib for the
+    provided `exe_path`. The primary use is to set a proper @loader_path to load
+    needed dylib shared objects and avoid the dependency on DYLD_LIBRARY_PATH
+    and similar.
+
+    Replace header such as:
+        @@HOMEBREW_PREFIX@@/opt/xz/lib/liblzma.5.dylib
+    with:
+        @loader_path/opt/zstd/lib/libzstd.1.dylib
+    Leave other unchanged such as:
+        /usr/lib/libSystem.B.dylib
+
+    TODO: what about the "SONAME" proper?
+        @@HOMEBREW_PREFIX@@/opt/libarchive/lib/libarchive.13.dylib
+    """
+    def get_updated_loader_path(loader_path):
+        """
+        MachO.rewriteLoadCommands `changefunc` to only change HOMEBREW-
+        prefixed paths and leave any system library path unchanged.
+        """
+        if '@@HOMEBREW_PREFIX@@' in loader_path:
+            # make this @loader_path-relative
+            _, _, dylib_name = loader_path.rpartition('/')
+            return f'@loader_path/{dylib_name}'
+
+    from macholib.MachO import MachO
+    exe = MachO(exe_path)
+    exe.rewriteLoadCommands(changefunc=get_updated_loader_path)
+
+    # from macholib.MachOStandalone
+    with open(exe_path, 'rb+') as macho:
+        for _header in exe.headers:
+            macho.seek(0)
+            exe.write(macho)
+        macho.seek(0, 2)
+        macho.flush()
+
+
+def apply_fixes(fixes):
+    """
+    Apply a list of `fixes` as (fixer, args) to an executable file (provided in the args).
+    """
+    fixers = {
+        'patchelf': patchelf,
+        'patchmacho': patchmacho,
+    }
+    for fix in fixes:
+        fixer = fix[0]
+        args = fix[1:]
+        fixer = fixers[fixer]
+        fixer(*args)
 
 
 def check_installed_files(install_dir, copies, package):
@@ -458,7 +527,8 @@ def extract_in_place(location):
 
 
 def fetch_package(name, osarch, fullversion=None, cache_dir=None,
-                  install_dir=None, ignore_deps=(), copies=None, deletes=()):
+                  install_dir=None, ignore_deps=(), copies=None, deletes=(),
+                  fixes=()):
     """
     Fetch a `package` with `name` for `osarch` and optional `fullversion` and
     save its sources and binaries as well as its full dependency tree sources
@@ -474,6 +544,7 @@ def fetch_package(name, osarch, fullversion=None, cache_dir=None,
     fullversion = fullversion or presets.get('fullversion')
     install_dir = install_dir or presets.get('install_dir')
     deletes = deletes or presets.get('deletes', [])
+    fixes = fixes or presets.get('fixes', [])
 
     for deletable in deletes:
         deletable = os.path.join(install_dir, deletable)
@@ -524,6 +595,23 @@ def fetch_package(name, osarch, fullversion=None, cache_dir=None,
             bin_cache_dir=bin_cache_dir, src_cache_dir=src_cache_dir)
 
     check_installed_files(install_dir, copies, root_package)
+
+    if fixes:
+        with pushd(install_dir):
+            apply_fixes(fixes)
+
+
+@contextlib.contextmanager
+def pushd(path):
+    """
+    Context manager to change the current working directory to `path`.
+    """
+    original_cwd = os.getcwd()
+    try:
+        os.chdir(path)
+        yield os.getcwd()
+    finally:
+        os.chdir(original_cwd)
 
 
 def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cache_dir):
@@ -626,29 +714,61 @@ PRESETS = {
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-linux/src/extractcode_libarchive',
+        'fixes': [
+            ('patchelf', '--set-soname', 'libarchive.so', 'lib/libarchive.so'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libarchive.so'),
+
+            ('patchelf', '--replace-needed', 'libb2.so.1'   , 'libb2-la3421.so.1'   , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libbsd.so.0'  , 'libbsd-la3421.so.0'  , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libbz2.so.1.0', 'libbz2-la3421.so.1.0', 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libexpat.so.1', 'libexpat-la3421.so.1', 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'liblz4.so.1'  , 'liblz4-la3421.so.1'  , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'liblzma.so.5' , 'liblzma-la3421.so.5' , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libz.so.1'    , 'libz-la3421.so.1'    , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libzstd.so.1' , 'libzstd-la3421.so.1' , 'lib/libarchive.so'),
+
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libb2-la3421.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbsd-la3421.so.0'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbz2-la3421.so.1.0'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libexpat-la3421.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblz4-la3421.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblzma-la3421.so.5'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-la3421.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libzstd-la3421.so.1'),
+
+            ('patchelf', '--set-soname', 'libb2-la3421.so.1'   , 'lib/libb2-la3421.so.1'   ),
+            ('patchelf', '--set-soname', 'libbsd-la3421.so.0'  , 'lib/libbsd-la3421.so.0'  ),
+            ('patchelf', '--set-soname', 'libbz2-la3421.so.1.0', 'lib/libbz2-la3421.so.1.0'),
+            ('patchelf', '--set-soname', 'libexpat-la3421.so.1', 'lib/libexpat-la3421.so.1'),
+            ('patchelf', '--set-soname', 'liblz4-la3421.so.1'  , 'lib/liblz4-la3421.so.1'  ),
+            ('patchelf', '--set-soname', 'liblzma-la3421.so.5' , 'lib/liblzma-la3421.so.5' ),
+            ('patchelf', '--set-soname', 'libz-la3421.so.1'    , 'lib/libz-la3421.so.1'    ),
+            ('patchelf', '--set-soname', 'libzstd-la3421.so.1' , 'lib/libzstd-la3421.so.1' ),
+
+        ],
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.so': 'lib/',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
             'libarchive/3.4.2_1/COPYING': 'licenses/libarchive/',
             'libarchive/3.4.2_1/README.md': 'licenses/libarchive/',
 
-            'libb2/0.98.1/lib/libb2.so.1': 'lib/',
+            'libb2/0.98.1/lib/libb2.so.1': 'lib/libb2-la3421.so.1',
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
             'libb2/0.98.1/COPYING': 'licenses/libb2/',
 
-            'libbsd/0.10.0/lib/libbsd.so.0': 'lib/',
+            'libbsd/0.10.0/lib/libbsd.so.0': 'lib/libbsd-la3421.so.0',
             'libbsd/0.10.0/INSTALL_RECEIPT.json': 'licenses/libbsd/',
             'libbsd/0.10.0/COPYING': 'licenses/libbsd/',
             'libbsd/0.10.0/README': 'licenses/libbsd/',
             'libbsd/0.10.0/ChangeLog': 'licenses/libbsd/',
 
-            'bzip2/1.0.8/lib/libbz2.so.1': 'lib/',
+            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la3421.so.1.0',
             'bzip2/1.0.8/INSTALL_RECEIPT.json': 'licenses/bzip2/',
             'bzip2/1.0.8/LICENSE': 'licenses/bzip2/',
             'bzip2/1.0.8/README': 'licenses/bzip2/',
             'bzip2/1.0.8/CHANGES': 'licenses/bzip2/',
 
-            'expat/2.2.9/lib/libexpat.so.1': 'lib/',
+            'expat/2.2.9/lib/libexpat.so.1': 'lib/libexpat-la3421.so.1',
             'expat/2.2.9/INSTALL_RECEIPT.json': 'licenses/expat/',
             'expat/2.2.9/COPYING': 'licenses/expat/',
             'expat/2.2.9/README.md': 'licenses/expat/',
@@ -656,13 +776,13 @@ PRESETS = {
             'expat/2.2.9/Changes': 'licenses/expat/',
             'expat/2.2.9/share/doc/expat/changelog': 'licenses/expat/',
 
-            'lz4/1.9.2/lib/liblz4.so.1': 'lib/',
+            'lz4/1.9.2/lib/liblz4.so.1': 'lib/liblz4-la3421.so.1',
             'lz4/1.9.2/INSTALL_RECEIPT.json': 'licenses/lz4/',
             'lz4/1.9.2/LICENSE': 'licenses/lz4/',
             'lz4/1.9.2/README.md': 'licenses/lz4/',
             'lz4/1.9.2/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
 
-            'xz/5.2.5/lib/liblzma.so.5': 'lib/',
+            'xz/5.2.5/lib/liblzma.so.5': 'lib/liblzma-la3421.so.5',
             'xz/5.2.5/INSTALL_RECEIPT.json': 'licenses/xz/',
             'xz/5.2.5/COPYING': 'licenses/xz/',
             'xz/5.2.5/README': 'licenses/xz/',
@@ -670,12 +790,12 @@ PRESETS = {
             'xz/5.2.5/share/doc/xz/THANKS': 'licenses/xz/',
             'xz/5.2.5/ChangeLog': 'licenses/xz/',
 
-            'zlib/1.2.11/lib/libz.so.1': 'lib/',
+            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-la3421.so.1',
             'zlib/1.2.11/INSTALL_RECEIPT.json': 'licenses/zlib/',
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
 
-            'zstd/1.4.4/lib/libzstd.so.1': 'lib/',
+            'zstd/1.4.4/lib/libzstd.so.1': 'lib/libzstd-la3421.so.1',
             'zstd/1.4.4/INSTALL_RECEIPT.json': 'licenses/zstd/',
             'zstd/1.4.4/COPYING': 'licenses/zstd/',
             'zstd/1.4.4/README.md': 'licenses/zstd/',
@@ -689,6 +809,14 @@ PRESETS = {
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-macosx/src/extractcode_libarchive',
+        'fixes': [
+            ('patchmacho', 'lib/libarchive.dylib'),
+            ('patchmacho', 'lib/libb2.1.dylib'),
+            ('patchmacho', 'lib/liblz4.1.dylib'),
+            ('patchmacho', 'lib/liblzma.5.dylib'),
+            ('patchmacho', 'lib/libzstd.1.dylib'),
+        ],
+
         'copies': {
             'libarchive/3.4.2_1/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
             'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -722,12 +850,16 @@ PRESETS = {
         }
     },
 
-
     ('p7zip', 'x86_64_linux'): {
         'fullversion': '16.02_2',
         'install_dir': 'builtins/extractcode_7z-linux/src/extractcode_7z',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
+        'fixes': [
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'bin/7z.so'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'bin/7z'),
+            ('patchelf', '--set-interpreter', '/lib64/ld-linux-x86-64.so.2', 'bin/7z'),
+        ],
         'copies': {
             'p7zip/16.02_2/lib/p7zip/7z': 'bin/',
             'p7zip/16.02_2/lib/p7zip/7z.so': 'bin/',
@@ -742,7 +874,6 @@ PRESETS = {
             'p7zip/16.02_2/share/doc/p7zip/ChangeLog': 'licenses/p7zip/',
         },
     },
-
 
     ('p7zip', 'high_sierra'): {
         'fullversion': '16.02_2',
@@ -769,6 +900,13 @@ PRESETS = {
         'install_dir': 'builtins/typecode_libmagic-linux/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
+        'fixes': [
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libmagic.so'),
+            ('patchelf', '--replace-needed', 'libz.so.1' , 'libz-lm538.so.1', 'lib/libmagic.so'),
+
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-lm538.so.1'),
+            ('patchelf', '--set-soname', 'libz-lm538.so.1', 'lib/libz-lm538.so.1'),
+        ],
         'copies': {
             'libmagic/5.38/lib/libmagic.so': 'lib/',
             'libmagic/5.38/share/misc/magic.mgc': 'data/',
@@ -778,7 +916,7 @@ PRESETS = {
             'libmagic/5.38/AUTHORS': 'licenses/libmagic/',
             'libmagic/5.38/ChangeLog': 'licenses/libmagic/',
 
-            'zlib/1.2.11/lib/libz.so.1': 'lib/',
+            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-lm538.so.1',
             'zlib/1.2.11/INSTALL_RECEIPT.json': 'licenses/zlib/',
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
@@ -789,6 +927,10 @@ PRESETS = {
         'install_dir': 'builtins/typecode_libmagic-macosx/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
+        'fixes': [
+            ('patchmacho', 'lib/libmagic.dylib'),
+        ],
+
         'copies': {
             'libmagic/5.38/lib/libmagic.1.dylib': 'lib/libmagic.dylib',
             'libmagic/5.38/share/misc/magic.mgc': 'data/',
