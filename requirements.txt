@@ -1,4 +1,4 @@
 requests
 bumpversion
-delocate
-auditwheel
+macholib==1.14
+altgraph==0.17
