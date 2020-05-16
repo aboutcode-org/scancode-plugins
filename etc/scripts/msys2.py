@@ -79,22 +79,6 @@ class Repository:
         # a collection of {binary_package_name: BinaryPackage object}
         self.packages = {}
 
-
-    def fetch_packages_index(self, cache_dir):
-        """
-        Populate BinaryPackage and SourcePackage in this repo.
-        Caches the data for the duration of the session.
-        """
-        if self.packages:
-            return self.packages
-        print('Loading Repo from %r' % self.db_url)
-        packages = self.packages = {}
-        index_loc = os.path.join(cache_dir, f'formula-{self.name}.json')
-        req = requests.get(self.db_url, timeout=REQUEST_TIMEOUT)
-        with open(index_loc, 'wb') as o:
-            o.write(req.content)
-        items = req.json()
-
     def fetch_packages_index(self, cache_dir):
         """
         Populate BinaryPackage and SourcePackage in this repo.
