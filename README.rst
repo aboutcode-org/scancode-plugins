@@ -19,7 +19,10 @@ See also:
 
 To re-provision pre-built binaries, follow these instructions (only on Linux):
 
-- install clamav and patchelf
+- install the system package for clamav
+- install the latest patchelf from sources.
+  As of 2020-05-14, this is https://github.com/NixOS/patchelf/archive/978325def61e0126d13d7936eee51326cbd433d4.tar.gz
+  See src to get it. Older versions are buggy.
 
 - then run::
 
