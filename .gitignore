@@ -6,13 +6,10 @@
 *.egg-info
 /dist
 /build
-/bin
-/lib
 /scripts
 /Scripts
 /Lib
-lib64
-lib
+/lib64
 /pip-selfcheck.json
 /tmp
 .Python
