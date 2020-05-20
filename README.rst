@@ -7,6 +7,7 @@ These are various scancode plugins, some are builtins and some are extras.
 Several of them contain pre-built binaries. 
 
 Each plugin is under its own license.
+This repository (but there is not much in it) licensed under the Apache 2.0 license.
 
 The src-* directories contain the source code of pre-built plugins that contain
 native binaries.
