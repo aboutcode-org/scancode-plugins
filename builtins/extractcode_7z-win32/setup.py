@@ -17,13 +17,13 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native sevenzip 
 
 setup(
     name='extractcode_7z',
-    version='16.02.1.1',
+    version='16.04.1',
     license='lgpl-2.1 and unrar and brian-gladman-3-clause',
     description=desc,
     long_description=desc,
     author='nexB',
     author_email='info@aboutcode.org',
-    url='https://github.com/nexB/scancode-toolkit',
+    url='https://github.com/nexB/scancode-plugins',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
