@@ -73,7 +73,7 @@ class Repository:
         # a collection of {binary_package_name: BinaryPackage object}
         self.packages = {}
 
-    def fetch_packages_index(self, cache_dir):
+    def update_packages_index(self, cache_dir):
         """
         Populate BinaryPackage and SourcePackage in this repo.
         Caches the data for the duration of the session.
@@ -170,9 +170,9 @@ class Download:
             print(f'Cannot verify download: {self}')
         with open (self.fetched_location, 'rb') as f:
             fsha256 = hashlib.sha256(f.read()).hexdigest()
-            assert fsha256 == self.sha256
+            assert fsha256 == self.sha256, f'Invalid SHA256 for: {self.fetched_location}'
 
-    def fetch(self, dir_location, force=False, verify=False):
+    def fetch(self, dir_location, force=False, verify=True):
         """
         Fetch this downloa` and save it in `dir_location`.
         Return the `location` where the file is saved.
@@ -180,6 +180,8 @@ class Download:
         """
         self.fetched_location = fetch_file(
             url=self.url, dir_location=dir_location, file_name=self.file_name, force=force)
+        if verify:
+            self.verify()
         return self.fetched_location
 
 
@@ -526,7 +528,7 @@ def extract_in_place(location):
     return target_dir
 
 
-def fetch_package(name, osarch, fullversion=None, cache_dir=None,
+def update_package(name, osarch, fullversion=None, cache_dir=None,
                   install_dir=None, ignore_deps=(), copies=None, deletes=(),
                   fixes=()):
     """
@@ -556,7 +558,9 @@ def fetch_package(name, osarch, fullversion=None, cache_dir=None,
             os.remove(deletable)
 
     repository = REPOSITORIES[osarch]
-    binary_packages = repository.fetch_packages_index(cache_dir=cache_dir)
+    binary_packages = repository.update_packages_index(cache_dir=cache_dir)
+
+    extracted_locations =[]
 
     root_package = binary_packages[name]
 
@@ -576,10 +580,11 @@ def fetch_package(name, osarch, fullversion=None, cache_dir=None,
     if not install_dir:
         raise Exception('install_dir is required.')
 
-    process_package(
+    extracted_to = process_package(
         package=root_package, osarch=osarch,
         install_dir=install_dir, copies=copies,
         bin_cache_dir=bin_cache_dir, src_cache_dir=src_cache_dir)
+    extracted_locations.append(extracted_to)
 
     print('Fetching deps for: {}, ignoring deps: {}'.format(
         root_package.name,
@@ -589,16 +594,26 @@ def fetch_package(name, osarch, fullversion=None, cache_dir=None,
             binary_packages=binary_packages,
             ignore_deps=ignore_deps):
 
-        process_package(
+        extracted_to = process_package(
             package=dependency, osarch=osarch,
             install_dir=install_dir, copies=copies,
             bin_cache_dir=bin_cache_dir, src_cache_dir=src_cache_dir)
+        extracted_locations.append(extracted_to)
 
     check_installed_files(install_dir, copies, root_package)
 
     if fixes:
         with pushd(install_dir):
             apply_fixes(fixes)
+
+    # finally cleanup after thyself, removing extracted locations
+
+    for exloc in extracted_locations:
+        if os.path.exists(exloc):
+            if os.path.isdir(exloc):
+                shutil.rmtree(exloc, False)
+            else:
+                os.remove(exloc)
 
 
 @contextlib.contextmanager
@@ -619,7 +634,6 @@ def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cac
     Fetch sources and binaries and install files for package.
     """
     print('Fetching package for: {}'.format(package))
-
     # fetch the binary for the requested osarch
     package_bin = package.download_urls[osarch]
     fetched_binary_loc = package_bin.fetch(dir_location=bin_cache_dir)
@@ -645,6 +659,7 @@ def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cac
         package_name=package.name,
         package_fullversion=package.fullversion,
         copies=copies)
+    return extracted_dir
 
 
 def main(argv):
@@ -693,22 +708,22 @@ def main(argv):
 
     if args.build_all:
         cache_dir = cache_dir or 'src-homebrew'
-        fetch_package(name='libarchive', osarch='x86_64_linux', cache_dir=cache_dir)
-        fetch_package(name='p7zip', osarch='x86_64_linux', cache_dir=cache_dir)
-        fetch_package(name='libmagic', osarch='x86_64_linux', cache_dir=cache_dir)
-        fetch_package(name='libarchive', osarch='high_sierra', cache_dir=cache_dir)
-        fetch_package(name='p7zip', osarch='high_sierra', cache_dir=cache_dir)
-        fetch_package(name='libmagic', osarch='high_sierra', cache_dir=cache_dir)
+        update_package(name='libarchive', osarch='x86_64_linux', cache_dir=cache_dir)
+        update_package(name='p7zip', osarch='x86_64_linux', cache_dir=cache_dir)
+        update_package(name='libmagic', osarch='x86_64_linux', cache_dir=cache_dir)
+        update_package(name='libarchive', osarch='high_sierra', cache_dir=cache_dir)
+        update_package(name='p7zip', osarch='high_sierra', cache_dir=cache_dir)
+        update_package(name='libmagic', osarch='high_sierra', cache_dir=cache_dir)
 
     else:
 
-        fetch_package(name=name, fullversion=fullversion, osarch=osarch, cache_dir=cache_dir,
+        update_package(name=name, fullversion=fullversion, osarch=osarch, cache_dir=cache_dir,
             install_dir=install_dir, ignore_deps=ignore_deps,
             copies=copies, deletes=deletes)
 
 
 PRESETS = {
-    # latest https://libarchive.org/downloads/libarchive-3.4.2.tar.gz
+    # latest https://libarchive.org/downloads/libarchive-3.4.3.tar.gz
     ('libarchive', 'x86_64_linux'): {
         'fullversion': '3.4.2_1',
         'ignore_deps': [],
@@ -724,7 +739,7 @@ PRESETS = {
             ('patchelf', '--replace-needed', 'libexpat.so.1', 'libexpat-la3421.so.1', 'lib/libarchive.so'),
             ('patchelf', '--replace-needed', 'liblz4.so.1'  , 'liblz4-la3421.so.1'  , 'lib/libarchive.so'),
             ('patchelf', '--replace-needed', 'liblzma.so.5' , 'liblzma-la3421.so.5' , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libz.so.1'    , 'libz-la3421.so.1'    , 'lib/libarchive.so'),
+            ('patchelf', '--rep    lace-needed', 'libz.so.1'    , 'libz-la3421.so.1'    , 'lib/libarchive.so'),
             ('patchelf', '--replace-needed', 'libzstd.so.1' , 'libzstd-la3421.so.1' , 'lib/libarchive.so'),
 
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libb2-la3421.so.1'),
