@@ -37,6 +37,7 @@ in a target directory.
 
 import argparse
 from distutils.dir_util import copy_tree
+import hashlib
 import io
 from itertools import zip_longest
 import os
@@ -79,7 +80,7 @@ class Repository:
         # a collection of {binary_package_name: BinaryPackage object}
         self.packages = {}
 
-    def fetch_packages_index(self, cache_dir):
+    def update_packages_index(self, cache_dir):
         """
         Populate BinaryPackage and SourcePackage in this repo.
         Caches the fetched index for the duration of the session.
@@ -154,66 +155,66 @@ def from_desc(desc_text, repo_src_url, base_url):
 
 # temporary local data for advanced msys2 builds of patched packages
 # that do not exist in the index. These are the text of "desc" as found in the
-# index
+# index, but recreated manually since this is nt yet in the index
 OVERRIDES = {
     'mingw32': [
-        """%FILENAME%
-mingw-w64-i686-file-5.38-1-any.pkg.tar.zst
-
-%NAME%
-mingw-w64-i686-file
-
-%BASE%
-mingw-w64-file
-
-%VERSION%
-5.38-1
-
-%SHA256SUM%
-b5d2794ed45960520c6d9df2676f571bc8f4a39905649acc465cea40712a29da
-
-%LICENSE%
-BSD
-
-%ARCH%
-any
-
-%DEPENDS%
-mingw-w64-i686-bzip2
-mingw-w64-i686-libsystre
-mingw-w64-i686-xz
-mingw-w64-i686-zlib
-""",
+#         """%FILENAME%
+# mingw-w64-i686-file-5.38-1-any.pkg.tar.zst
+#
+# %NAME%
+# mingw-w64-i686-file
+#
+# %BASE%
+# mingw-w64-file
+#
+# %VERSION%
+# 5.38-1
+#
+# %SHA256SUM%
+# b5d2794ed45960520c6d9df2676f571bc8f4a39905649acc465cea40712a29da
+#
+# %LICENSE%
+# BSD
+#
+# %ARCH%
+# any
+#
+# %DEPENDS%
+# mingw-w64-i686-bzip2
+# mingw-w64-i686-libsystre
+# mingw-w64-i686-xz
+# mingw-w64-i686-zlib
+# """,
 
     ],
     'mingw64': [
-        """%FILENAME%
-mingw-w64-x86_64-file-5.38-1-any.pkg.tar.zst
-
-%NAME%
-mingw-w64-x86_64-file
-
-%BASE%
-mingw-w64-file
-
-%VERSION%
-5.38-1
-
-%SHA256SUM%
-39fed321c7a61868bc2b728dba576a1d500612aa21d08b9476f474af3a8d18e0
-
-%LICENSE%
-BSD
-
-%ARCH%
-any
-
-%DEPENDS%
-mingw-w64-x86_64-bzip2
-mingw-w64-x86_64-libsystre
-mingw-w64-x86_64-xz
-mingw-w64-x86_64-zlib
-""",
+#         """%FILENAME%
+# mingw-w64-x86_64-file-5.38-1-any.pkg.tar.zst
+#
+# %NAME%
+# mingw-w64-x86_64-file
+#
+# %BASE%
+# mingw-w64-file
+#
+# %VERSION%
+# 5.38-1
+#
+# %SHA256SUM%
+# 39fed321c7a61868bc2b728dba576a1d500612aa21d08b9476f474af3a8d18e0
+#
+# %LICENSE%
+# BSD
+#
+# %ARCH%
+# any
+#
+# %DEPENDS%
+# mingw-w64-x86_64-bzip2
+# mingw-w64-x86_64-libsystre
+# mingw-w64-x86_64-xz
+# mingw-w64-x86_64-zlib
+# """,
     ]
 }
 
@@ -328,7 +329,7 @@ class BinaryPackage:
                  filename: str,
                  files: List[str],
                  makedepends: List[str],
-                 sha256sum: str,
+                 sha256: str,
                  arch: str,
                  base_url: str,
                  provides: List[str],
@@ -358,7 +359,7 @@ class BinaryPackage:
         self.name = name
         self.short_name = name.replace('mingw-w64-x86_64-', '').replace('mingw-w64-i686-', '')
 
-        self.sha256sum = sha256sum
+        self.sha256 = sha256
         self.arch = arch
         # http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-file-5.37-1-any.pkg.tar.xz
         self.download_url = base_url + '/' + quote(self.filename)
@@ -416,7 +417,7 @@ class BinaryPackage:
             filename=desc['%FILENAME%'][0],
             base_url=base_url,
 
-            sha256sum=desc['%SHA256SUM%'][0],
+            sha256=desc['%SHA256SUM%'][0],
 
             desc=desc.get('%DESC%', [''])[0],
             groups=desc.get('%GROUPS%', []),
@@ -584,7 +585,7 @@ def package_name_is_vcs(package_name: str) -> bool:
         ("-cvs", "-svn", "-hg", "-darcs", "-bzr", "-git"))
 
 
-def fetch_file(url, dir_location, indent=1):
+def fetch_file(url, dir_location, force=False, indent=1):
     """
     Fetch the file at `url` and save it in `dir_location`.
     Return the `location` where teh file is saved.
@@ -595,7 +596,8 @@ def fetch_file(url, dir_location, indent=1):
 
     _, _, file_name = url.rpartition('/')
     location = os.path.join(dir_location, file_name)
-    if not os.path.exists(location):
+
+    if force or not os.path.exists(location):
         with open(location, 'wb') as o:
             o.write(requests.get(url, timeout=REQUEST_TIMEOUT).content)
     return location
@@ -604,15 +606,19 @@ def fetch_file(url, dir_location, indent=1):
 def extract_tar(location, target_dir):
     """
     Extract a tar archive at `location` in the `target_dir` directory.
+    Return a list of extracted locations (either directories or files)
     """
+    locations = []
     if location.endswith('.tar.zst'):
         # rare and "new" but used in msys
-        subprocess.check_call(['unzstd', '-k', '-f', location])
+        subprocess.check_call(['unzstd', '-q', '-k', '-f', location])
         location, _, _ = location.rpartition('.zst')
-
+        locations.append(location)
     with open(location, 'rb') as input_tar:
         with tarfile.open(fileobj=input_tar) as tar:
             tar.extractall(target_dir)
+    locations.append(target_dir)
+    return locations
 
 
 def install_files(extracted_dir, install_dir, package_short_name, copies=None):
@@ -698,17 +704,23 @@ def extract_in_place(location):
     """
     Extract a tar archive at `location` in a directory created side-by-side with
     the archive.
-    Return the directory where the files are extracted
+    Return the directory where the files are extracted, and a list of all extracted_locations.
     """
     target_dir = location.replace('.tar.xz', '').replace('.tar.gz', '').replace('.tar.zst', '')
     if os.path.exists(target_dir):
         shutil.rmtree(target_dir)
     os.makedirs(target_dir, exist_ok=True)
-    extract_tar(location, target_dir)
-    return target_dir
+    extracted_locations = extract_tar(location, target_dir)
+    return target_dir, extracted_locations
 
 
-def fetch_package(name, version=None, repo='mingw64', cache_dir=None,
+def verify(fetched_location, sha256):
+    with open (fetched_location, 'rb') as f:
+        fsha256 = hashlib.sha256(f.read()).hexdigest()
+        assert fsha256 == sha256, f'fetched_location has invalid SHA256: {fetched_location}'
+
+
+def update_package(name, version=None, repo='mingw64', cache_dir=None,
                   install_dir=None, ignore_deps=(), copies=None, deletes=()):
     """
     Fetch a `package` with `name` and optional `version` from `repo` and save
@@ -725,6 +737,7 @@ def fetch_package(name, version=None, repo='mingw64', cache_dir=None,
     install_dir = install_dir or presets.get('install_dir')
     deletes = deletes or presets.get('deletes', [])
 
+    print('Updating native code from:', name, version, repo)
     for deletable in deletes:
         deletable = os.path.join(install_dir, deletable)
         if not os.path.exists(deletable):
@@ -735,7 +748,7 @@ def fetch_package(name, version=None, repo='mingw64', cache_dir=None,
             os.remove(deletable)
 
     repo = REPOSITORIES[repo]
-    binary_packages = repo.fetch_packages_index(cache_dir=cache_dir)
+    binary_packages = repo.update_packages_index(cache_dir=cache_dir)
 
     root_package = binary_packages[name]
 
@@ -759,7 +772,12 @@ def fetch_package(name, version=None, repo='mingw64', cache_dir=None,
         print('Fetching package for: {}'.format(root_package))
 
     fetched_binary_loc = fetch_file(url=root_package.download_url, dir_location=bin_cache_dir)
-    extracted_dir = extract_in_place(fetched_binary_loc)
+    try:
+        verify(fetched_binary_loc, root_package.sha256)
+    except:
+        fetched_binary_loc = fetch_file(url=root_package.download_url, dir_location=bin_cache_dir, force=True)
+        verify(fetched_binary_loc, root_package.sha256)
+    extracted_dir, extracted_locations = extract_in_place(fetched_binary_loc)
     install_files(extracted_dir, install_dir, package_short_name=root_package.short_name, copies=copies)
 
     # also fetch sources
@@ -777,13 +795,29 @@ def fetch_package(name, version=None, repo='mingw64', cache_dir=None,
             print(f'\n  -> Fetching dependency: {dep}')
 
         fetched_binary_loc = fetch_file(url=dep.download_url, dir_location=bin_cache_dir, indent=3)
-        extracted_dir = extract_in_place(fetched_binary_loc)
+        try:
+            verify(fetched_binary_loc, dep.sha256)
+        except:
+            fetched_binary_loc = fetch_file(url=dep.download_url, dir_location=bin_cache_dir, indent=3, force=True)
+            verify(fetched_binary_loc, dep.sha256)
+        extracted_dir, dep_extracted_locations = extract_in_place(fetched_binary_loc)
         install_files(extracted_dir, install_dir, package_short_name=dep.short_name, copies=copies)
 
         # also fetch sources
         fetch_file(url=dep.source_package.download_url, dir_location=src_cache_dir, indent=5)
 
+        extracted_locations.extend(dep_extracted_locations)
+
     check_installed_files(install_dir, copies, root_package)
+
+    # finally cleanup after thyself, removing extracted locations
+
+    for exloc in extracted_locations:
+        if os.path.exists(exloc):
+            if os.path.isdir(exloc):
+                shutil.rmtree(exloc, False)
+            else:
+                os.remove(exloc)
 
 
 def main(argv):
@@ -832,12 +866,12 @@ def main(argv):
 
     if args.build_all:
         cache_dir = cache_dir or 'src-msys2'
-        fetch_package(name='mingw-w64-x86_64-libarchive', repo='mingw64', cache_dir=cache_dir)
-        fetch_package(name='mingw-w64-i686-libarchive', repo='mingw32', cache_dir=cache_dir)
-        fetch_package(name='mingw-w64-x86_64-file', repo='mingw64', cache_dir=cache_dir)
-        fetch_package(name='mingw-w64-i686-file', repo='mingw32', cache_dir=cache_dir)
+        update_package(name='mingw-w64-x86_64-libarchive', repo='mingw64', cache_dir=cache_dir)
+        update_package(name='mingw-w64-i686-libarchive', repo='mingw32', cache_dir=cache_dir)
+        update_package(name='mingw-w64-x86_64-file', repo='mingw64', cache_dir=cache_dir)
+        update_package(name='mingw-w64-i686-file', repo='mingw32', cache_dir=cache_dir)
     else:
-        fetch_package(name=name, version=version, repo=repo, cache_dir=cache_dir,
+        update_package(name=name, version=version, repo=repo, cache_dir=cache_dir,
             install_dir=install_dir, ignore_deps=ignore_deps,
             copies=copies, deletes=deletes)
 
