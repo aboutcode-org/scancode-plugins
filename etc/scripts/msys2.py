@@ -1118,6 +1118,7 @@ PRESETS = {
             'mingw32/bin/libquadmath-0.dll': 'lib/libquadmath-0.dll',
             'mingw32/bin/libssp-0.dll': 'lib/libssp-0.dll',
             'mingw32/bin/libstdc++-6.dll': 'lib/libstdc++-6.dll',
+            'mingw32/bin/libgcc_s_dw2-1.dll': 'lib/libgcc_s_dw2-1.dll',
 
             # gettext
             'mingw32/bin/libasprintf-0.dll': 'lib/libasprintf-0.dll',
