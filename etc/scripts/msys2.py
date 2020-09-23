@@ -728,8 +728,10 @@ def update_package(name, version=None, repo='mingw64', cache_dir=None,
     except:
         fetched_binary_loc = shared_utils.fetch_file(url=root_package.download_url, dir_location=bin_cache_dir, force=True)
         shared_utils.verify(fetched_binary_loc, root_package.sha256)
-    extracted_dir, extracted_locations = shared_utils.extract_in_place(fetched_binary_loc)
+    extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
     install_files(extracted_dir, install_dir, package_short_name=root_package.short_name, copies=copies)
+
+    extracted_locs = [extracted_dir]
 
     # also fetch sources
     shared_utils.fetch_file(url=root_package.source_package.download_url, dir_location=src_cache_dir)
@@ -751,24 +753,19 @@ def update_package(name, version=None, repo='mingw64', cache_dir=None,
         except:
             fetched_binary_loc = shared_utils.fetch_file(url=dep.download_url, dir_location=bin_cache_dir, indent=3, force=True)
             shared_utils.verify(fetched_binary_loc, dep.sha256)
-        extracted_dir, dep_extracted_locations = shared_utils.extract_in_place(fetched_binary_loc)
+        extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
         install_files(extracted_dir, install_dir, package_short_name=dep.short_name, copies=copies)
 
         # also fetch sources
         shared_utils.fetch_file(url=dep.source_package.download_url, dir_location=src_cache_dir, indent=5)
 
-        extracted_locations.extend(dep_extracted_locations)
+        extracted_locs.append(extracted_dir)
 
     check_installed_files(install_dir, copies, root_package)
 
     # finally cleanup after thyself, removing extracted locations
-
-    for exloc in extracted_locations:
-        if os.path.exists(exloc):
-            if os.path.isdir(exloc):
-                shutil.rmtree(exloc, False)
-            else:
-                os.remove(exloc)
+    for loc in extracted_locs:
+        shutil.rmtree(loc, False)
 
 
 def main(argv):

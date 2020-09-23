@@ -615,7 +615,7 @@ def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cac
     # fetch the binary for the requested osarch
     package_binary_download = package.download_urls[osarch]
     fetched_binary_loc = package_binary_download.fetch(dir_location=bin_cache_dir)
-    extracted_dir, _extracted_locations = shared_utils.extract_in_place(location=fetched_binary_loc)
+    extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
 
     # fetch the upstream formula and collect extra sources/patches:
     # formula_loc = package.formula_download_url.fetch(dir_location=src_cache_dir)

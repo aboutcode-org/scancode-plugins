@@ -11,7 +11,6 @@ import argparse
 from distutils.dir_util import copy_tree
 import os
 import shutil
-import subprocess
 import sys
 
 import shared_utils
@@ -21,15 +20,6 @@ REQUEST_TIMEOUT = 60
 
 TRACE = False
 TRACE_DEEP = False
-
-
-def extract_7zip(location, target_dir):
-    """
-    Extract a 7z archive at `location` in the `target_dir` directory.
-    """
-    out = subprocess.check_output(['7z', 'x', location], cwd=target_dir)
-    if not b'Everything is Ok' in out:
-        raise Exception(out)
 
 
 def install_files(extracted_dir, install_dir, copies):
@@ -57,19 +47,6 @@ def install_files(extracted_dir, install_dir, copies):
                 if isdir:
                     os.makedirs(dst, exist_ok=True)
                 shutil.copy2(src, dst)
-
-def extract_in_place(location):
-    """
-    Extract an archive at `location` in a directory created side-by-side with
-    the archive.
-    Return the directory where the files are extracted
-    """
-    target_dir = location.replace('.exe', '')
-    if os.path.exists(target_dir):
-        shutil.rmtree(target_dir)
-    os.makedirs(target_dir, exist_ok=True)
-    extract_7zip(location, target_dir)
-    return target_dir
 
 
 def fetch_package(name, cache_dir):
@@ -102,7 +79,7 @@ def fetch_package(name, cache_dir):
     fetched_binary_loc = shared_utils.fetch_file(url=bin_url, dir_location=bin_cache_dir)
     shared_utils.verify(fetched_binary_loc, bin_sha256)
 
-    extracted_dir = extract_in_place(fetched_binary_loc)
+    extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
     install_files(extracted_dir, install_dir, copies)
 
     # also fetch sources
