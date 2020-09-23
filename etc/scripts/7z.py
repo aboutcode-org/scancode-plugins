@@ -2,7 +2,7 @@
 # Copyright (c) 2020 nexB Inc.
 # Copyright (c) 2016-2019 Christoph Reiter
 #
-import hashlib
+
 """
 Utility to keep Windows prebuilt ScanCode toolkit plugins for 7zip on Windows up to date.
 """
@@ -14,8 +14,7 @@ import shutil
 import subprocess
 import sys
 
-import requests
-
+import shared_utils
 
 REQUEST_TIMEOUT = 60
 
@@ -24,27 +23,13 @@ TRACE = False
 TRACE_DEEP = False
 
 
-def fetch_file(url, dir_location, force=False, indent=1):
-    """
-    Fetch the file at `url` and save it in `dir_location`.
-    Return the `location` where teh file is saved.
-    If `force` is False, do not refetch if already fetched.
-    """
-    print(indent * ' ' + f'Fetching {url}')
-
-    _, _, file_name = url.rpartition('/')
-    location = os.path.join(dir_location, file_name)
-    if force or not os.path.exists(location):
-        with open(location, 'wb') as o:
-            o.write(requests.get(url, timeout=REQUEST_TIMEOUT).content)
-    return location
-
-
 def extract_7zip(location, target_dir):
     """
     Extract a 7z archive at `location` in the `target_dir` directory.
     """
-    subprocess.check_call(['7z', 'x', location], cwd=target_dir)
+    out = subprocess.check_output(['7z', 'x', location], cwd=target_dir)
+    if not b'Everything is Ok' in out:
+        raise Exception(out)
 
 
 def install_files(extracted_dir, install_dir, copies):
@@ -72,13 +57,6 @@ def install_files(extracted_dir, install_dir, copies):
                 if isdir:
                     os.makedirs(dst, exist_ok=True)
                 shutil.copy2(src, dst)
-
-
-def verify(fetched_location, sha256):
-    with open (fetched_location, 'rb') as f:
-        fsha256 = hashlib.sha256(f.read()).hexdigest()
-        assert fsha256 == sha256, f'fetched_location has invalid SHA256: {fetched_location}'
-
 
 def extract_in_place(location):
     """
@@ -121,15 +99,15 @@ def fetch_package(name, cache_dir):
 
     print('Fetching package: {}'.format(bin_url))
 
-    fetched_binary_loc = fetch_file(url=bin_url, dir_location=bin_cache_dir)
-    verify(fetched_binary_loc, bin_sha256)
+    fetched_binary_loc = shared_utils.fetch_file(url=bin_url, dir_location=bin_cache_dir)
+    shared_utils.verify(fetched_binary_loc, bin_sha256)
 
     extracted_dir = extract_in_place(fetched_binary_loc)
     install_files(extracted_dir, install_dir, copies)
 
     # also fetch sources
-    fetched_src_loc = fetch_file(url=src_url, dir_location=src_cache_dir)
-    verify(fetched_src_loc, src_sha256)
+    fetched_src_loc = shared_utils.fetch_file(url=src_url, dir_location=src_cache_dir)
+    shared_utils.verify(fetched_src_loc, src_sha256)
 
 
 def main(argv):
