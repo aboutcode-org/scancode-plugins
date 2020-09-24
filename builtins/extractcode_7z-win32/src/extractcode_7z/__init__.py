@@ -30,7 +30,6 @@ from os.path import dirname
 from os.path import join
 
 from plugincode.location_provider import LocationProviderPlugin
-from plugincode.location_provider import location_provider_impl
 
 
 class SevenzipPaths(LocationProviderPlugin):
