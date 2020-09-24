@@ -1,8 +1,10 @@
 class Libmagic < Formula
   desc "Implementation of the file(1) command"
   homepage "https://www.darwinsys.com/file/"
-  url "https://astron.com/pub/file/file-5.38.tar.gz"
-  sha256 "593c2ffc2ab349c5aea0f55fedfe4d681737b6b62376a9b3ad1e77b2cc19fa34"
+  url "https://astron.com/pub/file/file-5.39.tar.gz"
+  sha256 "f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1"
+
+  uses_from_macos "zlib"
 
   def install
     system "./configure", "--disable-dependency-tracking",

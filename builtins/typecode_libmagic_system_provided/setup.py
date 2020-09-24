@@ -17,7 +17,7 @@ desc = '''A ScanCode path provider plugin to provide a system package provided l
 
 setup(
     name='typecode_libmagic-system-provided',
-    version='5.38.1',
+    version='5.39.1',
     license='bsd-simplified',
     description=desc,
     long_description=desc,

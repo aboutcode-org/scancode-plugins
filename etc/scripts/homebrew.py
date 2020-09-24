@@ -3,23 +3,21 @@
 
 """
 Utility to keep linux and macOS prebuilt ScanCode toolkit plugins up to date.
+Note that homebrew
 """
 
 import argparse
 import contextlib
 from distutils.dir_util import copy_tree
-import hashlib
+import json
 import os
 import shutil
-import sys
-import tarfile
-
-import requests
 import subprocess
+import sys
 
+import shared_utils
 
 REQUEST_TIMEOUT = 60
-
 
 TRACE = False
 TRACE_DEEP = False
@@ -39,7 +37,6 @@ MACOS_VERSIONS = {
     '10.15': 'catalina',
 }
 
-
 DARWIN_VERSIONS = {
     '10.6': '10',
     '10.7': '11',
@@ -53,13 +50,13 @@ DARWIN_VERSIONS = {
     '10.15': '19',
 }
 
-
 """
 https://github.com/Homebrew/formulae.brew.sh/blob/b578ad73a21ce8078e68c28d2a8a94afc0f31654/_config.yml#L43
 homebrew-core
 linuxbrew-core
 homebrew-cask
 """
+
 
 class Repository:
     """
@@ -82,11 +79,15 @@ class Repository:
             return self.packages
         print('Loading Repo from %r' % self.db_url)
         packages = self.packages = {}
-        index_loc = os.path.join(cache_dir, f'formula-{self.name}.json')
-        req = requests.get(self.db_url, timeout=REQUEST_TIMEOUT)
-        with open(index_loc, 'wb') as o:
-            o.write(req.content)
-        items = req.json()
+
+        index_loc = shared_utils.fetch_file(
+            url=self.db_url,
+            dir_location=cache_dir,
+            file_name=f'formula-{self.name}.json',
+            force=True)
+
+        with open(index_loc) as il:
+            items = json.load(il)
 
         for item in items:
             try:
@@ -103,7 +104,6 @@ OSARCHES = [
     'mavericks', 'yosemite',
     'x86_64_linux'
 ]
-
 
 REPOSITORIES = {
     'x86_64_linux': Repository(
@@ -127,11 +127,11 @@ REPOSITORIES = {
 }
 
 
-
 class Download:
     """
     Represent a source, patch or binary download.
     """
+
     def __init__(self, url, file_name=None, sha256=None):
         self.url = url.strip('/')
         if not file_name:
@@ -139,6 +139,9 @@ class Download:
         self.file_name = file_name
         self.sha256 = sha256
         self.fetched_location = None
+
+    def __repr__(self, *args, **kwargs):
+        return f'Download({self.url}, {self.file_name}, {self.sha256})'
 
     @classmethod
     def from_index(cls, url, tag=None, revision=None, sha256=None, **kwargs):
@@ -151,7 +154,7 @@ class Download:
         url = url.strip('/')
         if not tag and not revision:
             _, _, file_name = url.rpartition('/')
-            return cls(url=url, file_name=file_name,)
+            return cls(url=url, file_name=file_name, sha256=sha256)
         # a github URL
         assert url.startswith('https://github.com'), f'Invalid {url}'
         if not tag and not revision:
@@ -163,32 +166,40 @@ class Download:
         download_url = f'{url}/archive/{commitish}.tar.gz'
         _, _, ghrepo_name = url.rpartition('/')
         file_name = f'{ghrepo_name}-{commitish}.tar.gz'
-        return cls(url=download_url, file_name=file_name,)
-
-    def verify(self):
-        if not self.fetched_location or not self.sha256:
-            print(f'Cannot verify download: {self}')
-        with open (self.fetched_location, 'rb') as f:
-            fsha256 = hashlib.sha256(f.read()).hexdigest()
-            assert fsha256 == self.sha256, f'Invalid SHA256 for: {self.fetched_location}'
+        return Download(
+            url=download_url,
+            file_name=file_name,
+            sha256=sha256,
+        )
 
     def fetch(self, dir_location, force=False, verify=True):
         """
-        Fetch this downloa` and save it in `dir_location`.
+        Fetch this download and save it in `dir_location`.
         Return the `location` where the file is saved.
         If `force` is False, do not refetch if already fetched.
         """
-        self.fetched_location = fetch_file(
-            url=self.url, dir_location=dir_location, file_name=self.file_name, force=force)
+        self.fetched_location = shared_utils.fetch_file(
+            url=self.url,
+            dir_location=dir_location,
+            file_name=self.file_name,
+            force=force,
+        )
         if verify:
-            self.verify()
+            shared_utils.verify(self.fetched_location, self.sha256)
         return self.fetched_location
 
 
 class BinaryPackage:
 
-    def __init__(self, name, version, revision, download_urls,
-                 formula_download_url, source_download_urls, depends):
+    def __init__(
+        self,
+        name,
+        version,
+        revision,
+        download_urls,
+        formula_download_url,
+        source_download_urls,
+        depends):
 
         self.name = name
         self.version = version
@@ -275,21 +286,23 @@ class BinaryPackage:
 
         formula_download_url = Download(url=repo.formula_base_url.format(name))
         source_url = item['urls']['stable']
-        source_download_urls = [Download.from_index(**source_url)]
+        sdu = Download.from_index(**source_url)
+        source_download_urls = [sdu]
 
         download_urls = {}
         for osarch, durl in item['bottle']['stable']['files'].items():
             if repo.name not in durl['url']:
                 # in linuxbrew, we have incorrect URLS for homebrew packages
                 continue
-            download_urls[osarch] = Download.from_index(**durl)
+            archdu = Download(url=durl['url'], sha256=durl['sha256'])
+            download_urls[osarch] = archdu
 
         depends = []
         for dep in item['dependencies']:
             dname, _, dversion = dep.partition('@')
             depends.append((dname, dversion,))
 
-        return BinaryPackage(
+        bp = BinaryPackage(
             name=name,
             version=version,
             revision=revision,
@@ -297,7 +310,13 @@ class BinaryPackage:
             formula_download_url=formula_download_url,
             source_download_urls=source_download_urls,
             depends=depends,
-    )
+        )
+
+        if TRACE_DEEP:
+            print(f'for: {bp}')
+            for arch, dnl  in download_urls.items():
+                print('    ', arch, dnl)
+        return bp
 
     def get_all_depends(self, binary_packages, ignore_deps=()):
         """
@@ -340,34 +359,6 @@ def get_formula_urls(location):
             if line.startswith('url '):
                 _, _, url = line.partition('url ')
                 yield url.strip(' "')
-
-
-def fetch_file(url, dir_location, file_name=None, force=False):
-    """
-    Fetch the file at `url` and save it in `dir_location`.
-    Return the `location` where the file is saved.
-    If `force` is False, do not refetch if already fetched.
-    """
-    print('  Fetching %r' % url)
-    if not file_name:
-        _, _, file_name = url.rpartition('/')
-    location = os.path.join(dir_location, file_name)
-    if force or not os.path.exists(location):
-        with open(location, 'wb') as o:
-            o.write(requests.get(url, timeout=REQUEST_TIMEOUT).content)
-    return location
-
-
-def extract_tar(location, target_dir):
-    """
-    Extract a tar archive at `location` in the `target_dir` directory.
-    """
-    with open(location, 'rb') as input_tar:
-        with tarfile.open(fileobj=input_tar) as tar:
-            members = tar.getmembers()
-            for tarinfo in members:
-                tarinfo.mode = 0o755
-            tar.extractall(target_dir, members=members)
 
 
 def install_files(extracted_dir, install_dir, package_name, package_fullversion, copies=None):
@@ -434,6 +425,7 @@ def patchmacho(exe_path):
     TODO: what about the "SONAME" proper?
         @@HOMEBREW_PREFIX@@/opt/libarchive/lib/libarchive.13.dylib
     """
+
     def get_updated_loader_path(loader_path):
         """
         MachO.rewriteLoadCommands `changefunc` to only change HOMEBREW-
@@ -514,20 +506,6 @@ def check_installed_files(install_dir, copies, package):
         raise Exception(f'These files were not installed for {package}:\n{missing}')
 
 
-def extract_in_place(location):
-    """
-    Extract a tar archive at `location` in a directory created side-by-side with
-    the archive.
-    Return the directory where the files are extracted
-    """
-    target_dir = location.replace('.tar.xz', '').replace('.tar.gz', '')
-    if os.path.exists(target_dir):
-        shutil.rmtree(target_dir)
-    os.makedirs(target_dir, exist_ok=True)
-    extract_tar(location, target_dir)
-    return target_dir
-
-
 def update_package(name, osarch, fullversion=None, cache_dir=None,
                   install_dir=None, ignore_deps=(), copies=None, deletes=(),
                   fixes=()):
@@ -560,7 +538,7 @@ def update_package(name, osarch, fullversion=None, cache_dir=None,
     repository = REPOSITORIES[osarch]
     binary_packages = repository.update_packages_index(cache_dir=cache_dir)
 
-    extracted_locations =[]
+    extracted_locations = []
 
     root_package = binary_packages[name]
 
@@ -633,11 +611,11 @@ def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cac
     """
     Fetch sources and binaries and install files for package.
     """
-    print('Fetching package for: {}'.format(package))
+    print(f'Fetching package: {package}')
     # fetch the binary for the requested osarch
-    package_bin = package.download_urls[osarch]
-    fetched_binary_loc = package_bin.fetch(dir_location=bin_cache_dir)
-    extracted_dir = extract_in_place(location=fetched_binary_loc)
+    package_binary_download = package.download_urls[osarch]
+    fetched_binary_loc = package_binary_download.fetch(dir_location=bin_cache_dir)
+    extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
 
     # fetch the upstream formula and collect extra sources/patches:
     # formula_loc = package.formula_download_url.fetch(dir_location=src_cache_dir)
@@ -725,7 +703,7 @@ def main(argv):
 PRESETS = {
     # latest https://libarchive.org/downloads/libarchive-3.4.3.tar.gz
     ('libarchive', 'x86_64_linux'): {
-        'fullversion': '3.4.2_1',
+        'fullversion': '3.4.3',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-linux/src/extractcode_libarchive',
@@ -733,57 +711,57 @@ PRESETS = {
             ('patchelf', '--set-soname', 'libarchive.so', 'lib/libarchive.so'),
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libarchive.so'),
 
-            ('patchelf', '--replace-needed', 'libb2.so.1'   , 'libb2-la3421.so.1'   , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libbsd.so.0'  , 'libbsd-la3421.so.0'  , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libbz2.so.1.0', 'libbz2-la3421.so.1.0', 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libexpat.so.1', 'libexpat-la3421.so.1', 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'liblz4.so.1'  , 'liblz4-la3421.so.1'  , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'liblzma.so.5' , 'liblzma-la3421.so.5' , 'lib/libarchive.so'),
-            ('patchelf', '--rep    lace-needed', 'libz.so.1'    , 'libz-la3421.so.1'    , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libzstd.so.1' , 'libzstd-la3421.so.1' , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libb2.so.1'   , 'libb2-la343.so.1'   , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libbsd.so.0'  , 'libbsd-la343.so.0'  , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libbz2.so.1.0', 'libbz2-la343.so.1.0', 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libexpat.so.1', 'libexpat-la343.so.1', 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'liblz4.so.1'  , 'liblz4-la343.so.1'  , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'liblzma.so.5' , 'liblzma-la343.so.5' , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libz.so.1'    , 'libz-la343.so.1'    , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libzstd.so.1' , 'libzstd-la343.so.1' , 'lib/libarchive.so'),
 
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libb2-la3421.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbsd-la3421.so.0'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbz2-la3421.so.1.0'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libexpat-la3421.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblz4-la3421.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblzma-la3421.so.5'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-la3421.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libzstd-la3421.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libb2-la343.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbsd-la343.so.0'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbz2-la343.so.1.0'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libexpat-la343.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblz4-la343.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblzma-la343.so.5'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-la343.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libzstd-la343.so.1'),
 
-            ('patchelf', '--set-soname', 'libb2-la3421.so.1'   , 'lib/libb2-la3421.so.1'   ),
-            ('patchelf', '--set-soname', 'libbsd-la3421.so.0'  , 'lib/libbsd-la3421.so.0'  ),
-            ('patchelf', '--set-soname', 'libbz2-la3421.so.1.0', 'lib/libbz2-la3421.so.1.0'),
-            ('patchelf', '--set-soname', 'libexpat-la3421.so.1', 'lib/libexpat-la3421.so.1'),
-            ('patchelf', '--set-soname', 'liblz4-la3421.so.1'  , 'lib/liblz4-la3421.so.1'  ),
-            ('patchelf', '--set-soname', 'liblzma-la3421.so.5' , 'lib/liblzma-la3421.so.5' ),
-            ('patchelf', '--set-soname', 'libz-la3421.so.1'    , 'lib/libz-la3421.so.1'    ),
-            ('patchelf', '--set-soname', 'libzstd-la3421.so.1' , 'lib/libzstd-la3421.so.1' ),
+            ('patchelf', '--set-soname', 'libb2-la343.so.1'   , 'lib/libb2-la343.so.1'),
+            ('patchelf', '--set-soname', 'libbsd-la343.so.0'  , 'lib/libbsd-la343.so.0'),
+            ('patchelf', '--set-soname', 'libbz2-la343.so.1.0', 'lib/libbz2-la343.so.1.0'),
+            ('patchelf', '--set-soname', 'libexpat-la343.so.1', 'lib/libexpat-la343.so.1'),
+            ('patchelf', '--set-soname', 'liblz4-la343.so.1'  , 'lib/liblz4-la343.so.1'),
+            ('patchelf', '--set-soname', 'liblzma-la343.so.5' , 'lib/liblzma-la343.so.5'),
+            ('patchelf', '--set-soname', 'libz-la343.so.1'    , 'lib/libz-la343.so.1'),
+            ('patchelf', '--set-soname', 'libzstd-la343.so.1' , 'lib/libzstd-la343.so.1'),
 
         ],
         'copies': {
-            'libarchive/3.4.2_1/lib/libarchive.so': 'lib/',
-            'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
-            'libarchive/3.4.2_1/COPYING': 'licenses/libarchive/',
-            'libarchive/3.4.2_1/README.md': 'licenses/libarchive/',
+            'libarchive/3.4.3/lib/libarchive.so': 'lib/',
+            'libarchive/3.4.3/INSTALL_RECEIPT.json': 'licenses/libarchive/',
+            'libarchive/3.4.3/COPYING': 'licenses/libarchive/',
+            'libarchive/3.4.3/README.md': 'licenses/libarchive/',
 
-            'libb2/0.98.1/lib/libb2.so.1': 'lib/libb2-la3421.so.1',
+            'libb2/0.98.1/lib/libb2.so.1': 'lib/libb2-la343.so.1',
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
             'libb2/0.98.1/COPYING': 'licenses/libb2/',
 
-            'libbsd/0.10.0/lib/libbsd.so.0': 'lib/libbsd-la3421.so.0',
+            'libbsd/0.10.0/lib/libbsd.so.0': 'lib/libbsd-la343.so.0',
             'libbsd/0.10.0/INSTALL_RECEIPT.json': 'licenses/libbsd/',
             'libbsd/0.10.0/COPYING': 'licenses/libbsd/',
             'libbsd/0.10.0/README': 'licenses/libbsd/',
             'libbsd/0.10.0/ChangeLog': 'licenses/libbsd/',
 
-            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la3421.so.1.0',
+            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la343.so.1.0',
             'bzip2/1.0.8/INSTALL_RECEIPT.json': 'licenses/bzip2/',
             'bzip2/1.0.8/LICENSE': 'licenses/bzip2/',
             'bzip2/1.0.8/README': 'licenses/bzip2/',
             'bzip2/1.0.8/CHANGES': 'licenses/bzip2/',
 
-            'expat/2.2.9/lib/libexpat.so.1': 'lib/libexpat-la3421.so.1',
+            'expat/2.2.9/lib/libexpat.so.1': 'lib/libexpat-la343.so.1',
             'expat/2.2.9/INSTALL_RECEIPT.json': 'licenses/expat/',
             'expat/2.2.9/COPYING': 'licenses/expat/',
             'expat/2.2.9/README.md': 'licenses/expat/',
@@ -791,13 +769,13 @@ PRESETS = {
             'expat/2.2.9/Changes': 'licenses/expat/',
             'expat/2.2.9/share/doc/expat/changelog': 'licenses/expat/',
 
-            'lz4/1.9.2/lib/liblz4.so.1': 'lib/liblz4-la3421.so.1',
+            'lz4/1.9.2/lib/liblz4.so.1': 'lib/liblz4-la343.so.1',
             'lz4/1.9.2/INSTALL_RECEIPT.json': 'licenses/lz4/',
             'lz4/1.9.2/LICENSE': 'licenses/lz4/',
             'lz4/1.9.2/README.md': 'licenses/lz4/',
             'lz4/1.9.2/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
 
-            'xz/5.2.5/lib/liblzma.so.5': 'lib/liblzma-la3421.so.5',
+            'xz/5.2.5/lib/liblzma.so.5': 'lib/liblzma-la343.so.5',
             'xz/5.2.5/INSTALL_RECEIPT.json': 'licenses/xz/',
             'xz/5.2.5/COPYING': 'licenses/xz/',
             'xz/5.2.5/README': 'licenses/xz/',
@@ -805,22 +783,22 @@ PRESETS = {
             'xz/5.2.5/share/doc/xz/THANKS': 'licenses/xz/',
             'xz/5.2.5/ChangeLog': 'licenses/xz/',
 
-            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-la3421.so.1',
+            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-la343.so.1',
             'zlib/1.2.11/INSTALL_RECEIPT.json': 'licenses/zlib/',
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
 
-            'zstd/1.4.4/lib/libzstd.so.1': 'lib/libzstd-la3421.so.1',
-            'zstd/1.4.4/INSTALL_RECEIPT.json': 'licenses/zstd/',
-            'zstd/1.4.4/COPYING': 'licenses/zstd/',
-            'zstd/1.4.4/README.md': 'licenses/zstd/',
-            'zstd/1.4.4/LICENSE': 'licenses/zstd/',
-            'zstd/1.4.4/CHANGELOG': 'licenses/zstd/',
+            'zstd/1.4.5/lib/libzstd.so.1': 'lib/libzstd-la343.so.1',
+            'zstd/1.4.5/INSTALL_RECEIPT.json': 'licenses/zstd/',
+            'zstd/1.4.5/COPYING': 'licenses/zstd/',
+            'zstd/1.4.5/README.md': 'licenses/zstd/',
+            'zstd/1.4.5/LICENSE': 'licenses/zstd/',
+            'zstd/1.4.5/CHANGELOG': 'licenses/zstd/',
         }
     },
 
     ('libarchive', 'high_sierra'): {
-        'fullversion': '3.4.2_1',
+        'fullversion': '3.4.3',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-macosx/src/extractcode_libarchive',
@@ -833,10 +811,10 @@ PRESETS = {
         ],
 
         'copies': {
-            'libarchive/3.4.2_1/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
-            'libarchive/3.4.2_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
-            'libarchive/3.4.2_1/COPYING': 'licenses/libarchive/',
-            'libarchive/3.4.2_1/README.md': 'licenses/libarchive/',
+            'libarchive/3.4.3/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
+            'libarchive/3.4.3/INSTALL_RECEIPT.json': 'licenses/libarchive/',
+            'libarchive/3.4.3/COPYING': 'licenses/libarchive/',
+            'libarchive/3.4.3/README.md': 'licenses/libarchive/',
 
             'libb2/0.98.1/lib/libb2.1.dylib': 'lib/',
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
@@ -856,12 +834,12 @@ PRESETS = {
             'xz/5.2.5/share/doc/xz/THANKS': 'licenses/xz/',
             'xz/5.2.5/ChangeLog': 'licenses/xz/',
 
-            'zstd/1.4.4/lib/libzstd.1.dylib': 'lib/',
-            'zstd/1.4.4/INSTALL_RECEIPT.json': 'licenses/zstd/',
-            'zstd/1.4.4/COPYING': 'licenses/zstd/',
-            'zstd/1.4.4/README.md': 'licenses/zstd/',
-            'zstd/1.4.4/LICENSE': 'licenses/zstd/',
-            'zstd/1.4.4/CHANGELOG': 'licenses/zstd/',
+            'zstd/1.4.5/lib/libzstd.1.dylib': 'lib/',
+            'zstd/1.4.5/INSTALL_RECEIPT.json': 'licenses/zstd/',
+            'zstd/1.4.5/COPYING': 'licenses/zstd/',
+            'zstd/1.4.5/README.md': 'licenses/zstd/',
+            'zstd/1.4.5/LICENSE': 'licenses/zstd/',
+            'zstd/1.4.5/CHANGELOG': 'licenses/zstd/',
         }
     },
 
@@ -911,34 +889,34 @@ PRESETS = {
     },
 
     ('libmagic', 'x86_64_linux'): {
-        'fullversion': '5.38',
+        'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-linux/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libmagic.so'),
-            ('patchelf', '--replace-needed', 'libz.so.1' , 'libz-lm538.so.1', 'lib/libmagic.so'),
+            ('patchelf', '--replace-needed', 'libz.so.1' , 'libz-lm539.so.1', 'lib/libmagic.so'),
 
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-lm538.so.1'),
-            ('patchelf', '--set-soname', 'libz-lm538.so.1', 'lib/libz-lm538.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-lm539.so.1'),
+            ('patchelf', '--set-soname', 'libz-lm539.so.1', 'lib/libz-lm539.so.1'),
         ],
         'copies': {
-            'libmagic/5.38/lib/libmagic.so': 'lib/',
-            'libmagic/5.38/share/misc/magic.mgc': 'data/',
-            'libmagic/5.38/INSTALL_RECEIPT.json': 'licenses/libmagic/',
-            'libmagic/5.38/COPYING': 'licenses/libmagic/',
-            'libmagic/5.38/README': 'licenses/libmagic/',
-            'libmagic/5.38/AUTHORS': 'licenses/libmagic/',
-            'libmagic/5.38/ChangeLog': 'licenses/libmagic/',
+            'libmagic/5.39/lib/libmagic.so': 'lib/',
+            'libmagic/5.39/share/misc/magic.mgc': 'data/',
+            'libmagic/5.39/INSTALL_RECEIPT.json': 'licenses/libmagic/',
+            'libmagic/5.39/COPYING': 'licenses/libmagic/',
+            'libmagic/5.39/README': 'licenses/libmagic/',
+            'libmagic/5.39/AUTHORS': 'licenses/libmagic/',
+            'libmagic/5.39/ChangeLog': 'licenses/libmagic/',
 
-            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-lm538.so.1',
+            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-lm539.so.1',
             'zlib/1.2.11/INSTALL_RECEIPT.json': 'licenses/zlib/',
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
         },
     },
     ('libmagic', 'high_sierra'): {
-        'fullversion': '5.38',
+        'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-macosx/src/typecode_libmagic',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
@@ -947,18 +925,17 @@ PRESETS = {
         ],
 
         'copies': {
-            'libmagic/5.38/lib/libmagic.1.dylib': 'lib/libmagic.dylib',
-            'libmagic/5.38/share/misc/magic.mgc': 'data/',
-            'libmagic/5.38/INSTALL_RECEIPT.json': 'licenses/libmagic/',
-            'libmagic/5.38/COPYING': 'licenses/libmagic/',
-            'libmagic/5.38/README': 'licenses/libmagic/',
-            'libmagic/5.38/AUTHORS': 'licenses/libmagic/',
-            'libmagic/5.38/ChangeLog': 'licenses/libmagic/',
+            'libmagic/5.39/lib/libmagic.1.dylib': 'lib/libmagic.dylib',
+            'libmagic/5.39/share/misc/magic.mgc': 'data/',
+            'libmagic/5.39/INSTALL_RECEIPT.json': 'licenses/libmagic/',
+            'libmagic/5.39/COPYING': 'licenses/libmagic/',
+            'libmagic/5.39/README': 'licenses/libmagic/',
+            'libmagic/5.39/AUTHORS': 'licenses/libmagic/',
+            'libmagic/5.39/ChangeLog': 'licenses/libmagic/',
         },
     },
 
 }
-
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
