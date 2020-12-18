@@ -1,12 +1,9 @@
 graft src
 graft thirdparty
 
-include setup.py
-include setup.cfg
-include .gitignore
-include apache-2.0.LICENSE
-include NOTICE
-include README.rst
-include MANIFEST.in
+include setup.*
+include *.rst
+include *LICENSE*
+include *NOTICE*
 
-global-exclude *.py[co] __pycache__ *.*~
+
