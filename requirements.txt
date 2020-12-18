@@ -1,9 +1,9 @@
-pip
-setuptools
-wheel
-virtualenv
-
-requests
-bumpversion
-macholib==1.14
 altgraph==0.17
+bump2version==1.0.1
+bumpversion==0.6.0
+certifi==2020.12.5
+chardet==4.0.0
+idna==2.10
+macholib==1.14
+requests==2.25.1
+urllib3==1.26.2
