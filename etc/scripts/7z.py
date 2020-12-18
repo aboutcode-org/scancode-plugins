@@ -107,7 +107,6 @@ def main(argv):
     if args.build_all:
         cache_dir = cache_dir or 'src-7zip'
         fetch_package(name='7zip-64', cache_dir=cache_dir)
-        fetch_package(name='7zip-32', cache_dir=cache_dir)
     else:
         fetch_package(name=name, cache_dir=cache_dir)
 
@@ -121,22 +120,6 @@ PACKAGES = {
         'src_sha256': '4f46b057b8b020e5c1146ca08faae0437a8d176388ffcb16ccbdecaebd9e10d0',
 
         'install_dir': 'builtins/extractcode_7z-win64/src/extractcode_7z',
-        'copies': {
-            '7z.exe': 'bin/',
-            '7z.dll': 'bin/',
-            'License.txt': 'licenses/',
-            'readme.txt': 'licenses/',
-            'History.txt': 'licenses/',
-        },
-    },
-    '7zip-32': {
-        'bin_url': 'https://master.dl.sourceforge.net/project/sevenzip/7-Zip/16.04/7z1604.exe',
-        'bin_sha256': 'dbb2b11dea9f4432291e2cbefe14ebe05e021940e983a37e113600eee55daa95',
-
-        'src_url': 'https://master.dl.sourceforge.net/project/sevenzip/7-Zip/16.04/7z1604-src.7z',
-        'src_sha256': '4f46b057b8b020e5c1146ca08faae0437a8d176388ffcb16ccbdecaebd9e10d0',
-
-        'install_dir': 'builtins/extractcode_7z-win32/src/extractcode_7z',
         'copies': {
             '7z.exe': 'bin/',
             '7z.dll': 'bin/',
