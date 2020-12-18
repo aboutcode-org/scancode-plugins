@@ -46,7 +46,7 @@ class DevelopLibMagic(setuptools_develop):
 
 
 setup(
-    name='typecode_libmagic',
+    name='typecode_libmagic_from_sources',
     version='5.39.1.1',
     license=(
         'bsd-simplified-darwin AND bsd-simplified AND public-domain AND '
