@@ -1,0 +1,13 @@
+graft src
+graft lib-src
+
+include setup.py
+include build.sh
+include setup.cfg
+include .gitignore
+include .bumpversion.cfg
+include README.rst
+include MANIFEST.in
+include LICENSE.txt
+
+global-exclude *.py[co] __pycache__ *.*~
