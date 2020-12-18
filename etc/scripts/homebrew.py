@@ -35,6 +35,7 @@ MACOS_VERSIONS = {
     '10.13': 'high_sierra',
     '10.14': 'mojave',
     '10.15': 'catalina',
+    '11.1': 'big_sur',
 }
 
 DARWIN_VERSIONS = {
@@ -48,7 +49,10 @@ DARWIN_VERSIONS = {
     '10.13': '17',
     '10.14': '18',
     '10.15': '19',
+    '11.1': '20',
 }
+
+CURRENT_MACOSX_VERSION = 'mojave'
 
 """
 https://github.com/Homebrew/formulae.brew.sh/blob/b578ad73a21ce8078e68c28d2a8a94afc0f31654/_config.yml#L43
@@ -100,9 +104,9 @@ class Repository:
 
 
 OSARCHES = [
-    'catalina', 'mojave', 'high_sierra', 'sierra', 'el_capitan',
+    'big_sur', 'catalina', 'mojave', 'high_sierra', 'sierra', 'el_capitan',
     'mavericks', 'yosemite',
-    'x86_64_linux'
+    'x86_64_linux',
 ]
 
 REPOSITORIES = {
@@ -110,20 +114,11 @@ REPOSITORIES = {
         name='linuxbrew',
         db_url='https://formulae.brew.sh/api/formula-linux.json',
         formula_base_url='https://raw.githubusercontent.com/Homebrew/linuxbrew-core/master/Formula/{}.rb'),
-    # after polling mac users, high_sierra is the oldest version we support for now
-    'high_sierra': Repository(
+    # mojave is the oldest version available on homebrew
+    CURRENT_MACOSX_VERSION: Repository(
         name='homebrew',
         db_url='https://formulae.brew.sh/api/formula.json',
         formula_base_url='https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/{}.rb'),
-
-#     'mojave': Repository(
-#         name='homebrew',
-#         db_url='https://formulae.brew.sh/api/formula.json',
-#         formula_base_url='https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/{}.rb'),
-#     'catalina': Repository(
-#         name='homebrew',
-#         db_url='https://formulae.brew.sh/api/formula.json',
-#         formula_base_url='https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/{}.rb'),
 }
 
 
@@ -689,9 +684,9 @@ def main(argv):
         update_package(name='libarchive', osarch='x86_64_linux', cache_dir=cache_dir)
         update_package(name='p7zip', osarch='x86_64_linux', cache_dir=cache_dir)
         update_package(name='libmagic', osarch='x86_64_linux', cache_dir=cache_dir)
-        update_package(name='libarchive', osarch='high_sierra', cache_dir=cache_dir)
-        update_package(name='p7zip', osarch='high_sierra', cache_dir=cache_dir)
-        update_package(name='libmagic', osarch='high_sierra', cache_dir=cache_dir)
+        update_package(name='libarchive', osarch=CURRENT_MACOSX_VERSION, cache_dir=cache_dir)
+        update_package(name='p7zip', osarch=CURRENT_MACOSX_VERSION, cache_dir=cache_dir)
+        update_package(name='libmagic', osarch=CURRENT_MACOSX_VERSION, cache_dir=cache_dir)
 
     else:
 
@@ -745,6 +740,20 @@ PRESETS = {
             'libarchive/3.4.3/COPYING': 'licenses/libarchive/',
             'libarchive/3.4.3/README.md': 'licenses/libarchive/',
 
+            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la343.so.1.0',
+            'bzip2/1.0.8/INSTALL_RECEIPT.json': 'licenses/bzip2/',
+            'bzip2/1.0.8/LICENSE': 'licenses/bzip2/',
+            'bzip2/1.0.8/README': 'licenses/bzip2/',
+            'bzip2/1.0.8/CHANGES': 'licenses/bzip2/',
+
+            'expat/2.2.10/lib/libexpat.so.1': 'lib/libexpat-la343.so.1',
+            'expat/2.2.10/INSTALL_RECEIPT.json': 'licenses/expat/',
+            'expat/2.2.10/COPYING': 'licenses/expat/',
+            'expat/2.2.10/README.md': 'licenses/expat/',
+            'expat/2.2.10/AUTHORS': 'licenses/expat/',
+            'expat/2.2.10/Changes': 'licenses/expat/',
+            'expat/2.2.10/share/doc/expat/changelog': 'licenses/expat/',
+
             'libb2/0.98.1/lib/libb2.so.1': 'lib/libb2-la343.so.1',
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
             'libb2/0.98.1/COPYING': 'licenses/libb2/',
@@ -755,25 +764,11 @@ PRESETS = {
             'libbsd/0.10.0/README': 'licenses/libbsd/',
             'libbsd/0.10.0/ChangeLog': 'licenses/libbsd/',
 
-            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la343.so.1.0',
-            'bzip2/1.0.8/INSTALL_RECEIPT.json': 'licenses/bzip2/',
-            'bzip2/1.0.8/LICENSE': 'licenses/bzip2/',
-            'bzip2/1.0.8/README': 'licenses/bzip2/',
-            'bzip2/1.0.8/CHANGES': 'licenses/bzip2/',
-
-            'expat/2.2.9/lib/libexpat.so.1': 'lib/libexpat-la343.so.1',
-            'expat/2.2.9/INSTALL_RECEIPT.json': 'licenses/expat/',
-            'expat/2.2.9/COPYING': 'licenses/expat/',
-            'expat/2.2.9/README.md': 'licenses/expat/',
-            'expat/2.2.9/AUTHORS': 'licenses/expat/',
-            'expat/2.2.9/Changes': 'licenses/expat/',
-            'expat/2.2.9/share/doc/expat/changelog': 'licenses/expat/',
-
-            'lz4/1.9.2/lib/liblz4.so.1': 'lib/liblz4-la343.so.1',
-            'lz4/1.9.2/INSTALL_RECEIPT.json': 'licenses/lz4/',
-            'lz4/1.9.2/LICENSE': 'licenses/lz4/',
-            'lz4/1.9.2/README.md': 'licenses/lz4/',
-            'lz4/1.9.2/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
+            'lz4/1.9.3/lib/liblz4.so.1': 'lib/liblz4-la343.so.1',
+            'lz4/1.9.3/INSTALL_RECEIPT.json': 'licenses/lz4/',
+            'lz4/1.9.3/LICENSE': 'licenses/lz4/',
+            'lz4/1.9.3/README.md': 'licenses/lz4/',
+            'lz4/1.9.3/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
 
             'xz/5.2.5/lib/liblzma.so.5': 'lib/liblzma-la343.so.5',
             'xz/5.2.5/INSTALL_RECEIPT.json': 'licenses/xz/',
@@ -788,16 +783,16 @@ PRESETS = {
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
 
-            'zstd/1.4.5/lib/libzstd.so.1': 'lib/libzstd-la343.so.1',
-            'zstd/1.4.5/INSTALL_RECEIPT.json': 'licenses/zstd/',
-            'zstd/1.4.5/COPYING': 'licenses/zstd/',
-            'zstd/1.4.5/README.md': 'licenses/zstd/',
-            'zstd/1.4.5/LICENSE': 'licenses/zstd/',
-            'zstd/1.4.5/CHANGELOG': 'licenses/zstd/',
+            'zstd/1.4.7/lib/libzstd.so.1': 'lib/libzstd-la343.so.1',
+            'zstd/1.4.7/INSTALL_RECEIPT.json': 'licenses/zstd/',
+            'zstd/1.4.7/COPYING': 'licenses/zstd/',
+            'zstd/1.4.7/README.md': 'licenses/zstd/',
+            'zstd/1.4.7/LICENSE': 'licenses/zstd/',
+            'zstd/1.4.7/CHANGELOG': 'licenses/zstd/',
         }
     },
 
-    ('libarchive', 'high_sierra'): {
+    ('libarchive', CURRENT_MACOSX_VERSION): {
         'fullversion': '3.4.3',
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
@@ -820,11 +815,11 @@ PRESETS = {
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
             'libb2/0.98.1/COPYING': 'licenses/libb2/',
 
-            'lz4/1.9.2/lib/liblz4.1.dylib': 'lib/',
-            'lz4/1.9.2/INSTALL_RECEIPT.json': 'licenses/lz4/',
-            'lz4/1.9.2/LICENSE': 'licenses/lz4/',
-            'lz4/1.9.2/README.md': 'licenses/lz4/',
-            'lz4/1.9.2/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
+            'lz4/1.9.3/lib/liblz4.1.dylib': 'lib/',
+            'lz4/1.9.3/INSTALL_RECEIPT.json': 'licenses/lz4/',
+            'lz4/1.9.3/LICENSE': 'licenses/lz4/',
+            'lz4/1.9.3/README.md': 'licenses/lz4/',
+            'lz4/1.9.3/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
 
             'xz/5.2.5/lib/liblzma.5.dylib': 'lib/',
             'xz/5.2.5/INSTALL_RECEIPT.json': 'licenses/xz/',
@@ -834,12 +829,12 @@ PRESETS = {
             'xz/5.2.5/share/doc/xz/THANKS': 'licenses/xz/',
             'xz/5.2.5/ChangeLog': 'licenses/xz/',
 
-            'zstd/1.4.5/lib/libzstd.1.dylib': 'lib/',
-            'zstd/1.4.5/INSTALL_RECEIPT.json': 'licenses/zstd/',
-            'zstd/1.4.5/COPYING': 'licenses/zstd/',
-            'zstd/1.4.5/README.md': 'licenses/zstd/',
-            'zstd/1.4.5/LICENSE': 'licenses/zstd/',
-            'zstd/1.4.5/CHANGELOG': 'licenses/zstd/',
+            'zstd/1.4.7/lib/libzstd.1.dylib': 'lib/',
+            'zstd/1.4.7/INSTALL_RECEIPT.json': 'licenses/zstd/',
+            'zstd/1.4.7/COPYING': 'licenses/zstd/',
+            'zstd/1.4.7/README.md': 'licenses/zstd/',
+            'zstd/1.4.7/LICENSE': 'licenses/zstd/',
+            'zstd/1.4.7/CHANGELOG': 'licenses/zstd/',
         }
     },
 
@@ -868,7 +863,7 @@ PRESETS = {
         },
     },
 
-    ('p7zip', 'high_sierra'): {
+    ('p7zip', CURRENT_MACOSX_VERSION): {
         'fullversion': '16.02_2',
         'install_dir': 'builtins/extractcode_7z-macosx/src/extractcode_7z',
         'ignore_deps': [],
@@ -915,7 +910,7 @@ PRESETS = {
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
         },
     },
-    ('libmagic', 'high_sierra'): {
+    ('libmagic', CURRENT_MACOSX_VERSION): {
         'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-macosx/src/typecode_libmagic',
         'ignore_deps': [],
