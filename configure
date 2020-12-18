@@ -34,7 +34,13 @@ function setup {
 }
 
 
+function build_patchelf {
+    $CONFIGURE_ROOT_DIR/src/build.sh
+}
+
+
 setup
+build_patchelf
 
 $CONFIGURE_ROOT_DIR/tmp/bin/pip install -r requirements.txt
 
