@@ -21,7 +21,7 @@ for root in builtins misc binary-analysis
       do 
         pushd $root/$plugin
         rm -rf dist build
-        # build and copy up        
+        # build and copy up
         python setup.py release
         cp dist/* $dist
         popd
