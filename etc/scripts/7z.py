@@ -17,7 +17,6 @@ import shared_utils
 
 REQUEST_TIMEOUT = 60
 
-
 TRACE = False
 TRACE_DEEP = False
 
@@ -63,14 +62,33 @@ def fetch_package(name, cache_dir):
     src_sha256 = presets['src_sha256']
 
     copies = presets['copies']
+
+
+    base_dir = presets['base_dir']
+    base_dir = os.path.abspath(base_dir)
+
+    source_plugins_dir = presets['source_plugins_dir']
+    source_plugins_dir = os.path.abspath(source_plugins_dir)
+
+    base_dir_name = os.path.basename(base_dir)
+    saved_sources_dir = os.path.join(source_plugins_dir, base_dir_name)
+    if os.path.exists(saved_sources_dir):
+        shutil.rmtree(saved_sources_dir, ignore_errors=False)
+
     install_dir = presets['install_dir']
+    install_dir = os.path.join(base_dir, install_dir)
+    os.makedirs(install_dir, exist_ok=True)
+
+    thirdparty_dir = presets['thirdparty_dir']
+    thirdparty_dir = os.path.join(base_dir, thirdparty_dir)
+    os.makedirs(thirdparty_dir, exist_ok=True)
 
     cache_dir = os.path.abspath(cache_dir)
-    install_dir = os.path.abspath(install_dir)
-
     os.makedirs(cache_dir, exist_ok=True)
+
     bin_cache_dir = os.path.join(cache_dir, 'bin')
     os.makedirs(bin_cache_dir, exist_ok=True)
+
     src_cache_dir = os.path.join(cache_dir, 'src')
     os.makedirs(src_cache_dir, exist_ok=True)
 
@@ -82,44 +100,54 @@ def fetch_package(name, cache_dir):
     extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
     install_files(extracted_dir, install_dir, copies)
 
-    # also fetch sources
+    # fetch sources
     fetched_src_loc = shared_utils.fetch_file(url=src_url, dir_location=src_cache_dir)
     shared_utils.verify(fetched_src_loc, src_sha256)
+
+    # save also in the plugin thirdparty with an ABOUT file
+    shutil.copy2(fetched_src_loc, thirdparty_dir)
+    about_resource =os.path.basename(fetched_src_loc)
+    shared_utils.create_about_file(
+        about_resource=about_resource,
+        name=presets['name'],
+        version=presets['version'],
+        download_url=src_url,
+        target_directory=thirdparty_dir,
+    )
+
+    # finally make a copy of the  plugins with their sources on our "sdist"
+    copy_tree(base_dir, saved_sources_dir)
 
 
 def main(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--package', type=str,
-        help='Package name to fetch')
     parser.add_argument('--cache-dir', type=str,
         help='Target directory where archives are fetched')
-    parser.add_argument('--build-all', action='store_true',
-        help='Build all default packages.')
 
     args = parser.parse_args()
-    name = args.package
-
     cache_dir = args.cache_dir or None
 
-    if TRACE_DEEP:
-        print('name:', name)
+    cache_dir = cache_dir or 'src-7zip'
+    fetch_package(name='7zip-64', cache_dir=cache_dir)
 
-    if args.build_all:
-        cache_dir = cache_dir or 'src-7zip'
-        fetch_package(name='7zip-64', cache_dir=cache_dir)
-    else:
-        fetch_package(name=name, cache_dir=cache_dir)
 
 
 PACKAGES = {
     '7zip-64': {
+        'name': '7zip',
+        'version': '16.04',
         'bin_url': 'https://master.dl.sourceforge.net/project/sevenzip/7-Zip/16.04/7z1604-x64.exe',
         'bin_sha256': '9bb4dc4fab2a2a45c15723c259dc2f7313c89a5ac55ab7c3f76bba26edc8bcaa',
 
         'src_url': 'https://master.dl.sourceforge.net/project/sevenzip/7-Zip/16.04/7z1604-src.7z',
         'src_sha256': '4f46b057b8b020e5c1146ca08faae0437a8d176388ffcb16ccbdecaebd9e10d0',
 
-        'install_dir': 'builtins/extractcode_7z-win64/src/extractcode_7z',
+        'base_dir': 'builtins/extractcode_7z-win64',
+        'install_dir': 'src/extractcode_7z',
+        'thirdparty_dir': 'thirdparty',
+
+        'source_plugins_dir': 'builtins/extractcode_7z-sources',
+
         'copies': {
             '7z.exe': 'bin/',
             '7z.dll': 'bin/',
@@ -129,7 +157,6 @@ PACKAGES = {
         },
     },
 }
-
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

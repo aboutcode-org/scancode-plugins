@@ -14,6 +14,6 @@ set -e
 mkdir -p src-homebrew
 mkdir -p src-msys2
 mkdir -p src-7zip
-python etc/scripts/homebrew.py  --cache-dir src-homebrew --build-all
 python etc/scripts/msys2.py  --cache-dir src-msys2 --build-all
-python etc/scripts/7z.py  --cache-dir src-7zip --build-all
+python etc/scripts/homebrew.py  --cache-dir src-homebrew --build-all
+python etc/scripts/7z.py  --cache-dir src-7zip

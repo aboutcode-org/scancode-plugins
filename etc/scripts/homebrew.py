@@ -8,12 +8,13 @@ Note that homebrew
 
 import argparse
 import contextlib
-from distutils.dir_util import copy_tree
 import json
 import os
 import shutil
 import subprocess
 import sys
+
+from distutils.dir_util import copy_tree
 
 import shared_utils
 
@@ -150,17 +151,21 @@ class Download:
         if not tag and not revision:
             _, _, file_name = url.rpartition('/')
             return cls(url=url, file_name=file_name, sha256=sha256)
+
         # a github URL
         assert url.startswith('https://github.com'), f'Invalid {url}'
         if not tag and not revision:
             return
+
         if url.endswith('.git'):
             url, _, _ = url.rpartition('.git')
+
         # prefer revision over tag
         commitish = revision or tag
         download_url = f'{url}/archive/{commitish}.tar.gz'
         _, _, ghrepo_name = url.rpartition('/')
         file_name = f'{ghrepo_name}-{commitish}.tar.gz'
+
         return Download(
             url=download_url,
             file_name=file_name,
@@ -179,8 +184,10 @@ class Download:
             file_name=self.file_name,
             force=force,
         )
+
         if verify:
             shared_utils.verify(self.fetched_location, self.sha256)
+
         return self.fetched_location
 
 
@@ -217,15 +224,17 @@ class BinaryPackage:
     def add_formula_source_download_urls(self, location):
         """
         Add source_download_urls found in the Ruby formula file at `location`.
-        These would typically be patches.
+        These would typically be patches and simialr as the sources should
+        already have been taken care of.
         """
         known_urls = set(d.url for d in self.source_download_urls)
-        for url in get_formula_urls(location):
+        for url in get_formula_source_urls(location):
             if url not in known_urls:
                 dnl = Download(url)
                 if not dnl:
                     # this can happen for bare github URL when we have no tag or commit
                     continue
+
                 self.source_download_urls.append(dnl)
 
     @classmethod
@@ -313,7 +322,7 @@ class BinaryPackage:
                 print('    ', arch, dnl)
         return bp
 
-    def get_all_depends(self, binary_packages, ignore_deps=()):
+    def get_all_dependents(self, binary_packages, ignore_deps=()):
         """
         Yield all the recursive deps of this package given a packages mapping
         of {name: package}
@@ -329,31 +338,39 @@ class BinaryPackage:
 
             yield depp
 
-            for subdep in depp.get_all_depends(binary_packages, ignore_deps):
+            for subdep in depp.get_all_dependents(binary_packages, ignore_deps):
                 yield subdep
 
-    def get_unique_depends(self, binary_packages, ignore_deps=()):
+    def get_unique_dependents(self, binary_packages, ignore_deps=()):
         """
         Return a list of unique package deps of this package given a
         packages mapping of {name: package}
         """
         unique = {}
-        for dep in self.get_all_depends(binary_packages, ignore_deps):
+        for dep in self.get_all_dependents(binary_packages, ignore_deps):
             if dep.name not in unique:
                 unique[dep.name] = dep
         return list(unique.values())
 
 
-def get_formula_urls(location):
+def get_formula_source_urls(location):
     """
     Yield URLs extracted from the Ruby formula file at location.
     """
+    good_extensions = (
+        '.tar.gz',
+        '.tar.xz',
+        '.tar.bz2',
+        '.zip',
+    )
     with open(location) as formula:
         for line in formula:
             line = line .strip()
             if line.startswith('url '):
-                _, _, url = line.partition('url ')
-                yield url.strip(' "')
+                _, _, url = line.partition('url "')
+                url = url.strip(' "')
+                if url.endswith(good_extensions):
+                    yield  url
 
 
 def install_files(extracted_dir, install_dir, package_name, package_fullversion, copies=None):
@@ -501,25 +518,38 @@ def check_installed_files(install_dir, copies, package):
         raise Exception(f'These files were not installed for {package}:\n{missing}')
 
 
-def update_package(name, osarch, fullversion=None, cache_dir=None,
-                  install_dir=None, ignore_deps=(), copies=None, deletes=(),
-                  fixes=()):
+def update_package(
+    name,
+    osarch,
+    fullversion=None,
+    cache_dir=None,
+    install_dir=None,
+    ignore_deps=(),
+    copies=None,
+    deletes=(),
+    fixes=(),
+):
     """
     Fetch a `package` with `name` for `osarch` and optional `fullversion` and
     save its sources and binaries as well as its full dependency tree sources
     and binaries in the `cache_dir` directory, ignoring `ignore_deps` list of
     dependencies. Then delete the list of paths under `install_dir` in
     `deletes`. Then install in `install_dir` using `copies` {from:to} copy
-    operations.
+    operations. Finally copy all the sources to `thirdparty_dir`
     """
     # Apply presets
     presets = PRESETS.get((name, osarch,), {})
     copies = copies or presets.get('copies', {})
     ignore_deps = ignore_deps or presets.get('ignore_deps', [])
     fullversion = fullversion or presets.get('fullversion')
-    install_dir = install_dir or presets.get('install_dir')
+    install_dir = install_dir or presets['install_dir']
     deletes = deletes or presets.get('deletes', [])
     fixes = fixes or presets.get('fixes', [])
+
+    # used for sources redistribution
+    base_dir = presets['base_dir']
+    thirdparty_dir = presets['thirdparty_dir']
+    source_plugins_dir = presets['source_plugins_dir']
 
     for deletable in deletes:
         deletable = os.path.join(install_dir, deletable)
@@ -538,7 +568,10 @@ def update_package(name, osarch, fullversion=None, cache_dir=None,
     root_package = binary_packages[name]
 
     if fullversion and fullversion != root_package.fullversion:
-        raise Exception(f'Incorrect version for {root_package.name}: {root_package.fullversion} vs. {fullversion}')
+        raise Exception(
+            f'Incorrect version for {root_package.name}: '
+            '{root_package.fullversion} vs. {fullversion}',
+        )
 
     if not cache_dir:
         cache_dir = os.path.dirname(__file__)
@@ -550,27 +583,46 @@ def update_package(name, osarch, fullversion=None, cache_dir=None,
     src_cache_dir = os.path.join(cache_dir, 'src')
     os.makedirs(src_cache_dir, exist_ok=True)
 
-    if not install_dir:
-        raise Exception('install_dir is required.')
+    # create AND cleanup
+    os.makedirs(thirdparty_dir, exist_ok=True)
+    for srcf in os.listdir(thirdparty_dir):
+        os.remove(os.path.join(thirdparty_dir, srcf))
+
+    # create AND cleanup these too:
+    base_dir_name = os.path.basename(base_dir)
+    saved_sources_dir = os.path.join(source_plugins_dir, base_dir_name)
+    if os.path.exists(saved_sources_dir):
+        shutil.rmtree(saved_sources_dir, ignore_errors=False)
 
     extracted_to = process_package(
-        package=root_package, osarch=osarch,
-        install_dir=install_dir, copies=copies,
-        bin_cache_dir=bin_cache_dir, src_cache_dir=src_cache_dir)
+        package=root_package,
+        osarch=osarch,
+        install_dir=install_dir,
+        thirdparty_dir=thirdparty_dir,
+        copies=copies,
+        bin_cache_dir=bin_cache_dir,
+        src_cache_dir=src_cache_dir,
+    )
+
     extracted_locations.append(extracted_to)
 
     print('Fetching deps for: {}, ignoring deps: {}'.format(
         root_package.name,
         ', '.join(ignore_deps)))
 
-    for dependency in root_package.get_unique_depends(
+    for dependency in root_package.get_unique_dependents(
             binary_packages=binary_packages,
             ignore_deps=ignore_deps):
 
         extracted_to = process_package(
-            package=dependency, osarch=osarch,
-            install_dir=install_dir, copies=copies,
-            bin_cache_dir=bin_cache_dir, src_cache_dir=src_cache_dir)
+            package=dependency,
+            osarch=osarch,
+            install_dir=install_dir,
+            thirdparty_dir=thirdparty_dir,
+            copies=copies,
+            bin_cache_dir=bin_cache_dir,
+            src_cache_dir=src_cache_dir,
+        )
         extracted_locations.append(extracted_to)
 
     check_installed_files(install_dir, copies, root_package)
@@ -579,14 +631,16 @@ def update_package(name, osarch, fullversion=None, cache_dir=None,
         with pushd(install_dir):
             apply_fixes(fixes)
 
-    # finally cleanup after thyself, removing extracted locations
-
+    # cleanup after thyself, removing extracted locations
     for exloc in extracted_locations:
         if os.path.exists(exloc):
             if os.path.isdir(exloc):
                 shutil.rmtree(exloc, False)
             else:
                 os.remove(exloc)
+
+    # finally make a copy of each plugins with their sources on our "sdist"
+    copy_tree(base_dir, saved_sources_dir)
 
 
 @contextlib.contextmanager
@@ -602,11 +656,20 @@ def pushd(path):
         os.chdir(original_cwd)
 
 
-def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cache_dir):
+def process_package(
+    package,
+    osarch,
+    install_dir,
+    thirdparty_dir,
+    copies,
+    bin_cache_dir,
+    src_cache_dir,
+):
     """
-    Fetch sources and binaries and install files for package.
+    Fetch sources and binaries and install files for package in plugin.
     """
-    print(f'Fetching package: {package}')
+    print(f'Fetching package: {package} for install in: {install_dir}')
+
     # fetch the binary for the requested osarch
     package_binary_download = package.download_urls[osarch]
     fetched_binary_loc = package_binary_download.fetch(dir_location=bin_cache_dir)
@@ -622,16 +685,40 @@ def process_package(package, osarch, install_dir, copies, bin_cache_dir, src_cac
         shutil.copy2(brew_formula_loc, src_cache_dir)
         package.add_formula_source_download_urls(brew_formula_loc)
 
+        # save also in the plugin thirdparty with an ABOUT file
+        shutil.copy2(brew_formula_loc, thirdparty_dir)
+        shared_utils.create_about_file(
+            about_resource=brew_formula,
+            name=package.name,
+            version=package.fullversion,
+            download_url=package_binary_download.url,
+            target_directory=thirdparty_dir,
+            notes='This is a brew formula used to create this package.'
+        )
+
     # fetch all sources
     for src_download in package.source_download_urls:
-        src_download.fetch(dir_location=src_cache_dir)
+        fetched_src_location = src_download.fetch(dir_location=src_cache_dir)
+
+        # save also in the plugin thirdparty with an ABOUT file
+        shutil.copy2(fetched_src_location, thirdparty_dir)
+        shared_utils.create_about_file(
+            about_resource=os.path.basename(fetched_src_location),
+            name=package.name,
+            version=package.fullversion,
+            download_url=src_download.url,
+            target_directory=thirdparty_dir,
+            notes='This is a source archive or patch used to create this package with brew.'
+        )
 
     # install the binary
     install_files(
-        extracted_dir=extracted_dir, install_dir=install_dir,
+        extracted_dir=extracted_dir,
+        install_dir=install_dir,
         package_name=package.name,
         package_fullversion=package.fullversion,
-        copies=copies)
+        copies=copies,
+    )
     return extracted_dir
 
 
@@ -674,7 +761,7 @@ def main(argv):
     if TRACE_DEEP:
         print('name:', name)
         print('fullversion:', fullversion)
-        print('install_dir:', copies)
+        print('install_dir:', install_dir)
         print('ignore_deps:', ignore_deps)
         print('copies:', copies)
         print('deletes:', deletes)
@@ -690,9 +777,16 @@ def main(argv):
 
     else:
 
-        update_package(name=name, fullversion=fullversion, osarch=osarch, cache_dir=cache_dir,
-            install_dir=install_dir, ignore_deps=ignore_deps,
-            copies=copies, deletes=deletes)
+        update_package(
+            name=name,
+            fullversion=fullversion,
+            osarch=osarch,
+            cache_dir=cache_dir,
+            install_dir=install_dir,
+            ignore_deps=ignore_deps,
+            copies=copies,
+            deletes=deletes,
+        )
 
 
 PRESETS = {
@@ -702,6 +796,11 @@ PRESETS = {
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-linux/src/extractcode_libarchive',
+        'thirdparty_dir': 'builtins/extractcode_libarchive-linux/thirdparty',
+
+        'base_dir': 'builtins/extractcode_libarchive-linux',
+        'source_plugins_dir': 'builtins/extractcode_libarchive-sources',
+
         'fixes': [
             ('patchelf', '--set-soname', 'libarchive.so', 'lib/libarchive.so'),
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libarchive.so'),
@@ -797,6 +896,12 @@ PRESETS = {
         'ignore_deps': [],
         'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-macosx/src/extractcode_libarchive',
+
+        'thirdparty_dir': 'builtins/extractcode_libarchive-macosx/thirdparty',
+
+        'base_dir': 'builtins/extractcode_libarchive-macosx',
+        'source_plugins_dir': 'builtins/extractcode_libarchive-sources',
+
         'fixes': [
             ('patchmacho', 'lib/libarchive.dylib'),
             ('patchmacho', 'lib/libb2.1.dylib'),
@@ -841,6 +946,11 @@ PRESETS = {
     ('p7zip', 'x86_64_linux'): {
         'fullversion': '16.02_2',
         'install_dir': 'builtins/extractcode_7z-linux/src/extractcode_7z',
+        'thirdparty_dir': 'builtins/extractcode_7z-linux/thirdparty',
+
+        'base_dir': 'builtins/extractcode_7z-linux',
+        'source_plugins_dir': 'builtins/extractcode_7z-sources',
+
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [
@@ -866,6 +976,11 @@ PRESETS = {
     ('p7zip', CURRENT_MACOSX_VERSION): {
         'fullversion': '16.02_2',
         'install_dir': 'builtins/extractcode_7z-macosx/src/extractcode_7z',
+        'thirdparty_dir': 'builtins/extractcode_7z-macosx/thirdparty',
+
+        'base_dir': 'builtins/extractcode_7z-macosx',
+        'source_plugins_dir': 'builtins/extractcode_7z-sources',
+
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
@@ -886,6 +1001,11 @@ PRESETS = {
     ('libmagic', 'x86_64_linux'): {
         'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-linux/src/typecode_libmagic',
+        'thirdparty_dir': 'builtins/typecode_libmagic-linux/thirdparty',
+
+        'base_dir': 'builtins/typecode_libmagic-linux',
+        'source_plugins_dir': 'builtins/typecode_libmagic-sources',
+
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [
@@ -913,6 +1033,11 @@ PRESETS = {
     ('libmagic', CURRENT_MACOSX_VERSION): {
         'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-macosx/src/typecode_libmagic',
+        'thirdparty_dir': 'builtins/typecode_libmagic-macosx/thirdparty',
+
+        'base_dir': 'builtins/typecode_libmagic-macosx',
+        'source_plugins_dir': 'builtins/typecode_libmagic-sources',
+
         'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [

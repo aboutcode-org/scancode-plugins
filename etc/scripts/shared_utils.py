@@ -1,5 +1,6 @@
 # Copyright (c) 2020 nexB Inc.
 
+import cgi
 import hashlib
 import os
 import shutil
@@ -7,13 +8,19 @@ import subprocess
 import tarfile
 import zipfile
 
+import saneyaml
 import requests
 
 REQUEST_TIMEOUT = 60
 
-TRACE = False
-TRACE_FETCH = False
+TRACE = True
+TRACE_FETCH = True
 TRACE_INSTALL = False
+
+
+def file_name_from_url(url):
+    _, _, file_name = url.strip('/').rpartition('/')
+    return file_name
 
 
 def fetch_file(url, dir_location, file_name=None, force=False, indent=1):
@@ -26,13 +33,24 @@ def fetch_file(url, dir_location, file_name=None, force=False, indent=1):
         print(indent * ' ' + f'Fetching {url}')
 
     if not file_name:
-        _, _, file_name = url.rpartition('/')
+        file_name = file_name_from_url(url)
+
+    if any(x in url for x in ('github.com')):
+        # find the true download file if possible using a head request
+        # but only for some URLs
+        head = requests.head(url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+        content_disposition = head.headers.get('content-disposition', '')
+        _value, params = cgi.parse_header(content_disposition)
+        file_name = params.get('filename') or file_name
 
     location = os.path.join(dir_location, file_name)
 
     if force or not os.path.exists(location):
+        response = requests.get(url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+
         with open(location, 'wb') as o:
-            o.write(requests.get(url, timeout=REQUEST_TIMEOUT).content)
+            o.write(response.content)
+
     return location
 
 
@@ -47,6 +65,7 @@ def extract_tar(location, target_dir):
         subprocess.check_call(['unzstd', '-q', '-k', '-f', location])
         temp_extraction, _, _ = location.rpartition('.zst')
         location = temp_extraction
+
     with open(location, 'rb') as input_tar:
         with tarfile.open(fileobj=input_tar) as tar:
             members = tar.getmembers()
@@ -116,3 +135,31 @@ def verify(fetched_location, expected_sha256=None):
     with open (fetched_location, 'rb') as f:
         fsha256 = hashlib.sha256(f.read()).hexdigest()
         assert fsha256 == expected_sha256, f'Invalid SHA256 for: {fetched_location}'
+
+
+def create_about_file(
+    about_resource,
+    name,
+    version,
+    download_url,
+    target_directory,
+    **kwargs,
+):
+    """
+    Create and save an ABOUT file in target_directory with the provided data.
+    """
+    about_data = dict(
+        about_resource=about_resource,
+        name=name,
+        version=version,
+        download_url=download_url,
+    )
+
+    about_data.update(kwargs)
+
+    about_file = f'{about_resource}.ABOUT'
+    with open(os.path.join(target_directory, about_file), 'w') as fo:
+        fo.write(saneyaml.dump(about_data))
+
+    return about_file
+
