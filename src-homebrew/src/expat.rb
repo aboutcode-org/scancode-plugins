@@ -1,9 +1,14 @@
-# expat: Build a bottle for Linuxbrew
 class Expat < Formula
   desc "XML 1.0 parser"
   homepage "https://libexpat.github.io/"
-  url "https://github.com/libexpat/libexpat/releases/download/R_2_2_9/expat-2.2.9.tar.xz"
-  sha256 "1ea6965b15c2106b6bbe883397271c80dfa0331cdf821b2c319591b55eadc0a4"
+  url "https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.xz"
+  sha256 "5dfe538f8b5b63f03e98edac520d7d9a6a4d22e482e5c96d4d06fcc5485c25f2"
+  license "MIT"
+
+  livecheck do
+    url "https://github.com/libexpat/libexpat/releases/latest"
+    regex(/href=.*?expat[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
 
   head do
     url "https://github.com/libexpat/libexpat.git"
@@ -16,7 +21,7 @@ class Expat < Formula
   keg_only :provided_by_macos
 
   # On Ubuntu 14, fix the error: You do not have support for any sources of high quality entropy
-  uses_from_macos "libbsd"
+  depends_on "libbsd" unless OS.mac?
 
   def install
     cd "expat" if build.head?
