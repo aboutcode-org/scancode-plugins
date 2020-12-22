@@ -38,6 +38,6 @@ class LibarchivePaths(LocationProviderPlugin):
         lib_dir = join(curr_dir, 'lib')
         locations = {
             'extractcode.libarchive.libdir': lib_dir,
-            'extractcode.libarchive.dll': join(lib_dir, 'libarchive.dll'),
+            'extractcode.libarchive.dll': join(lib_dir, 'libarchive-13.dll'),
         }
         return locations
