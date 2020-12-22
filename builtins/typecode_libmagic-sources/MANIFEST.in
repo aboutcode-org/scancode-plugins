@@ -1,0 +1,9 @@
+graft src
+graft thirdparty
+graft typecode_libmagic-linux
+graft typecode_libmagic-macosx
+graft typecode_libmagic-win64
+
+include setup.*
+include *.rst
+include *LICENSE*
