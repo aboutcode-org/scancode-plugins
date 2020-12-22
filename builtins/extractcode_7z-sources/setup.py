@@ -13,22 +13,22 @@ import sys
 from setuptools import find_packages
 from setuptools import setup
 
-desc = '''A ScanCode path provider plugin to provide a prebuilt native sevenzip binary.'''
 
 sys_platform = str(sys.platform).lower()
 if sys_platform.startswith('linux'):
     os = 'linux'
 elif 'win32' in sys_platform:
-    os = 'win'
+    os = 'win64'
 elif 'darwin' in sys_platform:
     os = 'macosx'
 else:
     raise Exception(f'Unsupported OS/platform {sys_platform}')
 
-#
 src_dir = f'extractcode_7z-{os}'
-#
-#
+
+desc = '''A ScanCode path provider plugin to provide a prebuilt native sevenzip binary.'''
+
+
 setup(
     name='extractcode_7z',
     version='16.5',
