@@ -39,7 +39,7 @@ class LibmagicPaths(LocationProviderPlugin):
         lib_dir = join(curr_dir, 'lib')
         locations = {
             'typecode.libmagic.libdir': lib_dir,
-            'typecode.libmagic.dll': join(lib_dir, 'libmagic.dll'),
+            'typecode.libmagic.dll': join(lib_dir, 'libmagic-1.dll'),
             'typecode.libmagic.db': join(data_dir, 'magic.mgc'),
         }
         return locations
