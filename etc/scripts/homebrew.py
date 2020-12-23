@@ -6,7 +6,6 @@ Utility to keep linux and macOS prebuilt ScanCode toolkit plugins up to date.
 Note that homebrew
 """
 
-import argparse
 import contextlib
 import json
 import os
@@ -22,6 +21,12 @@ REQUEST_TIMEOUT = 60
 
 TRACE = False
 TRACE_DEEP = False
+
+CACHE_DIR = 'src-homebrew'
+BIN_CACHE_DIR = os.path.join(CACHE_DIR, 'bin')
+os.makedirs(BIN_CACHE_DIR, exist_ok=True)
+SRC_CACHE_DIR = os.path.join(CACHE_DIR, 'src')
+os.makedirs(SRC_CACHE_DIR, exist_ok=True)
 
 # homebrew uses version names and not numbers.
 # See https://en.wikipedia.org/wiki/MacOS_version_history#Releases
@@ -75,7 +80,7 @@ class Repository:
         # a collection of {binary_package_name: BinaryPackage object}
         self.packages = {}
 
-    def update_packages_index(self, cache_dir):
+    def update_packages_index(self):
         """
         Populate BinaryPackage and SourcePackage in this repo.
         Caches the data for the duration of the session.
@@ -87,7 +92,7 @@ class Repository:
 
         index_loc = shared_utils.fetch_file(
             url=self.db_url,
-            dir_location=cache_dir,
+            dir_location=CACHE_DIR,
             file_name=f'formula-{self.name}.json',
             force=True)
 
@@ -322,14 +327,12 @@ class BinaryPackage:
                 print('    ', arch, dnl)
         return bp
 
-    def get_all_dependents(self, binary_packages, ignore_deps=()):
+    def get_all_dependents(self, binary_packages):
         """
         Yield all the recursive deps of this package given a packages mapping
         of {name: package}
         """
         for dep_name, _dep_req in self.depends:
-            if ignore_deps and dep_name in ignore_deps:
-                continue
 
             try:
                 depp = binary_packages[dep_name]
@@ -338,16 +341,16 @@ class BinaryPackage:
 
             yield depp
 
-            for subdep in depp.get_all_dependents(binary_packages, ignore_deps):
+            for subdep in depp.get_all_dependents(binary_packages):
                 yield subdep
 
-    def get_unique_dependents(self, binary_packages, ignore_deps=()):
+    def get_unique_dependents(self, binary_packages):
         """
         Return a list of unique package deps of this package given a
         packages mapping of {name: package}
         """
         unique = {}
-        for dep in self.get_all_dependents(binary_packages, ignore_deps):
+        for dep in self.get_all_dependents(binary_packages):
             if dep.name not in unique:
                 unique[dep.name] = dep
         return list(unique.values())
@@ -522,9 +525,7 @@ def update_package(
     name,
     osarch,
     fullversion=None,
-    cache_dir=None,
     install_dir=None,
-    ignore_deps=(),
     copies=None,
     deletes=(),
     fixes=(),
@@ -532,24 +533,17 @@ def update_package(
     """
     Fetch a `package` with `name` for `osarch` and optional `fullversion` and
     save its sources and binaries as well as its full dependency tree sources
-    and binaries in the `cache_dir` directory, ignoring `ignore_deps` list of
-    dependencies. Then delete the list of paths under `install_dir` in
-    `deletes`. Then install in `install_dir` using `copies` {from:to} copy
-    operations. Finally copy all the sources to `thirdparty_dir`
+    and binaries in the `CACHE_DIR` directory. Then delete the list of paths
+    under `install_dir` in `deletes`. Then install in `install_dir` using
+    `copies` {from:to} copy operations.
     """
     # Apply presets
     presets = PRESETS.get((name, osarch,), {})
-    copies = copies or presets.get('copies', {})
-    ignore_deps = ignore_deps or presets.get('ignore_deps', [])
-    fullversion = fullversion or presets.get('fullversion')
     install_dir = install_dir or presets['install_dir']
+    copies = copies or presets.get('copies', {})
+    fullversion = fullversion or presets.get('fullversion')
     deletes = deletes or presets.get('deletes', [])
     fixes = fixes or presets.get('fixes', [])
-
-    # used for sources redistribution
-    base_dir = presets['base_dir']
-    thirdparty_dir = presets['thirdparty_dir']
-    source_plugins_dir = presets['source_plugins_dir']
 
     for deletable in deletes:
         deletable = os.path.join(install_dir, deletable)
@@ -561,7 +555,7 @@ def update_package(
             os.remove(deletable)
 
     repository = REPOSITORIES[osarch]
-    binary_packages = repository.update_packages_index(cache_dir=cache_dir)
+    binary_packages = repository.update_packages_index()
 
     extracted_locations = []
 
@@ -573,55 +567,24 @@ def update_package(
             '{root_package.fullversion} vs. {fullversion}',
         )
 
-    if not cache_dir:
-        cache_dir = os.path.dirname(__file__)
-    os.makedirs(cache_dir, exist_ok=True)
-
-    bin_cache_dir = os.path.join(cache_dir, 'bin')
-    os.makedirs(bin_cache_dir, exist_ok=True)
-
-    src_cache_dir = os.path.join(cache_dir, 'src')
-    os.makedirs(src_cache_dir, exist_ok=True)
-
-    # create AND cleanup
-    os.makedirs(thirdparty_dir, exist_ok=True)
-    for srcf in os.listdir(thirdparty_dir):
-        os.remove(os.path.join(thirdparty_dir, srcf))
-
-    # create AND cleanup these too:
-    base_dir_name = os.path.basename(base_dir)
-    saved_sources_dir = os.path.join(source_plugins_dir, base_dir_name)
-    if os.path.exists(saved_sources_dir):
-        shutil.rmtree(saved_sources_dir, ignore_errors=False)
-
     extracted_to = process_package(
         package=root_package,
         osarch=osarch,
         install_dir=install_dir,
-        thirdparty_dir=thirdparty_dir,
         copies=copies,
-        bin_cache_dir=bin_cache_dir,
-        src_cache_dir=src_cache_dir,
     )
 
     extracted_locations.append(extracted_to)
 
-    print('Fetching deps for: {}, ignoring deps: {}'.format(
-        root_package.name,
-        ', '.join(ignore_deps)))
+    print(f'Fetching deps for: {root_package.name}')
 
-    for dependency in root_package.get_unique_dependents(
-            binary_packages=binary_packages,
-            ignore_deps=ignore_deps):
+    for dependency in root_package.get_unique_dependents(binary_packages=binary_packages):
 
         extracted_to = process_package(
             package=dependency,
             osarch=osarch,
             install_dir=install_dir,
-            thirdparty_dir=thirdparty_dir,
             copies=copies,
-            bin_cache_dir=bin_cache_dir,
-            src_cache_dir=src_cache_dir,
         )
         extracted_locations.append(extracted_to)
 
@@ -638,9 +601,6 @@ def update_package(
                 shutil.rmtree(exloc, False)
             else:
                 os.remove(exloc)
-
-    # finally make a copy of each plugins with their sources on our "sdist"
-    copy_tree(base_dir, saved_sources_dir)
 
 
 @contextlib.contextmanager
@@ -660,10 +620,7 @@ def process_package(
     package,
     osarch,
     install_dir,
-    thirdparty_dir,
     copies,
-    bin_cache_dir,
-    src_cache_dir,
 ):
     """
     Fetch sources and binaries and install files for package in plugin.
@@ -672,42 +629,50 @@ def process_package(
 
     # fetch the binary for the requested osarch
     package_binary_download = package.download_urls[osarch]
-    fetched_binary_loc = package_binary_download.fetch(dir_location=bin_cache_dir)
+    fetched_binary_loc = package_binary_download.fetch(dir_location=BIN_CACHE_DIR)
+    fetched_binary_name = os.path.basename(fetched_binary_loc)
+    shared_utils.create_about_file(
+        about_resource=fetched_binary_name,
+        name=package.name,
+        version=package.fullversion,
+        type='homebrew',
+        download_url=package_binary_download.url,
+        target_directory=BIN_CACHE_DIR,
+    )
+
     extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
 
-    # fetch the upstream formula and collect extra sources/patches:
+    # TODO: fetch the upstream formula and collect extra sources/patches:
     # formula_loc = package.formula_download_url.fetch(dir_location=src_cache_dir)
 
     # collect the actual formula(s) used for the build (which may be older than upstream)
     brew_dir = os.path.join(extracted_dir, package.name, package.fullversion, '.brew')
     for brew_formula in os.listdir(brew_dir):
         brew_formula_loc = os.path.join(brew_dir, brew_formula)
-        shutil.copy2(brew_formula_loc, src_cache_dir)
+        shutil.copy2(brew_formula_loc, SRC_CACHE_DIR)
         package.add_formula_source_download_urls(brew_formula_loc)
 
-        # save also in the plugin thirdparty with an ABOUT file
-        shutil.copy2(brew_formula_loc, thirdparty_dir)
         shared_utils.create_about_file(
             about_resource=brew_formula,
             name=package.name,
             version=package.fullversion,
+            type='homebrew',
             download_url=package_binary_download.url,
-            target_directory=thirdparty_dir,
+            target_directory=SRC_CACHE_DIR,
             notes='This is a brew formula used to create this package.'
         )
 
     # fetch all sources
     for src_download in package.source_download_urls:
-        fetched_src_location = src_download.fetch(dir_location=src_cache_dir)
+        fetched_src_location = src_download.fetch(dir_location=SRC_CACHE_DIR)
 
-        # save also in the plugin thirdparty with an ABOUT file
-        shutil.copy2(fetched_src_location, thirdparty_dir)
         shared_utils.create_about_file(
             about_resource=os.path.basename(fetched_src_location),
             name=package.name,
             version=package.fullversion,
+            type='homebrew',
             download_url=src_download.url,
-            target_directory=thirdparty_dir,
+            target_directory=SRC_CACHE_DIR,
             notes='This is a source archive or patch used to create this package with brew.'
         )
 
@@ -722,84 +687,21 @@ def process_package(
     return extracted_dir
 
 
-def main(argv):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--package', type=str,
-        help='Package name to fetch')
-    parser.add_argument('-v', '--fullversion', type=str, default=None,
-        help='Package fullversion ')
-    parser.add_argument('--osarch', type=str,
-        choices=OSARCHES,
-        help='OS/Arch to use for the selected package ')
-    parser.add_argument('--cache-dir', type=str,
-        help='Target directory where archives are fetched')
-    parser.add_argument('--install-dir', type=str,
-        help='Install directory where archive files are copied')
-    parser.add_argument('--ignore-deps', type=str, action='append',
-        help='Ignore a dependent package with this name. Repeat for more ignores.')
-    parser.add_argument('--copies', type=str, action='append',
-        help='Copy this extra file or directory from the binary package to the '
-             'install directory (such as in foo=bar/data). Repeat for more copies.')
-    parser.add_argument('--deletes', type=str, action='append',
-        help='Delete this path before installing. Repeat for more paths.')
-    parser.add_argument('--build-all', action='store_true',
-        help='Build all default packages.')
+def main():
+    update_package(name='libarchive', osarch='x86_64_linux')
+    update_package(name='p7zip', osarch='x86_64_linux')
+    update_package(name='libmagic', osarch='x86_64_linux')
 
-    args = parser.parse_args()
-    name = args.package
-    fullversion = args.fullversion
-    osarch = args.osarch
-    copies = args.copies or {}
-    if copies:
-        copies = dict(op.split('=') for op in copies)
-
-    ignore_deps = args.ignore_deps or []
-    install_dir = args.install_dir or None
-    cache_dir = args.cache_dir or None
-    deletes = args.deletes  or []
-
-    if TRACE_DEEP:
-        print('name:', name)
-        print('fullversion:', fullversion)
-        print('install_dir:', install_dir)
-        print('ignore_deps:', ignore_deps)
-        print('copies:', copies)
-        print('deletes:', deletes)
-
-    if args.build_all:
-        cache_dir = cache_dir or 'src-homebrew'
-        update_package(name='libarchive', osarch='x86_64_linux', cache_dir=cache_dir)
-        update_package(name='p7zip', osarch='x86_64_linux', cache_dir=cache_dir)
-        update_package(name='libmagic', osarch='x86_64_linux', cache_dir=cache_dir)
-        update_package(name='libarchive', osarch=CURRENT_MACOSX_VERSION, cache_dir=cache_dir)
-        update_package(name='p7zip', osarch=CURRENT_MACOSX_VERSION, cache_dir=cache_dir)
-        update_package(name='libmagic', osarch=CURRENT_MACOSX_VERSION, cache_dir=cache_dir)
-
-    else:
-
-        update_package(
-            name=name,
-            fullversion=fullversion,
-            osarch=osarch,
-            cache_dir=cache_dir,
-            install_dir=install_dir,
-            ignore_deps=ignore_deps,
-            copies=copies,
-            deletes=deletes,
-        )
+    update_package(name='libarchive', osarch=CURRENT_MACOSX_VERSION)
+    update_package(name='p7zip', osarch=CURRENT_MACOSX_VERSION)
+    update_package(name='libmagic', osarch=CURRENT_MACOSX_VERSION)
 
 
 PRESETS = {
     # latest https://libarchive.org/downloads/libarchive-3.4.3.tar.gz
     ('libarchive', 'x86_64_linux'): {
         'fullversion': '3.4.3',
-        'ignore_deps': [],
-        'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-linux/src/extractcode_libarchive',
-        'thirdparty_dir': 'builtins/extractcode_libarchive-linux/thirdparty',
-
-        'base_dir': 'builtins/extractcode_libarchive-linux',
-        'source_plugins_dir': 'builtins/extractcode_libarchive-sources',
 
         'fixes': [
             ('patchelf', '--set-soname', 'libarchive.so', 'lib/libarchive.so'),
@@ -833,6 +735,7 @@ PRESETS = {
             ('patchelf', '--set-soname', 'libzstd-la343.so.1' , 'lib/libzstd-la343.so.1'),
 
         ],
+        'deletes': ['licenses', 'lib'],
         'copies': {
             'libarchive/3.4.3/lib/libarchive.so': 'lib/',
             'libarchive/3.4.3/INSTALL_RECEIPT.json': 'licenses/libarchive/',
@@ -882,25 +785,18 @@ PRESETS = {
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
 
-            'zstd/1.4.7/lib/libzstd.so.1': 'lib/libzstd-la343.so.1',
-            'zstd/1.4.7/INSTALL_RECEIPT.json': 'licenses/zstd/',
-            'zstd/1.4.7/COPYING': 'licenses/zstd/',
-            'zstd/1.4.7/README.md': 'licenses/zstd/',
-            'zstd/1.4.7/LICENSE': 'licenses/zstd/',
-            'zstd/1.4.7/CHANGELOG': 'licenses/zstd/',
+            'zstd/1.4.8/lib/libzstd.so.1': 'lib/libzstd-la343.so.1',
+            'zstd/1.4.8/INSTALL_RECEIPT.json': 'licenses/zstd/',
+            'zstd/1.4.8/COPYING': 'licenses/zstd/',
+            'zstd/1.4.8/README.md': 'licenses/zstd/',
+            'zstd/1.4.8/LICENSE': 'licenses/zstd/',
+            'zstd/1.4.8/CHANGELOG': 'licenses/zstd/',
         }
     },
 
     ('libarchive', CURRENT_MACOSX_VERSION): {
         'fullversion': '3.4.3',
-        'ignore_deps': [],
-        'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-macosx/src/extractcode_libarchive',
-
-        'thirdparty_dir': 'builtins/extractcode_libarchive-macosx/thirdparty',
-
-        'base_dir': 'builtins/extractcode_libarchive-macosx',
-        'source_plugins_dir': 'builtins/extractcode_libarchive-sources',
 
         'fixes': [
             ('patchmacho', 'lib/libarchive.dylib'),
@@ -910,8 +806,10 @@ PRESETS = {
             ('patchmacho', 'lib/libzstd.1.dylib'),
         ],
 
+        'deletes': ['licenses', 'lib'],
         'copies': {
             'libarchive/3.4.3/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
+
             'libarchive/3.4.3/INSTALL_RECEIPT.json': 'licenses/libarchive/',
             'libarchive/3.4.3/COPYING': 'licenses/libarchive/',
             'libarchive/3.4.3/README.md': 'licenses/libarchive/',
@@ -934,30 +832,25 @@ PRESETS = {
             'xz/5.2.5/share/doc/xz/THANKS': 'licenses/xz/',
             'xz/5.2.5/ChangeLog': 'licenses/xz/',
 
-            'zstd/1.4.7/lib/libzstd.1.dylib': 'lib/',
-            'zstd/1.4.7/INSTALL_RECEIPT.json': 'licenses/zstd/',
-            'zstd/1.4.7/COPYING': 'licenses/zstd/',
-            'zstd/1.4.7/README.md': 'licenses/zstd/',
-            'zstd/1.4.7/LICENSE': 'licenses/zstd/',
-            'zstd/1.4.7/CHANGELOG': 'licenses/zstd/',
+            'zstd/1.4.8/lib/libzstd.1.dylib': 'lib/',
+            'zstd/1.4.8/INSTALL_RECEIPT.json': 'licenses/zstd/',
+            'zstd/1.4.8/COPYING': 'licenses/zstd/',
+            'zstd/1.4.8/README.md': 'licenses/zstd/',
+            'zstd/1.4.8/LICENSE': 'licenses/zstd/',
+            'zstd/1.4.8/CHANGELOG': 'licenses/zstd/',
         }
     },
 
     ('p7zip', 'x86_64_linux'): {
         'fullversion': '16.02_2',
         'install_dir': 'builtins/extractcode_7z-linux/src/extractcode_7z',
-        'thirdparty_dir': 'builtins/extractcode_7z-linux/thirdparty',
 
-        'base_dir': 'builtins/extractcode_7z-linux',
-        'source_plugins_dir': 'builtins/extractcode_7z-sources',
-
-        'ignore_deps': [],
-        'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'bin/7z.so'),
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'bin/7z'),
             ('patchelf', '--set-interpreter', '/lib64/ld-linux-x86-64.so.2', 'bin/7z'),
         ],
+        'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
             'p7zip/16.02_2/lib/p7zip/7z': 'bin/',
             'p7zip/16.02_2/lib/p7zip/7z.so': 'bin/',
@@ -975,14 +868,9 @@ PRESETS = {
 
     ('p7zip', CURRENT_MACOSX_VERSION): {
         'fullversion': '16.02_2',
-        'install_dir': 'builtins/extractcode_7z-macosx/src/extractcode_7z',
-        'thirdparty_dir': 'builtins/extractcode_7z-macosx/thirdparty',
-
-        'base_dir': 'builtins/extractcode_7z-macosx',
-        'source_plugins_dir': 'builtins/extractcode_7z-sources',
-
-        'ignore_deps': [],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
+        'install_dir': 'builtins/extractcode_7z-macosx/src/extractcode_7z',
+
         'copies': {
             'p7zip/16.02_2/lib/p7zip/7z': 'bin/',
             'p7zip/16.02_2/lib/p7zip/7z.so': 'bin/',
@@ -1001,13 +889,7 @@ PRESETS = {
     ('libmagic', 'x86_64_linux'): {
         'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-linux/src/typecode_libmagic',
-        'thirdparty_dir': 'builtins/typecode_libmagic-linux/thirdparty',
 
-        'base_dir': 'builtins/typecode_libmagic-linux',
-        'source_plugins_dir': 'builtins/typecode_libmagic-sources',
-
-        'ignore_deps': [],
-        'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libmagic.so'),
             ('patchelf', '--replace-needed', 'libz.so.1' , 'libz-lm539.so.1', 'lib/libmagic.so'),
@@ -1015,6 +897,7 @@ PRESETS = {
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-lm539.so.1'),
             ('patchelf', '--set-soname', 'libz-lm539.so.1', 'lib/libz-lm539.so.1'),
         ],
+        'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
             'libmagic/5.39/lib/libmagic.so': 'lib/',
             'libmagic/5.39/share/misc/magic.mgc': 'data/',
@@ -1033,17 +916,12 @@ PRESETS = {
     ('libmagic', CURRENT_MACOSX_VERSION): {
         'fullversion': '5.39',
         'install_dir': 'builtins/typecode_libmagic-macosx/src/typecode_libmagic',
-        'thirdparty_dir': 'builtins/typecode_libmagic-macosx/thirdparty',
 
-        'base_dir': 'builtins/typecode_libmagic-macosx',
-        'source_plugins_dir': 'builtins/typecode_libmagic-sources',
-
-        'ignore_deps': [],
-        'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'fixes': [
             ('patchmacho', 'lib/libmagic.dylib'),
         ],
 
+        'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
             'libmagic/5.39/lib/libmagic.1.dylib': 'lib/libmagic.dylib',
             'libmagic/5.39/share/misc/magic.mgc': 'data/',
@@ -1058,4 +936,4 @@ PRESETS = {
 }
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())

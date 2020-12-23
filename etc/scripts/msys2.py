@@ -4,7 +4,7 @@
 #
 # Based on MSYS2 web application code.
 # download_url: https://raw.githubusercontent.com/msys2/msys2-web/628ec96975ab84b4e13567c8d4bdc25ad1a8f937/main.py
-
+#
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -23,7 +23,7 @@
 # CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+#
 """
 Utility to keep Windows prebuilt ScanCode toolkit plugins up to date.
 
@@ -66,7 +66,9 @@ Of note: a tarball can be compressed with gzip, xz, or zstd.
 
 from collections import defaultdict
 from distutils.dir_util import copy_tree
+import fnmatch
 import functools
+import glob
 from itertools import zip_longest
 import os
 import re
@@ -83,9 +85,12 @@ REQUEST_TIMEOUT = 60
 TRACE = False
 TRACE_DEEP = False
 TRACE_FETCH = False
+TRACE_DEP = True
 TRACE_INSTALL = False
 
 CACHE_DIR = 'src-msys2'
+BIN_CACHE_DIR = os.path.join(CACHE_DIR, 'bin')
+SRC_CACHE_DIR = os.path.join(CACHE_DIR, 'src')
 
 ################################################################################
 # Package repositories
@@ -131,8 +136,8 @@ class Repository:
         def populate_index(index_url, package_cls):
             by_name = defaultdict(list)
             download_urls = find_download_urls(index_url)
-            for download_url, file_name in download_urls:
-                pck = package_cls.from_download_url(download_url, file_name)
+            for download_url, _file_name in download_urls:
+                pck = package_cls.from_download_url(download_url)
                 by_name[pck.name].append(pck)
             for _name, versions in by_name.items():
                 BasePackage.sort(versions)
@@ -144,54 +149,54 @@ class Repository:
     @classmethod
     def update_packages(self, existing_packages, new_packages):
         """
-        Update an index mapping of {name: [packages]}
+        Update an existing_packages index mapping of {name: [packages]} with
+        a new_packages similar mapping:
+        - new package versions are added
+        - existing package versions empty attributes are updated with new data
         """
+        # TODO!
+        # this is meant to be used when combining a remote index with a local
+        # cache
 
     def populate_package_from_directory(self):
         """
         Populate BinaryPackage and SourcePackage in this repo.
         Caches the fetched indexes for the duration of a session.
         """
-        print(f'Loading Repo from HTML indexes at: {self.binaries_url} and: {self.sources_url}')
+        print(f'Loading Repo from archive directories at: {CACHE_DIR}')
 
-        source_download_urls = find_download_urls(self.sources_url)
-        for download_url, file_name in source_download_urls:
-            sp = SourcePackage.from_download_url(download_url, file_name)
-            self.sources_by_name[sp.name].append(sp)
+        # TODO!
+        # collect archive names and build skinny packages
+        # merge in main indexes
 
-        binary_download_urls = find_download_urls(self.binaries_url)
-        for download_url, file_name in binary_download_urls:
-            bp = BinaryPackage.from_download_url(download_url, file_name)
-            self.binaries_by_name[bp.name].append(bp)
-
-        # sort each list of package for a name by version from oldest to newest
-        for _name, versions in self.binaries_by_name.items():
-            BasePackage.sort(versions)
-
-        for _name, versions in self.sources_by_name.items():
-            BasePackage.sort(versions)
-
-    def get_binary_package_version(self, name, version=None):
+    def get_binary_package(self, name, version=None):
         """
-        Return the binary Package with name and version or None.
-        Return the latest version if version is None
+        Return the binary Package with `name` and `version` or None if not
+        found. Return the latest version if `version` is None.
         """
-        packages = self.binaries_by_name.get(name)
-        return self.get_package_version(packages, name, version)
+        packages = self.get_packages(self.binaries_by_name, name)
+        return self.get_package_version(packages, version)
 
-    def get_source_package_version(self, name, version=None):
+    def get_source_package(self, name, version=None):
         """
-        Return the source Package with name and version or None.
-        Return the latest version if version is None
+        Return the source Package with name and version or None if not found.
+        Return the latest version if `version` is None.
         """
-        packages = self.sources_by_name.get(name)
-        return self.get_package_version(packages, name, version)
+        packages = self.get_packages(self.sources_by_name, name)
+        return self.get_package_version(packages, version)
 
     @classmethod
-    def get_package_version(cls, packages, name, version=None):
+    def get_packages(cls, packages_by_name, name):
         """
-        Return the Package with name and version from packages or None.
-        Return the latest version if version is None.
+        Return the list of with name or None if not found.
+        """
+        return packages_by_name[name] or packages_by_name.get(name + '-git') or None
+
+    @classmethod
+    def get_package_version(cls, packages, version=None):
+        """
+        Return the Package with name and version from packages or None if not
+        found. Return the latest version if `version` is None.
         """
         if not packages:
             return
@@ -204,22 +209,22 @@ class Repository:
                 return p
 
 
-EXTENSIONS = '.tar.gz', '.tar.bz2', '.zip', '.tar.xz', '.sig'
+EXTENSIONS = '.tar.gz', '.tar.bz2', '.tar.xz', '.tar.zst', '.zip',
+IGNORED_EXTENSIONS = '.db.tar.gz', '.files.tar.gz', '.sig',
 
 
-def find_download_urls(repo_url, cache_dir=CACHE_DIR, extensions=EXTENSIONS):
+def find_download_urls(repo_url):
     """
-    Return a list of tuples (download URL, filename) for hrefs found in the HTML
-    age index at `repo_url`that match the list of `extensions` strings.
+    Return a list of download URL for HREF  found in the HTML page index at
+    `repo_url`.
     """
-    get_hrefs = re.compile('href="([^"]+)"').findall
 
     _, _, index_file_name = repo_url.partition('//')
     index_file_name = index_file_name.strip('/').replace('/', '-') + '.html'
 
     index_loc = shared_utils.fetch_file(
         url=repo_url,
-        dir_location=cache_dir,
+        dir_location=CACHE_DIR,
         file_name=index_file_name,
         force=False,
     )
@@ -227,9 +232,48 @@ def find_download_urls(repo_url, cache_dir=CACHE_DIR, extensions=EXTENSIONS):
     with open(index_loc) as fi:
         text = fi.read()
 
-    hrefs = get_hrefs(text)
-    hrefs = [l for l in hrefs if l.endswith(extensions)]
+    hrefs = find_hrefs(text)
     return  [(f'{repo_url}/{href}', href) for href in hrefs]
+
+
+def find_hrefs(text):
+    """
+    Return a list of HREF links found in the HTML page `text`.
+
+    For example::
+    >>> text = '''
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libao-1.2.2-1-any.pkg.tar.xz.sig">mingw-w64-x86_64-libao-1.2.2-1-any.pkg.tar.xz.sig</a></td><td align="right">2017-12-21 06:36  </td><td align="right"> 96 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.1-1-any.pkg.tar.xz">mingw-w64-x86_64-libarchive-3.4.1-1-any.pkg.tar.xz</a></td><td align="right">2019-12-31 12:16  </td><td align="right">676K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.1-1-any.pkg.tar.xz.sig">mingw-w64-x86_64-libarchive-3.4.1-1-any.pkg.tar.xz.sig</a></td><td align="right">2019-12-31 12:22  </td><td align="right">119 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-1-any.pkg.tar.xz">mingw-w64-x86_64-libarchive-3.4.2-1-any.pkg.tar.xz</a></td><td align="right">2020-02-18 21:03  </td><td align="right">677K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-1-any.pkg.tar.xz.sig">mingw-w64-x86_64-libarchive-3.4.2-1-any.pkg.tar.xz.sig</a></td><td align="right">2020-02-18 21:28  </td><td align="right">119 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz">mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz</a></td><td align="right">2020-03-11 07:55  </td><td align="right">677K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz.sig">mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz.sig</a></td><td align="right">2020-03-11 07:56  </td><td align="right">119 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst</a></td><td align="right">2020-05-06 08:56  </td><td align="right">731K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst.sig</a></td><td align="right">2020-05-06 08:56  </td><td align="right">119 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst</a></td><td align="right">2020-05-25 10:42  </td><td align="right">743K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst.sig</a></td><td align="right">2020-05-25 10:42  </td><td align="right">119 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst</a></td><td align="right">2020-12-06 13:52  </td><td align="right">732K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst.sig</a></td><td align="right">2020-12-06 13:57  </td><td align="right">438 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz">mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz</a></td><td align="right">2018-01-17 16:34  </td><td align="right">112K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz.sig">mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz.sig</a></td><td align="right">2018-01-17 16:34  </td><td align="right"> 96 </td><td>&nbsp;</td></tr>
+    ... '''
+    >>> for href in find_hrefs(text):
+    ...     print(href)
+    mingw-w64-x86_64-libarchive-3.4.1-1-any.pkg.tar.xz
+    mingw-w64-x86_64-libarchive-3.4.2-1-any.pkg.tar.xz
+    mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz
+    mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst
+    mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst
+    mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst
+    mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz
+    """
+    get_hrefs = re.compile('href="([^"]+)"').findall
+    hrefs = get_hrefs(text)
+    hrefs = [l for l in hrefs if
+        l.endswith(EXTENSIONS) and
+        not l.endswith(IGNORED_EXTENSIONS)]
+    return hrefs
 
 
 REPOSITORIES = {
@@ -274,6 +318,15 @@ class PackageName:
 
     @property
     def full_name(self):
+        """
+        Return the full name of a package.
+        For example::
+
+        >>> fn = 'mingw-w64-x86_64-libwinpthread-git-8.0.0.5906.c9a21571-1-any.pkg.tar.zst'
+        >>> pn = PackageName.from_file_name(fn)
+        >>> pn.full_name
+        'mingw-w64-x86_64-libwinpthread-git'
+        """
         return f'{self.prefix}{self.real_name}'
 
     @property
@@ -494,12 +547,6 @@ class BasePackage:
             help='Package version.'),
     )
 
-    base = attr.ib(
-        type=str,
-        metadata=dict(
-            help='Package base name: the name of the source package'),
-    )
-
     download_url = attr.ib(
         type=str,
         metadata=dict(help='Download URL'),
@@ -579,7 +626,7 @@ class BasePackage:
         self.update_with_package_data(package_data=pkgdata)
 
     @classmethod
-    def prepare_package_data(cls, package_data):
+    def prepare_package_data(cls, package_data, is_pkginfo=True):
         """
         Return a new mapping of package_data by filtering and adjusting existing
         package data for use with `cls` class
@@ -588,7 +635,16 @@ class BasePackage:
         package_data['version'] = version
 
         # the base is the source package name if present
-        package_data['base'] = package_data.get('base') or package_data['name']
+        names = package_data['name']
+        if is_pkginfo:
+            # single name/pkgname and optional pkgbase/source name defaulting to name/pkgname
+            name = package_data['name'] = names[0]
+            package_data['source_name'] = package_data.get('source_name') or name
+        else:
+            # base/source name is always present and is the name
+            # multiple pkgnames
+            package_data['name'] = package_data.pop('source_name')
+            package_data['binary_names'] = names
 
         package_data = filter_unknown_attributes(cls, package_data)
 
@@ -598,8 +654,9 @@ class BasePackage:
 @attr.attributes(kw_only=True)
 class SourcePackage(BasePackage):
 
-    binary_package_name = attr.ib(
-        type=str,
+    binary_names = attr.ib(
+        type=list,
+        default=attr.Factory(list),
         metadata=dict(
             help='Package name.'),
     )
@@ -613,7 +670,6 @@ class SourcePackage(BasePackage):
         pn = PackageName.from_file_name(file_name)
         return cls(
             name=pn.full_name,
-            binary_package_name=None,
             version=pn.full_version,
             arch=pn.arch or 'any',
             download_url=download_url,
@@ -624,19 +680,15 @@ class SourcePackage(BasePackage):
         """
         Return a new `SourcePackage` object built from a `package_data` mapping.
         """
-        package_data = cls.prepare_package_data(package_data)
+        package_data = cls.prepare_package_data(package_data, is_pkginfo=False)
         package_data['download_url'] = download_url
-
-        # the base is the source package name if present
-        binary_package_name = package_data['name']
-        package_data['name'] = package_data['base']
-        return cls(binary_package_name=binary_package_name, **package_data)
+        return cls(**package_data)
 
 
 @attr.attributes(kw_only=True)
 class BinaryPackage(BasePackage):
 
-    source_package_name = attr.ib(type=str, metadata=dict(help='Source Package name'),)
+    source_name = attr.ib(type=str, default=None, metadata=dict(help='Source Package name'),)
 
     groups = attr.ib(type=list, default=attr.Factory(list), metadata=dict(help='groups'))
     sha256 = attr.ib(type=str, default=None, metadata=dict(help='sha256'))
@@ -663,9 +715,9 @@ class BinaryPackage(BasePackage):
         Return a BinaryPackage built from a package data mapping (from a desc or
         pkginfo file).
         """
-        package_data = cls.prepare_package_data(package_data)
+        package_data = cls.prepare_package_data(package_data, is_pkginfo=True)
         package_data['download_url'] = download_url
-        return cls(source_package_name=package_data['base'], **package_data)
+        return cls(**package_data)
 
     @classmethod
     def from_download_url(cls, download_url):
@@ -679,7 +731,6 @@ class BinaryPackage(BasePackage):
             version=pn.full_version,
             arch=pn.arch or 'any',
             download_url=download_url,
-            source_package_name=None,
         )
 
     def get_all_dependencies(self, repo):
@@ -687,21 +738,23 @@ class BinaryPackage(BasePackage):
         Yield recursively all the dependent packages of this package in a repo.
         """
         for dep_name, dep_req in self.depends:
-            try:
-                name = dep_name
-                repo.binaries_by_name[name]
-            except KeyError:
-                name = dep_name + '-git'
-                repo.binaries_by_name[name]
-
             # TODO: use/apply dep_req to select correct version
-            latest_depp = repo.get_binary_package_version(name)
-            if not latest_depp:
-                raise Exception('Unable to find latest version for:', name)
+            latest_dep_package = repo.get_binary_package(dep_name)
 
-            yield latest_depp
+            if not latest_dep_package:
+                raise Exception('Unable to find latest version for:', dep_name)
 
-            for subdep in latest_depp.get_all_dependencies(repo):
+            if TRACE_DEP: print(f'Adding dep: {latest_dep_package.name}@{latest_dep_package.version}')
+
+            # the dep needs to be fetched now
+            fetch_and_update_binary_package(latest_dep_package)
+
+            yield latest_dep_package
+
+            for subdep in latest_dep_package.get_all_dependencies(repo):
+                if TRACE_DEP: print(
+                    f'  Adding subdep: {subdep.name}@{subdep.version} of '
+                    f'{latest_dep_package.name}@{latest_dep_package.version}')
                 yield subdep
 
     def get_unique_dependencies(self, repo):
@@ -808,6 +861,10 @@ def parse_desc(text):
 
 # https://wiki.archlinux.org/index.php/User:Apg#String_List_Fields
 STRING_LIST_FIELDS = (
+    # pkgname is special: this is a list in srcinfo and a string in pkginfo
+    # as one source can yield many binaries
+    'pkgname',
+
     'group',
     'license',
     'depend',
@@ -834,6 +891,7 @@ STRING_LIST_FIELDS = (
     'sha256sums',
     'sha384sums',
     'sha512sums',
+    'validpgpkeys',
 )
 
 
@@ -862,8 +920,8 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
     ... depend = mingw-w64-x86_64-readline
     ... makedepend = mingw-w64-x86_64-tcl'''
     >>> expected = {
-    ...     'name': 'mingw-w64-x86_64-sqlcipher',
-    ...     'base': 'mingw-w64-sqlcipher',
+    ...     'name': ['mingw-w64-x86_64-sqlcipher'],
+    ...     'source_name': 'mingw-w64-sqlcipher',
     ...     'version': '4.4.2-1',
     ...     'licenses': ['GPL', 'BSD'],
     ...     'desc': 'SQLite extension',
@@ -883,7 +941,28 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
     >>> assert expected == result, result
 
 
-    For example, using a .SRCINFO text:
+    Another example of .PKGINFO truncated for bbrevity::
+
+    >>> text = '''# Generated by makepkg 5.2.2
+    ... pkgname = mingw-w64-x86_64-gcc-libs
+    ... pkgbase = mingw-w64-gcc
+    ... pkgver = 10.2.0-6
+    ... depend = mingw-w64-x86_64-gmp
+    ... depend = mingw-w64-x86_64-mpc
+    ... depend = mingw-w64-x86_64-mpfr
+    ... depend = mingw-w64-x86_64-libwinpthread
+    ... '''
+    >>> expected = {
+    ... 'name': ['mingw-w64-x86_64-gcc-libs'],
+    ... 'source_name': 'mingw-w64-gcc',
+    ... 'version': '10.2.0-6',
+    ... 'depends': ['mingw-w64-x86_64-gmp', 'mingw-w64-x86_64-mpc', 'mingw-w64-x86_64-mpfr', 'mingw-w64-x86_64-libwinpthread'],
+    ... }
+    >>> result = parse_pkginfo(text)
+    >>> assert expected == result, result
+
+
+    For example, using a .SRCINFO text::
 
     >>> text = '''# Generated by makepkg 5.2.1
     ... # Mon May 25 08:54:20 UTC 2020
@@ -905,8 +984,9 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
     ...     sha256sums = 19556c1c67aacdff547fd719729630444dbc7161c63eca661a310676a022bb01
     ...     sha256sums = 2c318a025029998a9389eb99ab80f733c0fcf3b4888421879f2f6b4530d7f522
     ...
-    ... pkgname = mingw-w64-x86_64-libarchive'''
-    >>> expected = {'base': 'mingw-w64-libarchive',
+    ... pkgname = mingw-w64-x86_64-libarchive
+    ... pkgname = mingw-w64-x86_64-libarchive2'''
+    >>> expected = {'source_name': 'mingw-w64-libarchive',
     ...     'desc': 'Multi-format archive and compression library (mingw-w64)',
     ...     'version': '3.4.3', 'release': '1', 'url': 'https://www.libarchive.org/',
     ...     'arch': 'any', 'licenses': ['BSD'],
@@ -920,7 +1000,7 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
     ...     'sha256sums': [
     ...          '19556c1c67aacdff547fd719729630444dbc7161c63eca661a310676a022bb01',
     ...         '2c318a025029998a9389eb99ab80f733c0fcf3b4888421879f2f6b4530d7f522'],
-    ...     'name': 'mingw-w64-x86_64-libarchive'
+    ...     'name': ['mingw-w64-x86_64-libarchive', 'mingw-w64-x86_64-libarchive2'],
     ... }
     >>> result = parse_pkginfo(text)
     >>> assert expected == result, result
@@ -947,7 +1027,7 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
     ...
     ... pkgname = mingw-w64-x86_64-libspiro'''
     >>> expected = {
-    ...     'base': 'mingw-w64-libspiro',
+    ...     'source_name': 'mingw-w64-libspiro',
     ...     'desc': 'Simplifies the drawing of beautiful curves (mingw-w64)',
     ...     'version': '20200505',
     ...     'release': '1',
@@ -959,7 +1039,7 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
     ...     'options': ['staticlibs', 'strip'],
     ...     'source': ['libspiro-20200505.tar.gz::https://github.com/fontforge/libspiro/archive/20200505.tar.gz'],
     ...     'sha256sums': ['00be530b5c0ea9274baadf'],
-    ...     'name': 'mingw-w64-x86_64-libspiro'}
+    ...     'name': ['mingw-w64-x86_64-libspiro']}
     >>> result = parse_pkginfo(text)
     >>> assert expected == result, result
     """
@@ -989,7 +1069,7 @@ def parse_pkginfo(text, string_list_fields=STRING_LIST_FIELDS):
             else:
                 raise Exception(
                     f'Multiple values but key is not a multivalue key: '
-                    f'{key} = {existing_value} and {value}')
+                    f'{key} = {existing_value} and {value}', text)
 
         if key in string_list_fields:
             value = [value]
@@ -1018,7 +1098,7 @@ PACKAGE_DATA_KEYS_MAPPING = {
     '%CHECKDEPENDS%': 'checkdepends',
     # pkginfo_keys_mapping
     'pkgname': 'name',
-    'pkgbase': 'base',
+    'pkgbase': 'source_name',
     'pkgver': 'version',
     'pkgrel': 'release',
     'pkgdesc': 'desc',
@@ -1181,6 +1261,13 @@ version_sort_key = functools.cmp_to_key(vercmp)
 ################################################################################
 
 
+def has_glob(pth):
+    """
+    Return True if pth contains glob metacharacters (*, ?, [])
+    """
+    return pth != glob.escape(pth)
+
+
 def install_files(extracted_dir, install_dir, real_name, copies=None):
     """
     Install libraries and licenses from the extracted_dir
@@ -1193,29 +1280,44 @@ def install_files(extracted_dir, install_dir, real_name, copies=None):
     copies = dict(copies)
 
     # also keep .BUILDINFO .PKGINFO under the licenses
-    copies['.BUILDINFO'] = f'licenses/{real_name}/.BUILDINFO'
-    copies['.PKGINFO'] = f'licenses/{real_name}/.PKGINFO'
+    copies['.BUILDINFO'] = f'build/{real_name}/.BUILDINFO'
+    copies['.PKGINFO'] = f'build/{real_name}/.PKGINFO'
 
     if TRACE: print('Installing with:', copies)
 
-    for src, dst in copies.items():
+    for src_path, dst in copies.items():
         isdir = dst.endswith('/')
-        src = os.path.join(extracted_dir, src)
+        src_path = os.path.join(extracted_dir, src_path)
         dst = os.path.join(install_dir, dst)
-        if os.path.exists(src):
-            if TRACE: print('copying:', src, dst)
-            if os.path.isdir(src):
-                if TRACE_INSTALL:
-                    print('Installing:', src, 'to:', dst)
-                copy_tree(src, dst)
+
+        # do we have globs? these are allowed only in the last segment
+        parent = os.path.dirname(src_path)
+        assert not has_glob(parent), f'source: {src_path} parent dir cannot contain glob in copies to {dst}'
+
+        file_name = os.path.basename(src_path)
+
+        if has_glob(file_name):
+            if os.path.exists(parent):
+                sources = fnmatch.filter(os.listdir(parent), file_name) or []
+                sources = [os.path.join(parent, fn) for fn in sources]
             else:
-                parent = os.path.dirname(dst)
-                os.makedirs(parent, exist_ok=True)
-                if isdir:
-                    os.makedirs(dst, exist_ok=True)
-                shutil.copy2(src, dst)
-                if TRACE_INSTALL:
-                    print('Installing:', src, 'to:', dst)
+                sources = []
+        else:
+            sources = [src_path]
+
+        for src in sources:
+            if os.path.exists(src):
+                if TRACE: print('copying:', src, dst)
+                if os.path.isdir(src):
+                    if TRACE_INSTALL: print('Installing:', src, 'to:', dst)
+                    copy_tree(src, dst)
+                else:
+                    parent = os.path.dirname(dst)
+                    os.makedirs(parent, exist_ok=True)
+                    if isdir:
+                        os.makedirs(dst, exist_ok=True)
+                    shutil.copy2(src, dst)
+                    if TRACE_INSTALL: print('Installing:', src, 'to:', dst)
 
 
 def check_installed_files(install_dir, copies, package):
@@ -1257,37 +1359,40 @@ def check_installed_files(install_dir, copies, package):
 
     if missing:
         missing = '\n'.join(missing)
-        raise Exception(f'These files were not installed for {package}:\n{missing}')
+        raise Exception(
+            f'These files were not installed for '
+            f'{package.name}@{package.version}:\n{missing}')
 
 
-def fetch_and_update_source_package(binary_package, repo, src_cache_dir, ident=3):
+def fetch_and_update_source_package(binary_package, repo, indent=3, cleanup=True):
     """
-    Given a binary_package and repo, fetch the sources to `src_cache_dir`. Also
+    Given a binary_package and repo, fetch the sources to `SRC_CACHE_DIR`. Also
     update the repo with the newest source_package data from .SRCINFO. Return
     the location where the source_package archive was fetched and the
     SourcePackage object.
     """
 
-    if not binary_package.source_package_name:
-        raise Exception(f'{binary_package} is missing required "source_package_name"')
+    if not binary_package.source_name:
+        raise Exception(f'{binary_package} is missing required "source_name"')
 
     source_package = repo.get_source_package(
-        name=binary_package.source_package_name,
+        name=binary_package.source_name,
         version=binary_package.version,
     )
 
     fetched_loc = shared_utils.fetch_file(
-        url=binary_package.source_package.download_url,
-        dir_location=src_cache_dir,
-        ident=ident,
+        url=source_package.download_url,
+        dir_location=SRC_CACHE_DIR,
+        indent=indent,
     )
 
     extracted_source_dir = shared_utils.extract_in_place(fetched_loc)
-    srcinfo_loc = os.path.join(extracted_source_dir, '.SRCINFO')
+    subdir = os.listdir(extracted_source_dir)[0]
+    srcinfo_loc = os.path.join(extracted_source_dir, subdir, '.SRCINFO')
     source_package.update_with_info(srcinfo_loc)
 
-    # cleanup
-    shutil.rmtree(extracted_source_dir, ignore_errors=False)
+    if cleanup:
+        shutil.rmtree(extracted_source_dir, ignore_errors=False)
     return fetched_loc, source_package
 
 
@@ -1299,76 +1404,56 @@ def verify_package(package, fetched_loc):
         shared_utils.verify(fetched_loc, package.sha256)
 
 
-def setup_dirs(install_dir, thirdparty_dir, base_dir, source_plugins_dir, deletes):
+def fetch_and_update_binary_package(binary_package, indent=1):
     """
-    Setup environment: create or clean target directories.
+    Fetch, verify, extract and update a binary package and return the location
+    where it was extracted
     """
-    # create cache directories
-    bin_cache_dir = os.path.join(CACHE_DIR, 'bin')
-    src_cache_dir = os.path.join(CACHE_DIR, 'src')
+    fetched_binary_loc = shared_utils.fetch_file(
+        url=binary_package.download_url,
+        dir_location=BIN_CACHE_DIR,
+        indent=indent,
+    )
+    verify_package(package=binary_package, fetched_loc=fetched_binary_loc)
+    extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
+    pkginfo_loc = os.path.join(extracted_dir, '.PKGINFO')
+    binary_package.update_with_info(pkginfo_loc)
 
-    os.makedirs(bin_cache_dir, exist_ok=True)
-    os.makedirs(src_cache_dir, exist_ok=True)
+    shared_utils.create_about_file(
+        target_directory=BIN_CACHE_DIR, **binary_package.to_about())
 
-    # cleanup deletable directories
-    for deletable in deletes:
-        deletable = os.path.join(install_dir, deletable)
-        if os.path.exists(deletable):
-            if os.path.isdir(deletable):
-                shutil.rmtree(deletable, ignore_errors=False)
-            else:
-                os.remove(deletable)
-
-    # create AND cleanup
-    os.makedirs(thirdparty_dir, exist_ok=True)
-    for srcf in os.listdir(thirdparty_dir):
-        os.remove(os.path.join(thirdparty_dir, srcf))
-
-    # create AND cleanup these too:
-    base_dir_name = os.path.basename(base_dir)
-    saved_sources_dir = os.path.join(source_plugins_dir, base_dir_name)
-    if os.path.exists(saved_sources_dir):
-        shutil.rmtree(saved_sources_dir, ignore_errors=False)
-
-    return bin_cache_dir, src_cache_dir, saved_sources_dir
+    return  extracted_dir
 
 
 def process_package(
     binary_package,
     repo,
     copies,
-    bin_cache_dir,
-    src_cache_dir,
     install_dir,
-    thirdparty_dir,
-    ident=1,
+    indent=1,
 ):
     """
-    Process a binary package end to end.
+    Process a binary package end to end: fetch, verify, extract, update
+    metadata, install, fetch and save sources, update their metadata and
+    generate ABOUT files.
     """
-    # fetch, verify, extract and update package. install files
-    fetched_binary_loc = shared_utils.fetch_file(
-        url=binary_package.download_url, dir_location=bin_cache_dir, ident=ident)
-
-    verify_package(package=binary_package, fetched_loc=fetched_binary_loc)
-
-    extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
-
-    pkginfo_loc = os.path.join(extracted_dir, '.PKGINFO')
-    binary_package.update_with_info(pkginfo_loc)
+    extracted_dir = fetch_and_update_binary_package(
+        binary_package=binary_package, indent=indent)
 
     install_files(
-        extracted_dir=extracted_dir, install_dir=install_dir,
-        real_name=binary_package.real_name, copies=copies)
+        extracted_dir=extracted_dir,
+        install_dir=install_dir,
+        real_name=binary_package.real_name,
+        copies=copies)
 
     # fetch sources and update metadata
-    fetch_source_loc, source_package = fetch_and_update_source_package(
-        package=binary_package, repo=repo, src_cache_dir=src_cache_dir, ident=ident + 2)
+    _fetch_source_loc, source_package = fetch_and_update_source_package(
+        binary_package=binary_package,
+        repo=repo,
+        indent=indent + 2)
 
-    # save a copy in the plugin thirdparty with an ABOUT file
-    shutil.copy2(src=fetch_source_loc, dst=thirdparty_dir)
     shared_utils.create_about_file(
-        target_directory=thirdparty_dir, **source_package.to_about())
+        target_directory=SRC_CACHE_DIR, **source_package.to_about())
 
     return extracted_dir
 
@@ -1377,6 +1462,7 @@ def update_package(
     name,
     version=None,
     repo_name='mingw64',
+    cleanup=True,
 ):
     """
     Fetch a `package` with `name` and optional `version` from `repo` and save
@@ -1395,57 +1481,65 @@ def update_package(
     deletes = presets['deletes']
     copies = presets['copies']
 
-    # used for sources redistribution
-    base_dir = presets['base_dir']
-    thirdparty_dir = presets['thirdparty_dir']
-    source_plugins_dir = presets['source_plugins_dir']
-
     print('Updating package:', name, '@', version, 'from repo:', repo_name)
 
-    bin_cache_dir, src_cache_dir, saved_sources_dir = setup_dirs(
-        install_dir, thirdparty_dir, base_dir, source_plugins_dir, deletes,
-    )
+    os.makedirs(BIN_CACHE_DIR, exist_ok=True)
+    os.makedirs(SRC_CACHE_DIR, exist_ok=True)
+
+    # cleanup deletable directories
+    for deletable in deletes:
+        deletable = os.path.join(install_dir, deletable)
+        if os.path.exists(deletable):
+            if os.path.isdir(deletable):
+                shutil.rmtree(deletable, ignore_errors=False)
+            else:
+                os.remove(deletable)
 
     # populate our remote index with the list of known source and binary packages
     repo = REPOSITORIES[repo_name]
     repo.populate_package_from_index_urls()
 
     root_package = repo.get_binary_package(name, version)
+    if not root_package:
+        raise Exception(repo.binaries_by_name[name])
     assert root_package, f'Unable to find package: {name} @ {version}'
 
     if TRACE_FETCH: print(f'Processing package: {root_package}')
     extracted_locs = []
 
     extracted_loc = process_package(
-        root_package, repo, copies,
-        bin_cache_dir, src_cache_dir,
-        install_dir, thirdparty_dir,
+        binary_package=root_package,
+        repo=repo,
+        copies=copies,
+        install_dir=install_dir,
         indent=1,
     )
 
     extracted_locs.append(extracted_loc)
 
-    if TRACE_FETCH: print(f'Fetching dependencies for: {root_package}')
-    for dep in root_package.get_unique_dependencies(repo):
+    dependent_packages = root_package.get_unique_dependencies(repo)
+    if TRACE_FETCH: print(f'Fetching dependent_packages for: {root_package.name}')
 
-        if TRACE_FETCH: print(f'\n  -> Fetching dependency: {dep}')
+    for dep_package in dependent_packages:
+        if TRACE_FETCH: print(f'  -> Fetching dependency: {dep_package.name}')
+
         extracted_loc = process_package(
-            dep, repo, copies,
-            bin_cache_dir, src_cache_dir,
-            install_dir, thirdparty_dir,
+            binary_package=dep_package,
+            repo=repo,
+            copies=copies,
+            install_dir=install_dir,
             indent=3,
         )
+        extracted_locs.append(extracted_loc)
 
-    # finally make a copy of each plugins with their sources on our "sdist"
-    copy_tree(base_dir, saved_sources_dir)
-
-    check_installed_files(install_dir, copies, root_package)
-    # finally cleanup after thyself, removing extracted locations
-    for loc in extracted_locs:
-        shutil.rmtree(loc, False)
+    # check_installed_files(install_dir, copies, root_package)
+    if cleanup:
+        # finally cleanup after thyself, removing extracted locations
+        for loc in extracted_locs:
+            shutil.rmtree(loc, False)
 
 
-def main(argv):
+def main():
     update_package(name='mingw-w64-x86_64-libarchive', version='3.4.3-1', repo_name='mingw64')
     update_package(name='mingw-w64-x86_64-file', version='5.39-1', repo_name='mingw64')
 
@@ -1453,201 +1547,64 @@ def main(argv):
 PRESETS = {
     ('mingw-w64-x86_64-libarchive', 'mingw64') : {
         'version': '3.4.3-1',
-        'deletes': ['licenses', 'lib'],
         'install_dir': 'builtins/extractcode_libarchive-win64/src/extractcode_libarchive',
 
-        'base_dir': 'builtins/extractcode_libarchive-win64',
-        'thirdparty_dir': 'builtins/extractcode_libarchive-win64/thirdparty',
-
-        'source_plugins_dir': 'builtins/extractcode_libarchive-sources',
-
+        'deletes': ['licenses', 'lib', 'doc', 'include', 'man', 'build', ],
         'copies': {
+            'mingw64/bin/*.dll': 'lib/',
             'mingw64/share/licenses/': 'licenses/',
-            'mingw64/bin/libarchive-13.dll': 'lib/libarchive.dll',
+            # extra uncommon licenses
             'mingw64/include/archive.h': 'licenses/libarchive/libarchive.LICENSE',
-
-            # other libs
-            'mingw64/bin/libbz2-1.dll': 'lib/libbz2-1.dll',
-
-            'mingw64/bin/libffi-7.dll': 'lib/libffi-7.dll',
-
-            'mingw64/bin/libtasn1-6.dll': 'lib/libtasn1-6.dll',
-
-            'mingw64/bin/liblz4.dll': 'lib/liblz4.dll',
             'mingw64/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
-
             'mingw64/include/mpc.h': 'licenses/mpc/mpc.LICENSE',
-
             'mingw64/include/mpfr.h': 'licenses/mpfr/mpfr.LICENSE',
             'mingw64/share/doc/mpfr/COPYING.LESSER': 'licenses/mpfr/',
             'mingw64/share/doc/mpfr/AUTHORS': 'licenses/mpfr/',
             'mingw64/share/doc/mpfr/COPYING': 'licenses/mpfr/',
             'mingw64/share/doc/mpfr/COPYING.LESSER': 'licenses/mpfr/',
-
-            'mingw64/bin/libhogweed-6.dll': 'lib/libhogweed-6.dll',
-            'mingw64/bin/libnettle-8.dll': 'lib/libnettle-8.dll',
             'mingw64/include/nettle/nettle-meta.h': 'licenses/nettle/nettle.LICENSE',
-
-            # openssl
-            'mingw64/bin/libcrypto-1_1-x64.dll': 'lib/libcrypto-1_1-x64.dll',
-            'mingw64/bin/libssl-1_1-x64.dll': 'lib/libssl-1_1-x64.dll',
-
-            # p11-kit
-            'mingw64/bin/libp11-kit-0.dll': 'lib/libp11-kit-0.dll',
             'mingw64/include/p11-kit-1/p11-kit/p11-kit.h': 'licenses/p11-kit/p11-kit.LICENSE',
-
-            # xz/lzma
-            'mingw64/bin/liblzma-5.dll': 'lib/liblzma-5.dll',
-
-            'mingw64/bin/libzstd.dll': 'lib/libzstd.dll',
-
-            # zlib
-            'mingw64/bin/zlib1.dll': 'lib/zlib1.dll',
-
-            ######### standard libs
-            # expat
-            'mingw64/bin/libexpat-1.dll': 'lib/libexpat-1.dll',
-
-            # gcc libs
-            'mingw64/bin/libatomic-1.dll': 'lib/libatomic-1.dll',
-            'mingw64/bin/libgcc_s_seh-1.dll': 'lib/libgcc_s_seh-1.dll',
-            'mingw64/bin/libgomp-1.dll': 'lib/libgomp-1.dll',
-            'mingw64/bin/libquadmath-0.dll': 'lib/libquadmath-0.dll',
-            'mingw64/bin/libssp-0.dll': 'lib/libssp-0.dll',
-            'mingw64/bin/libstdc++-6.dll': 'lib/libstdc++-6.dll',
-
-            # gettext
-            'mingw64/bin/libasprintf-0.dll': 'lib/libasprintf-0.dll',
-            'mingw64/bin/libgettextlib-0-19-8-1.dll': 'lib/libgettextlib-0-19-8-1.dll',
-            'mingw64/bin/libgettextpo-0.dll': 'lib/libgettextpo-0.dll',
-            'mingw64/bin/libgettextsrc-0-19-8-1.dll': 'lib/libgettextsrc-0-19-8-1.dll',
-            'mingw64/bin/libintl-8.dll': 'lib/libintl-8.dll',
-
-            # gmp
-            'mingw64/bin/libgmp-10.dll': 'lib/libgmp-10.dll',
-            'mingw64/bin/libgmpxx-4.dll': 'lib/libgmpxx-4.dll',
             'mingw64/include/gmp.h': 'licenses/gmp/gmp.LICENSE',
-
-            # iconv
-            'mingw64/bin/libcharset-1.dll': 'lib/libcharset-1.dll',
-            'mingw64/bin/libiconv-2.dll': 'lib/libiconv-2.dll',
-
-            # tre and systre
-            'mingw64/bin/libsystre-0.dll': 'lib/libsystre-0.dll',
-            'mingw64/bin/libtre-5.dll': 'lib/libtre-5.dll',
-
-            # libwinpthread
-            'mingw64/bin/libwinpthread-1.dll': 'lib/libwinpthread-1.dll',
         },
     },
     ('mingw-w64-x86_64-file', 'mingw64') : {
         'version': '5.39-1',
-        'deletes': ['licenses', 'lib', 'data'],
         'install_dir': 'builtins/typecode_libmagic-win64/src/typecode_libmagic',
 
-        'base_dir': 'builtins/typecode_libmagic-win64',
-        'thirdparty_dir': 'builtins/typecode_libmagic-win64/thirdparty',
-        'source_plugins_dir': 'builtins/typecode_libmagic-sources',
-
+        'deletes': ['licenses', 'lib', 'doc', 'include', 'man', 'build', ],
         'copies': {
-            'mingw64/share/licenses/': 'licenses/',
-            'mingw64/bin/libmagic-1.dll': 'lib/libmagic.dll',
+            'mingw64/bin/*.dll': 'lib/',
             'mingw64/share/misc/magic.mgc': 'data/magic.mgc',
 
-            'mingw64/bin/libbz2-1.dll': 'lib/libbz2-1.dll',
-            'mingw64/bin/liblzma-5.dll': 'lib/liblzma-5.dll',
-            'mingw64/bin/zlib1.dll': 'lib/zlib1.dll',
-
-            ######### standard libs
-            # expat
-            'mingw64/bin/libexpat-1.dll': 'lib/libexpat-1.dll',
-
-            # gcc libs
-            'mingw64/bin/libatomic-1.dll': 'lib/libatomic-1.dll',
-            'mingw64/bin/libgcc_s_seh-1.dll': 'lib/libgcc_s_seh-1.dll',
-            'mingw64/bin/libgomp-1.dll': 'lib/libgomp-1.dll',
-            'mingw64/bin/libquadmath-0.dll': 'lib/libquadmath-0.dll',
-            'mingw64/bin/libssp-0.dll': 'lib/libssp-0.dll',
-            'mingw64/bin/libstdc++-6.dll': 'lib/libstdc++-6.dll',
-
-            # gettext
-            'mingw64/bin/libasprintf-0.dll': 'lib/libasprintf-0.dll',
-            'mingw64/bin/libgettextlib-0-19-8-1.dll': 'lib/libgettextlib-0-19-8-1.dll',
-            'mingw64/bin/libgettextpo-0.dll': 'lib/libgettextpo-0.dll',
-            'mingw64/bin/libgettextsrc-0-19-8-1.dll': 'lib/libgettextsrc-0-19-8-1.dll',
-            'mingw64/bin/libintl-8.dll': 'lib/libintl-8.dll',
-
-            # gmp
-            'mingw64/bin/libgmp-10.dll': 'lib/libgmp-10.dll',
-            'mingw64/bin/libgmpxx-4.dll': 'lib/libgmpxx-4.dll',
+            'mingw64/share/licenses/': 'licenses/',
             'mingw64/include/gmp.h': 'licenses/gmp/gmp.LICENSE',
-
-            # iconv
-            'mingw64/bin/libcharset-1.dll': 'lib/libcharset-1.dll',
-            'mingw64/bin/libiconv-2.dll': 'lib/libiconv-2.dll',
-
-            # tre and systre
-            'mingw64/bin/libsystre-0.dll': 'lib/libsystre-0.dll',
-            'mingw64/bin/libtre-5.dll': 'lib/libtre-5.dll',
-
-            # libwinpthread
-            'mingw64/bin/libwinpthread-1.dll': 'lib/libwinpthread-1.dll',
-        }
+            'mingw64/include/zlib.h': 'licenses/zlib/zlib.LICENSE',
+        },
     },
+
     ('mingw-w64-x86_64-universal-ctags-git', 'mingw64'): {
         'version': 'r7253.7492b90e-1',
-        'deletes': ['licenses', 'bin', 'lib', ],
         'install_dir': 'binary-analysis/scancode-ctags-win64/src/scancode_ctags',
 
-        'base_dir': 'binary-analysis/scancode-ctags-win64',
-        'thirdparty_dir': 'binary-analysis/scancode-ctags-win64/thirdparty',
-        'source_plugins_dir': 'binary-analysis/scancode-ctags-sources',
-
+        'deletes': ['licenses', 'lib', 'doc', 'include', 'man', 'build', ],
         'copies': {
-            'mingw64/share/licenses/': 'licenses/',
             'mingw64/bin/ctags.exe': 'bin/ctags.exe',
-
-            'mingw64/bin/libjansson-4.dll': 'bin/libjansson-4.dll',
-            'mingw64/bin/liblzma-5.dll': 'bin/liblzma-5.dll',
-            'mingw64/bin/libxml2-2.dll': 'bin/libxml2-2.dll',
-            'mingw64/bin/libyaml-0-2.dll': 'bin/libyaml-0-2.dll',
-            'mingw64/bin/xml2-config': 'bin/xml2-config',
-            'mingw64/bin/zlib1.dll': 'bin/zlib1.dll',
-
-            'mingw64/bin/libasprintf-0.dll': 'bin/libasprintf-0.dll',
-            'mingw64/bin/libatomic-1.dll': 'bin/libatomic-1.dll',
-            'mingw64/bin/libcharset-1.dll': 'bin/libcharset-1.dll',
-            'mingw64/bin/libexpat-1.dll': 'bin/libexpat-1.dll',
-            'mingw64/bin/libgcc_s_seh-1.dll': 'bin/libgcc_s_seh-1.dll',
-            'mingw64/bin/libgettextlib-0-19-8-1.dll': 'bin/libgettextlib-0-19-8-1.dll',
-            'mingw64/bin/libgettextpo-0.dll': 'bin/libgettextpo-0.dll',
-            'mingw64/bin/libgettextsrc-0-19-8-1.dll': 'bin/libgettextsrc-0-19-8-1.dll',
-            'mingw64/bin/libgmp-10.dll': 'bin/libgmp-10.dll',
-            'mingw64/bin/libgmpxx-4.dll': 'bin/libgmpxx-4.dll',
-            'mingw64/bin/libgomp-1.dll': 'bin/libgomp-1.dll',
-            'mingw64/bin/libiconv-2.dll': 'bin/libiconv-2.dll',
-            'mingw64/bin/libintl-8.dll': 'bin/libintl-8.dll',
-            'mingw64/bin/libquadmath-0.dll': 'bin/libquadmath-0.dll',
-            'mingw64/bin/libssp-0.dll': 'bin/libssp-0.dll',
-            'mingw64/bin/libstdc++-6.dll': 'bin/libstdc++-6.dll',
-            'mingw64/bin/libwinpthread-1.dll': 'bin/libwinpthread-1.dll',
-
+            'mingw64/bin/*.dll': 'lib/',
+            'mingw64/share/licenses/': 'licenses/',
         },
     },
     ('mingw-w64-cross-binutils', 'msys64'): {
         'version': '2.34-1',
         'install_dir': 'binary-analysis/scancode-readelf-win64/src/scancode_readelf',
-        'deletes': ['licenses', 'lib', 'bin', 'doc'],
 
-        'base_dir': 'binary-analysis/scancode-readelf-win64',
-        'thirdparty_dir': 'binary-analysis/scancode-readelf-win64/thirdparty',
-        'source_plugins_dir': 'binary-analysis/scancode-readelf-sources',
-
+        'deletes': ['licenses', 'lib', 'doc', 'include', 'man', 'build', ],
         'copies': {
-#            'usr/share/licenses': 'licenses',
+            'mingw64/bin/readelf.*': 'bin',
+            'mingw64/bin/*.dll': 'lib/',
+            'mingw64/share/licenses/': 'licenses/',
         },
     },
 }
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())

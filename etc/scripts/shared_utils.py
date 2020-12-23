@@ -8,14 +8,12 @@ import subprocess
 import tarfile
 import zipfile
 
-import saneyaml
 import requests
+import saneyaml
 
 REQUEST_TIMEOUT = 60
 
-TRACE = True
-TRACE_FETCH = True
-TRACE_INSTALL = False
+TRACE_FETCH = False
 
 
 def file_name_from_url(url):
@@ -29,13 +27,12 @@ def fetch_file(url, dir_location, file_name=None, force=False, indent=1):
     Return the `location` where the file is saved.
     If `force` is False, do not refetch if already fetched.
     """
-    if TRACE_FETCH:
-        print(indent * ' ' + f'Fetching {url}')
+    if TRACE_FETCH: print(indent * ' ' + f'Fetching {url}: ', end='')
 
     if not file_name:
         file_name = file_name_from_url(url)
 
-    if any(x in url for x in ('github.com')):
+    if 'github.com' in url:
         # find the true download file if possible using a head request
         # but only for some URLs
         head = requests.head(url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
@@ -45,11 +42,15 @@ def fetch_file(url, dir_location, file_name=None, force=False, indent=1):
 
     location = os.path.join(dir_location, file_name)
 
-    if force or not os.path.exists(location):
-        response = requests.get(url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+    if os.path.exists(location) and not force:
+        if TRACE_FETCH: print('from CACHE')
+        return location
 
-        with open(location, 'wb') as o:
-            o.write(response.content)
+    response = requests.get(url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+    with open(location, 'wb') as o:
+        o.write(response.content)
+
+    if TRACE_FETCH: print('from NET')
 
     return location
 
@@ -124,12 +125,13 @@ def extract_7zip(location, target_dir):
         raise Exception(out)
 
 
-def verify(fetched_location, expected_sha256=None):
+def verify(fetched_location, expected_sha256=None, verbose=False):
     """
     Verify that the file at `fetched_location` has the `expected_sha256` checksum.
     """
     if not fetched_location or not expected_sha256:
-        print(f'Cannot verify download at: {fetched_location} and sha256: {expected_sha256}')
+        if verbose:
+            print(f'    Cannot verify download at: {fetched_location} and sha256: {expected_sha256}')
         return
 
     with open (fetched_location, 'rb') as f:

@@ -13,7 +13,9 @@ set -e
 
 mkdir -p src-homebrew
 mkdir -p src-msys2
-mkdir -p src-7zip
-python etc/scripts/msys2.py  --cache-dir src-msys2 --build-all
-python etc/scripts/homebrew.py  --cache-dir src-homebrew --build-all
-python etc/scripts/7z.py  --cache-dir src-7zip
+mkdir -p src-7z
+python etc/scripts/msys2.py
+python etc/scripts/homebrew.py
+python etc/scripts/7z.py
+
+# https://github.com/nexB/thirdparty-packages/releases/tag/scancode-native

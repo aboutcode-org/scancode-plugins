@@ -4,10 +4,10 @@
 #
 
 """
-Utility to keep Windows prebuilt ScanCode toolkit plugins for 7zip on Windows up to date.
+Utility to keep Windows prebuilt ScanCode toolkit plugins for 7zip on Windows up
+to date.
 """
 
-import argparse
 from distutils.dir_util import copy_tree
 import os
 import shutil
@@ -48,7 +48,7 @@ def install_files(extracted_dir, install_dir, copies):
                 shutil.copy2(src, dst)
 
 
-def fetch_package(name, cache_dir):
+def fetch_package(name, cache_dir='src-7z'):
     """
     Fetch and install a 7z package with `name` using `cache_dir` directory for cache.
     """
@@ -63,26 +63,12 @@ def fetch_package(name, cache_dir):
 
     copies = presets['copies']
 
-
     base_dir = presets['base_dir']
     base_dir = os.path.abspath(base_dir)
-
-    source_plugins_dir = presets['source_plugins_dir']
-    source_plugins_dir = os.path.abspath(source_plugins_dir)
-
-    base_dir_name = os.path.basename(base_dir)
-    saved_sources_dir = os.path.join(source_plugins_dir, base_dir_name)
-    if os.path.exists(saved_sources_dir):
-        shutil.rmtree(saved_sources_dir, ignore_errors=False)
 
     install_dir = presets['install_dir']
     install_dir = os.path.join(base_dir, install_dir)
     os.makedirs(install_dir, exist_ok=True)
-
-    thirdparty_dir = presets['thirdparty_dir']
-    thirdparty_dir = os.path.join(base_dir, thirdparty_dir)
-    os.makedirs(thirdparty_dir, exist_ok=True)
-
     cache_dir = os.path.abspath(cache_dir)
     os.makedirs(cache_dir, exist_ok=True)
 
@@ -97,6 +83,17 @@ def fetch_package(name, cache_dir):
     fetched_binary_loc = shared_utils.fetch_file(url=bin_url, dir_location=bin_cache_dir)
     shared_utils.verify(fetched_binary_loc, bin_sha256)
 
+    about_resource = os.path.basename(fetched_binary_loc)
+    about_dir = os.path.dirname(fetched_binary_loc)
+    shared_utils.create_about_file(
+        about_resource=about_resource,
+        name=presets['name'],
+        version=presets['version'],
+        type='generic',
+        download_url=src_url,
+        target_directory=about_dir,
+    )
+
     extracted_dir = shared_utils.extract_in_place(fetched_binary_loc)
     install_files(extracted_dir, install_dir, copies)
 
@@ -104,32 +101,22 @@ def fetch_package(name, cache_dir):
     fetched_src_loc = shared_utils.fetch_file(url=src_url, dir_location=src_cache_dir)
     shared_utils.verify(fetched_src_loc, src_sha256)
 
-    # save also in the plugin thirdparty with an ABOUT file
-    shutil.copy2(fetched_src_loc, thirdparty_dir)
-    about_resource =os.path.basename(fetched_src_loc)
+    about_resource = os.path.basename(fetched_src_loc)
+    about_dir = os.path.dirname(fetched_src_loc)
     shared_utils.create_about_file(
         about_resource=about_resource,
         name=presets['name'],
         version=presets['version'],
+        type='generic',
         download_url=src_url,
-        target_directory=thirdparty_dir,
+        target_directory=about_dir,
     )
 
-    # finally make a copy of the  plugins with their sources on our "sdist"
-    copy_tree(base_dir, saved_sources_dir)
+    shutil.rmtree(extracted_dir, ignore_errors=False)
 
 
-def main(argv):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--cache-dir', type=str,
-        help='Target directory where archives are fetched')
-
-    args = parser.parse_args()
-    cache_dir = args.cache_dir or None
-
-    cache_dir = cache_dir or 'src-7zip'
-    fetch_package(name='7zip-64', cache_dir=cache_dir)
-
+def main():
+    fetch_package(name='7zip-64')
 
 
 PACKAGES = {
@@ -144,9 +131,6 @@ PACKAGES = {
 
         'base_dir': 'builtins/extractcode_7z-win64',
         'install_dir': 'src/extractcode_7z',
-        'thirdparty_dir': 'thirdparty',
-
-        'source_plugins_dir': 'builtins/extractcode_7z-sources',
 
         'copies': {
             '7z.exe': 'bin/',
@@ -159,4 +143,4 @@ PACKAGES = {
 }
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())
