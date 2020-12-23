@@ -1,8 +1,0 @@
-graft extractcode_libarchive-linux
-graft extractcode_libarchive-macosx
-graft extractcode_libarchive-win64
-graft thirdparty
-
-include setup.*
-include *.rst
-include *LICENSE*

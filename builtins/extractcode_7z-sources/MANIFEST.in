@@ -1,9 +1,0 @@
-graft src
-graft thirdparty
-graft extractcode_7z-linux
-graft extractcode_7z-macosx
-graft extractcode_7z-win64
-
-include setup.*
-include *.rst
-include *LICENSE*
