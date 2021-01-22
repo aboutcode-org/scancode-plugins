@@ -1,0 +1,6 @@
+about_resource: libb2-0.98.1.tar.gz
+name: libb2
+version: 0.98.1
+download_url: https://github.com/BLAKE2/libb2/releases/download/v0.98.1/libb2-0.98.1.tar.gz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

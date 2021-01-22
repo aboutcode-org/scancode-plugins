@@ -1,0 +1,6 @@
+about_resource: libbsd.rb
+name: libbsd
+version: 0.10.0
+download_url: https://linuxbrew.bintray.com/bottles/libbsd-0.10.0.x86_64_linux.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

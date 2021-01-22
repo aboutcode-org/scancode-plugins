@@ -1,0 +1,6 @@
+about_resource: bzip2.rb
+name: bzip2
+version: 1.0.8
+download_url: https://linuxbrew.bintray.com/bottles/bzip2-1.0.8.x86_64_linux.bottle.1.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

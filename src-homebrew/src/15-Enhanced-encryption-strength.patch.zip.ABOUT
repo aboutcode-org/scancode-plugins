@@ -1,0 +1,6 @@
+about_resource: 15-Enhanced-encryption-strength.patch.zip
+name: p7zip
+version: 16.02_2
+download_url: https://github.com/aonez/Keka/files/2940620/15-Enhanced-encryption-strength.patch.zip
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

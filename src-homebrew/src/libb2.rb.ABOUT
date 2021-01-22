@@ -1,0 +1,6 @@
+about_resource: libb2.rb
+name: libb2
+version: 0.98.1
+download_url: https://homebrew.bintray.com/bottles/libb2-0.98.1.mojave.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

@@ -1,0 +1,6 @@
+about_resource: xz-5.2.5.tar.gz
+name: xz
+version: 5.2.5
+download_url: https://downloads.sourceforge.net/project/lzmautils/xz-5.2.5.tar.gz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

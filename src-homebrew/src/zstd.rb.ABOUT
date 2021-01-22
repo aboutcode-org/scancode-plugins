@@ -1,0 +1,6 @@
+about_resource: zstd.rb
+name: zstd
+version: 1.4.8
+download_url: https://homebrew.bintray.com/bottles/zstd-1.4.8.mojave.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

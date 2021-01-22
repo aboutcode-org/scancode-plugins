@@ -1,0 +1,6 @@
+about_resource: expat-2.2.10.tar.xz
+name: expat
+version: 2.2.10
+download_url: https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.xz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

@@ -1,0 +1,5 @@
+about_resource: lz4-1.9.3.x86_64_linux.bottle.tar.gz
+name: lz4
+version: 1.9.3
+download_url: https://linuxbrew.bintray.com/bottles/lz4-1.9.3.x86_64_linux.bottle.tar.gz
+type: homebrew

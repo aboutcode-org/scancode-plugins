@@ -1,0 +1,6 @@
+about_resource: p7zip_16.02+dfsg-6.debian.tar.xz
+name: p7zip
+version: 16.02_2
+download_url: https://deb.debian.org/debian/pool/main/p/p7zip/p7zip_16.02+dfsg-6.debian.tar.xz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

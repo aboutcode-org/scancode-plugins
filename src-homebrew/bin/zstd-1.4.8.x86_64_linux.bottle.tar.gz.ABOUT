@@ -1,0 +1,5 @@
+about_resource: zstd-1.4.8.x86_64_linux.bottle.tar.gz
+name: zstd
+version: 1.4.8
+download_url: https://linuxbrew.bintray.com/bottles/zstd-1.4.8.x86_64_linux.bottle.tar.gz
+type: homebrew

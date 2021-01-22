@@ -1,0 +1,6 @@
+about_resource: zlib.rb
+name: zlib
+version: 1.2.11
+download_url: https://linuxbrew.bintray.com/bottles/zlib-1.2.11.x86_64_linux.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

@@ -1,0 +1,6 @@
+about_resource: lz4-1.9.3.tar.gz
+name: lz4
+version: 1.9.3
+download_url: https://github.com/lz4/lz4/archive/v1.9.3.tar.gz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

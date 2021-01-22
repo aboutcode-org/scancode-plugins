@@ -1,0 +1,6 @@
+about_resource: libmagic.rb
+name: libmagic
+version: '5.39'
+download_url: https://homebrew.bintray.com/bottles/libmagic-5.39.mojave.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

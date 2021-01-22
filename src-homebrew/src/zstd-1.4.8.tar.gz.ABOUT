@@ -1,0 +1,6 @@
+about_resource: zstd-1.4.8.tar.gz
+name: zstd
+version: 1.4.8
+download_url: https://github.com/facebook/zstd/archive/v1.4.8.tar.gz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

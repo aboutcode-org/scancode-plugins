@@ -1,0 +1,6 @@
+about_resource: lz4.rb
+name: lz4
+version: 1.9.3
+download_url: https://homebrew.bintray.com/bottles/lz4-1.9.3.mojave.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

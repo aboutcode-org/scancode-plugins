@@ -1,0 +1,6 @@
+about_resource: xz.rb
+name: xz
+version: 5.2.5
+download_url: https://homebrew.bintray.com/bottles/xz-5.2.5.mojave.bottle.tar.gz
+type: homebrew
+notes: This is a brew formula used to create this package.

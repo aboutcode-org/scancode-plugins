@@ -1,0 +1,5 @@
+about_resource: libmagic-5.39.mojave.bottle.tar.gz
+name: libmagic
+version: '5.39'
+download_url: https://homebrew.bintray.com/bottles/libmagic-5.39.mojave.bottle.tar.gz
+type: homebrew

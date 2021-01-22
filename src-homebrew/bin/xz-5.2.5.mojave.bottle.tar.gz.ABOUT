@@ -1,0 +1,5 @@
+about_resource: xz-5.2.5.mojave.bottle.tar.gz
+name: xz
+version: 5.2.5
+download_url: https://homebrew.bintray.com/bottles/xz-5.2.5.mojave.bottle.tar.gz
+type: homebrew

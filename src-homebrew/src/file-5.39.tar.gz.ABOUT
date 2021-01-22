@@ -1,0 +1,6 @@
+about_resource: file-5.39.tar.gz
+name: libmagic
+version: '5.39'
+download_url: https://astron.com/pub/file/file-5.39.tar.gz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

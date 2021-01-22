@@ -1,0 +1,5 @@
+about_resource: p7zip-16.02_2.mojave.bottle.tar.gz
+name: p7zip
+version: 16.02_2
+download_url: https://homebrew.bintray.com/bottles/p7zip-16.02_2.mojave.bottle.tar.gz
+type: homebrew

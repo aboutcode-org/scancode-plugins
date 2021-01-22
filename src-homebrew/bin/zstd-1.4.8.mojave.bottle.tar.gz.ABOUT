@@ -1,0 +1,5 @@
+about_resource: zstd-1.4.8.mojave.bottle.tar.gz
+name: zstd
+version: 1.4.8
+download_url: https://homebrew.bintray.com/bottles/zstd-1.4.8.mojave.bottle.tar.gz
+type: homebrew
