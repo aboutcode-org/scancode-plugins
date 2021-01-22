@@ -1,0 +1,10 @@
+about_resource: mingw-w64-winpthreads-git-9.0.0.6029.ecb4ff54-1.src.tar.gz
+name: mingw-w64-winpthreads-git
+version: 9.0.0.6029.ecb4ff54-1
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-winpthreads-git-9.0.0.6029.ecb4ff54-1.src.tar.gz
+type: msys2
+description: MinGW-w64 winpthreads library
+homepage_url: https://mingw-w64.sourceforge.io/
+declared_license:
+  - MIT
+  - BSD

@@ -1,0 +1,9 @@
+about_resource: mingw-w64-x86_64-zstd-1.4.5-1-any.pkg.tar.zst
+name: mingw-w64-x86_64-zstd
+version: 1.4.5-1
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-zstd-1.4.5-1-any.pkg.tar.zst
+type: msys2
+description: Zstandard - Fast real-time compression algorithm (mingw-w64)
+homepage_url: https://facebook.github.io/zstd/
+declared_license:
+  - BSD

@@ -1,0 +1,9 @@
+about_resource: mingw-w64-file-5.39-1.src.tar.gz
+name: mingw-w64-file
+version: 5.39-1
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-file-5.39-1.src.tar.gz
+type: msys2
+description: Determine the type of a file from its contents (mingw-w64)
+homepage_url: https://www.darwinsys.com/file/
+declared_license:
+  - BSD

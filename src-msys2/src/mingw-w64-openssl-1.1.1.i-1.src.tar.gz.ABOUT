@@ -1,0 +1,9 @@
+about_resource: mingw-w64-openssl-1.1.1.i-1.src.tar.gz
+name: mingw-w64-openssl
+version: 1.1.1.i-1
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-openssl-1.1.1.i-1.src.tar.gz
+type: msys2
+description: The Open Source toolkit for Secure Sockets Layer and Transport Layer Security (mingw-w64)
+homepage_url: https://www.openssl.org
+declared_license:
+  - custom:BSD

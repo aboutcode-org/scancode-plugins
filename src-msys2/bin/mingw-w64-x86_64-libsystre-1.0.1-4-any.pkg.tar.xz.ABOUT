@@ -1,0 +1,9 @@
+about_resource: mingw-w64-x86_64-libsystre-1.0.1-4-any.pkg.tar.xz
+name: mingw-w64-x86_64-libsystre
+version: 1.0.1-4
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libsystre-1.0.1-4-any.pkg.tar.xz
+type: msys2
+description: Wrapper library around TRE that provides POSIX API (mingw-w64)
+homepage_url:
+declared_license:
+  - BSD

@@ -1,0 +1,9 @@
+about_resource: mingw-w64-x86_64-libtre-git-r128.6fb7206-2-any.pkg.tar.xz
+name: mingw-w64-x86_64-libtre-git
+version: r128.6fb7206-2
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libtre-git-r128.6fb7206-2-any.pkg.tar.xz
+type: msys2
+description: The approximate regex matching library and agrep command line tool (mingw-w64)
+homepage_url: https://github.com/laurikari/tre
+declared_license:
+  - BSD

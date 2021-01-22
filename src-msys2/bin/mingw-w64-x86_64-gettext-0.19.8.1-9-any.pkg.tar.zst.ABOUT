@@ -1,0 +1,10 @@
+about_resource: mingw-w64-x86_64-gettext-0.19.8.1-9-any.pkg.tar.zst
+name: mingw-w64-x86_64-gettext
+version: 0.19.8.1-9
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gettext-0.19.8.1-9-any.pkg.tar.zst
+type: msys2
+description: GNU internationalization library (mingw-w64)
+homepage_url: https://www.gnu.org/software/gettext/
+declared_license:
+  - GPL3
+  - partial:LGPL2.1

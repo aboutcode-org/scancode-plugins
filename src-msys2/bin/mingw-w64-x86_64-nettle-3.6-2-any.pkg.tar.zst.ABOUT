@@ -1,0 +1,9 @@
+about_resource: mingw-w64-x86_64-nettle-3.6-2-any.pkg.tar.zst
+name: mingw-w64-x86_64-nettle
+version: 3.6-2
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-nettle-3.6-2-any.pkg.tar.zst
+type: msys2
+description: A low-level cryptographic library (mingw-w64)
+homepage_url: https://www.lysator.liu.se/~nisse/nettle
+declared_license:
+  - LGPL

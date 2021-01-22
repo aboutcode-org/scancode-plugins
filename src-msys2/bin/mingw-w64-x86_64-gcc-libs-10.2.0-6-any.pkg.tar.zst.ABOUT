@@ -1,0 +1,11 @@
+about_resource: mingw-w64-x86_64-gcc-libs-10.2.0-6-any.pkg.tar.zst
+name: mingw-w64-x86_64-gcc-libs
+version: 10.2.0-6
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gcc-libs-10.2.0-6-any.pkg.tar.zst
+type: msys2
+description: GNU Compiler Collection (libraries) for MinGW-w64
+homepage_url: https://gcc.gnu.org
+declared_license:
+  - GPL3+
+  - partial:GCCRLE
+  - partial:LGPL2+

@@ -1,0 +1,9 @@
+about_resource: mingw-w64-expat-2.2.10-1.src.tar.gz
+name: mingw-w64-expat
+version: 2.2.10-1
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-expat-2.2.10-1.src.tar.gz
+type: msys2
+description: An XML parser library (mingw-w64)
+homepage_url: https://libexpat.github.io/
+declared_license:
+  - MIT

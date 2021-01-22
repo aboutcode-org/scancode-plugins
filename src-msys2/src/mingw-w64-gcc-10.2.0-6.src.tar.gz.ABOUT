@@ -1,0 +1,12 @@
+about_resource: mingw-w64-gcc-10.2.0-6.src.tar.gz
+name: mingw-w64-gcc
+version: 10.2.0-6
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-gcc-10.2.0-6.src.tar.gz
+type: msys2
+description: GCC for the MinGW-w64
+homepage_url: https://gcc.gnu.org
+declared_license:
+  - GPL
+  - LGPL
+  - FDL
+  - custom

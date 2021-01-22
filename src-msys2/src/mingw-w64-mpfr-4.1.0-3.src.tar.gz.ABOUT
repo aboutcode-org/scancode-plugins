@@ -1,0 +1,9 @@
+about_resource: mingw-w64-mpfr-4.1.0-3.src.tar.gz
+name: mingw-w64-mpfr
+version: 4.1.0-3
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-mpfr-4.1.0-3.src.tar.gz
+type: msys2
+description: Multiple-precision floating-point library (mingw-w64)
+homepage_url:
+declared_license:
+  - LGPL

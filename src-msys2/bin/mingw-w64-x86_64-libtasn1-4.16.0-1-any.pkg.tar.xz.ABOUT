@@ -1,0 +1,10 @@
+about_resource: mingw-w64-x86_64-libtasn1-4.16.0-1-any.pkg.tar.xz
+name: mingw-w64-x86_64-libtasn1
+version: 4.16.0-1
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libtasn1-4.16.0-1-any.pkg.tar.xz
+type: msys2
+description: A library for Abstract Syntax Notation One (ASN.1) and Distinguish Encoding Rules
+  (DER) manipulation (mingw-w64)
+homepage_url: https://www.gnu.org/software/libtasn1/
+declared_license:
+  - GPL3, LGPL

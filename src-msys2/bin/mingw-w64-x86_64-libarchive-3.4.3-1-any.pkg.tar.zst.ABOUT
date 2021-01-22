@@ -1,0 +1,9 @@
+about_resource: mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst
+name: mingw-w64-x86_64-libarchive
+version: 3.4.3-1
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst
+type: msys2
+description: Multi-format archive and compression library (mingw-w64)
+homepage_url: https://www.libarchive.org/
+declared_license:
+  - BSD

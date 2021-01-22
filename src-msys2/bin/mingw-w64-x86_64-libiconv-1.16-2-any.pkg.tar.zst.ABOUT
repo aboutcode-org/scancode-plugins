@@ -1,0 +1,10 @@
+about_resource: mingw-w64-x86_64-libiconv-1.16-2-any.pkg.tar.zst
+name: mingw-w64-x86_64-libiconv
+version: 1.16-2
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libiconv-1.16-2-any.pkg.tar.zst
+type: msys2
+description: Character encoding conversion library (mingw-w64)
+homepage_url: https://www.gnu.org/software/libiconv/
+declared_license:
+  - LGPL2
+  - documentation:GPL3
