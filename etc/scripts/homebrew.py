@@ -563,8 +563,8 @@ def update_package(
 
     if fullversion and fullversion != root_package.fullversion:
         raise Exception(
-            f'Incorrect version for {root_package.name}: '
-            '{root_package.fullversion} vs. {fullversion}',
+            f'Incorrect version found for {root_package.name}: '
+            f'got: {root_package.fullversion} vs. wanted: {fullversion}',
         )
 
     extracted_to = process_package(
@@ -698,81 +698,72 @@ def main():
 
 
 PRESETS = {
-    # latest https://libarchive.org/downloads/libarchive-3.4.3.tar.gz
+    # latest https://libarchive.org/downloads/libarchive-3.5.1.tar.gz
     ('libarchive', 'x86_64_linux'): {
-        'fullversion': '3.4.3',
+        'fullversion': '3.5.1_1',
         'install_dir': 'builtins/extractcode_libarchive-linux/src/extractcode_libarchive',
 
         'fixes': [
             ('patchelf', '--set-soname', 'libarchive.so', 'lib/libarchive.so'),
             ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libarchive.so'),
 
-            ('patchelf', '--replace-needed', 'libb2.so.1'   , 'libb2-la343.so.1'   , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libbsd.so.0'  , 'libbsd-la343.so.0'  , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libbz2.so.1.0', 'libbz2-la343.so.1.0', 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libexpat.so.1', 'libexpat-la343.so.1', 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'liblz4.so.1'  , 'liblz4-la343.so.1'  , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'liblzma.so.5' , 'liblzma-la343.so.5' , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libz.so.1'    , 'libz-la343.so.1'    , 'lib/libarchive.so'),
-            ('patchelf', '--replace-needed', 'libzstd.so.1' , 'libzstd-la343.so.1' , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libb2.so.1'   , 'libb2-la3511.so.1'   , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libbz2.so.1.0', 'libbz2-la3511.so.1.0', 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libexpat.so.1', 'libexpat-la3511.so.1', 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'liblz4.so.1'  , 'liblz4-la3511.so.1'  , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'liblzma.so.5' , 'liblzma-la3511.so.5' , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libz.so.1'    , 'libz-la3511.so.1'    , 'lib/libarchive.so'),
+            ('patchelf', '--replace-needed', 'libzstd.so.1' , 'libzstd-la3511.so.1' , 'lib/libarchive.so'),
 
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libb2-la343.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbsd-la343.so.0'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbz2-la343.so.1.0'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libexpat-la343.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblz4-la343.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblzma-la343.so.5'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-la343.so.1'),
-            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libzstd-la343.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libb2-la3511.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libbz2-la3511.so.1.0'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libexpat-la3511.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblz4-la3511.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/liblzma-la3511.so.5'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libz-la3511.so.1'),
+            ('patchelf', '--set-rpath', '$ORIGIN/.', 'lib/libzstd-la3511.so.1'),
 
-            ('patchelf', '--set-soname', 'libb2-la343.so.1'   , 'lib/libb2-la343.so.1'),
-            ('patchelf', '--set-soname', 'libbsd-la343.so.0'  , 'lib/libbsd-la343.so.0'),
-            ('patchelf', '--set-soname', 'libbz2-la343.so.1.0', 'lib/libbz2-la343.so.1.0'),
-            ('patchelf', '--set-soname', 'libexpat-la343.so.1', 'lib/libexpat-la343.so.1'),
-            ('patchelf', '--set-soname', 'liblz4-la343.so.1'  , 'lib/liblz4-la343.so.1'),
-            ('patchelf', '--set-soname', 'liblzma-la343.so.5' , 'lib/liblzma-la343.so.5'),
-            ('patchelf', '--set-soname', 'libz-la343.so.1'    , 'lib/libz-la343.so.1'),
-            ('patchelf', '--set-soname', 'libzstd-la343.so.1' , 'lib/libzstd-la343.so.1'),
+            ('patchelf', '--set-soname', 'libb2-la3511.so.1'   , 'lib/libb2-la3511.so.1'),
+            ('patchelf', '--set-soname', 'libbz2-la3511.so.1.0', 'lib/libbz2-la3511.so.1.0'),
+            ('patchelf', '--set-soname', 'libexpat-la3511.so.1', 'lib/libexpat-la3511.so.1'),
+            ('patchelf', '--set-soname', 'liblz4-la3511.so.1'  , 'lib/liblz4-la3511.so.1'),
+            ('patchelf', '--set-soname', 'liblzma-la3511.so.5' , 'lib/liblzma-la3511.so.5'),
+            ('patchelf', '--set-soname', 'libz-la3511.so.1'    , 'lib/libz-la3511.so.1'),
+            ('patchelf', '--set-soname', 'libzstd-la3511.so.1' , 'lib/libzstd-la3511.so.1'),
 
         ],
         'deletes': ['licenses', 'lib'],
         'copies': {
-            'libarchive/3.4.3/lib/libarchive.so': 'lib/',
-            'libarchive/3.4.3/INSTALL_RECEIPT.json': 'licenses/libarchive/',
-            'libarchive/3.4.3/COPYING': 'licenses/libarchive/',
-            'libarchive/3.4.3/README.md': 'licenses/libarchive/',
+            'libarchive/3.5.1_1/lib/libarchive.so': 'lib/',
+            'libarchive/3.5.1_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
+            'libarchive/3.5.1_1/COPYING': 'licenses/libarchive/',
+            'libarchive/3.5.1_1/README.md': 'licenses/libarchive/',
 
-            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la343.so.1.0',
+            'bzip2/1.0.8/lib/libbz2.so.1.0': 'lib/libbz2-la3511.so.1.0',
             'bzip2/1.0.8/INSTALL_RECEIPT.json': 'licenses/bzip2/',
             'bzip2/1.0.8/LICENSE': 'licenses/bzip2/',
             'bzip2/1.0.8/README': 'licenses/bzip2/',
             'bzip2/1.0.8/CHANGES': 'licenses/bzip2/',
 
-            'expat/2.2.10/lib/libexpat.so.1': 'lib/libexpat-la343.so.1',
-            'expat/2.2.10/INSTALL_RECEIPT.json': 'licenses/expat/',
-            'expat/2.2.10/COPYING': 'licenses/expat/',
-            'expat/2.2.10/README.md': 'licenses/expat/',
-            'expat/2.2.10/AUTHORS': 'licenses/expat/',
-            'expat/2.2.10/Changes': 'licenses/expat/',
-            'expat/2.2.10/share/doc/expat/changelog': 'licenses/expat/',
+            'expat/2.2.10_1/lib/libexpat.so.1': 'lib/libexpat-la3511.so.1',
+            'expat/2.2.10_1/INSTALL_RECEIPT.json': 'licenses/expat/',
+            'expat/2.2.10_1/COPYING': 'licenses/expat/',
+            'expat/2.2.10_1/README.md': 'licenses/expat/',
+            'expat/2.2.10_1/AUTHORS': 'licenses/expat/',
+            'expat/2.2.10_1/Changes': 'licenses/expat/',
+            'expat/2.2.10_1/share/doc/expat/changelog': 'licenses/expat/',
 
-            'libb2/0.98.1/lib/libb2.so.1': 'lib/libb2-la343.so.1',
+            'libb2/0.98.1/lib/libb2.so.1': 'lib/libb2-la3511.so.1',
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
             'libb2/0.98.1/COPYING': 'licenses/libb2/',
 
-            'libbsd/0.10.0/lib/libbsd.so.0': 'lib/libbsd-la343.so.0',
-            'libbsd/0.10.0/INSTALL_RECEIPT.json': 'licenses/libbsd/',
-            'libbsd/0.10.0/COPYING': 'licenses/libbsd/',
-            'libbsd/0.10.0/README': 'licenses/libbsd/',
-            'libbsd/0.10.0/ChangeLog': 'licenses/libbsd/',
-
-            'lz4/1.9.3/lib/liblz4.so.1': 'lib/liblz4-la343.so.1',
+            'lz4/1.9.3/lib/liblz4.so.1': 'lib/liblz4-la3511.so.1',
             'lz4/1.9.3/INSTALL_RECEIPT.json': 'licenses/lz4/',
             'lz4/1.9.3/LICENSE': 'licenses/lz4/',
             'lz4/1.9.3/README.md': 'licenses/lz4/',
             'lz4/1.9.3/include/lz4frame_static.h': 'licenses/lz4/lz4.LICENSE',
 
-            'xz/5.2.5/lib/liblzma.so.5': 'lib/liblzma-la343.so.5',
+            'xz/5.2.5/lib/liblzma.so.5': 'lib/liblzma-la3511.so.5',
             'xz/5.2.5/INSTALL_RECEIPT.json': 'licenses/xz/',
             'xz/5.2.5/COPYING': 'licenses/xz/',
             'xz/5.2.5/README': 'licenses/xz/',
@@ -780,12 +771,12 @@ PRESETS = {
             'xz/5.2.5/share/doc/xz/THANKS': 'licenses/xz/',
             'xz/5.2.5/ChangeLog': 'licenses/xz/',
 
-            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-la343.so.1',
+            'zlib/1.2.11/lib/libz.so.1': 'lib/libz-la3511.so.1',
             'zlib/1.2.11/INSTALL_RECEIPT.json': 'licenses/zlib/',
             'zlib/1.2.11/README': 'licenses/zlib/',
             'zlib/1.2.11/ChangeLog': 'licenses/zlib/',
 
-            'zstd/1.4.8/lib/libzstd.so.1': 'lib/libzstd-la343.so.1',
+            'zstd/1.4.8/lib/libzstd.so.1': 'lib/libzstd-la3511.so.1',
             'zstd/1.4.8/INSTALL_RECEIPT.json': 'licenses/zstd/',
             'zstd/1.4.8/COPYING': 'licenses/zstd/',
             'zstd/1.4.8/README.md': 'licenses/zstd/',
@@ -795,7 +786,7 @@ PRESETS = {
     },
 
     ('libarchive', CURRENT_MACOSX_VERSION): {
-        'fullversion': '3.4.3',
+        'fullversion': '3.5.1_1',
         'install_dir': 'builtins/extractcode_libarchive-macosx/src/extractcode_libarchive',
 
         'fixes': [
@@ -808,11 +799,11 @@ PRESETS = {
 
         'deletes': ['licenses', 'lib'],
         'copies': {
-            'libarchive/3.4.3/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
+            'libarchive/3.5.1_1/lib/libarchive.13.dylib': 'lib/libarchive.dylib',
 
-            'libarchive/3.4.3/INSTALL_RECEIPT.json': 'licenses/libarchive/',
-            'libarchive/3.4.3/COPYING': 'licenses/libarchive/',
-            'libarchive/3.4.3/README.md': 'licenses/libarchive/',
+            'libarchive/3.5.1_1/INSTALL_RECEIPT.json': 'licenses/libarchive/',
+            'libarchive/3.5.1_1/COPYING': 'licenses/libarchive/',
+            'libarchive/3.5.1_1/README.md': 'licenses/libarchive/',
 
             'libb2/0.98.1/lib/libb2.1.dylib': 'lib/',
             'libb2/0.98.1/INSTALL_RECEIPT.json': 'licenses/libb2/',
@@ -842,7 +833,7 @@ PRESETS = {
     },
 
     ('p7zip', 'x86_64_linux'): {
-        'fullversion': '16.02_2',
+        'fullversion': '16.02_3',
         'install_dir': 'builtins/extractcode_7z-linux/src/extractcode_7z',
 
         'fixes': [
@@ -852,37 +843,35 @@ PRESETS = {
         ],
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'copies': {
-            'p7zip/16.02_2/lib/p7zip/7z': 'bin/',
-            'p7zip/16.02_2/lib/p7zip/7z.so': 'bin/',
-
-            'p7zip/16.02_2/INSTALL_RECEIPT.json': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/README': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/License.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/copying.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/unRarLicense.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/readme.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/src-history.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/ChangeLog': 'licenses/p7zip/',
+            'p7zip/16.02_3/lib/p7zip/7z': 'bin/',
+            'p7zip/16.02_3/lib/p7zip/7z.so': 'bin/',
+            'p7zip/16.02_3/INSTALL_RECEIPT.json': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/README': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/License.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/copying.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/unRarLicense.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/readme.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/src-history.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/ChangeLog': 'licenses/p7zip/',
         },
     },
 
     ('p7zip', CURRENT_MACOSX_VERSION): {
-        'fullversion': '16.02_2',
+        'fullversion': '16.02_3',
         'deletes': ['licenses', 'lib', 'bin', 'doc'],
         'install_dir': 'builtins/extractcode_7z-macosx/src/extractcode_7z',
 
         'copies': {
-            'p7zip/16.02_2/lib/p7zip/7z': 'bin/',
-            'p7zip/16.02_2/lib/p7zip/7z.so': 'bin/',
-
-            'p7zip/16.02_2/INSTALL_RECEIPT.json': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/README': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/License.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/copying.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/unRarLicense.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/readme.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/DOC/src-history.txt': 'licenses/p7zip/',
-            'p7zip/16.02_2/share/doc/p7zip/ChangeLog': 'licenses/p7zip/',
+            'p7zip/16.02_3/lib/p7zip/7z': 'bin/',
+            'p7zip/16.02_3/lib/p7zip/7z.so': 'bin/',
+            'p7zip/16.02_3/INSTALL_RECEIPT.json': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/README': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/License.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/copying.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/unRarLicense.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/readme.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/DOC/src-history.txt': 'licenses/p7zip/',
+            'p7zip/16.02_3/share/doc/p7zip/ChangeLog': 'licenses/p7zip/',
         },
     },
 

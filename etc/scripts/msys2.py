@@ -251,8 +251,8 @@ def find_hrefs(text):
     ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz.sig">mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz.sig</a></td><td align="right">2020-03-11 07:56  </td><td align="right">119 </td><td>&nbsp;</td></tr>
     ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst</a></td><td align="right">2020-05-06 08:56  </td><td align="right">731K</td><td>&nbsp;</td></tr>
     ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst.sig</a></td><td align="right">2020-05-06 08:56  </td><td align="right">119 </td><td>&nbsp;</td></tr>
-    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst</a></td><td align="right">2020-05-25 10:42  </td><td align="right">743K</td><td>&nbsp;</td></tr>
-    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst.sig</a></td><td align="right">2020-05-25 10:42  </td><td align="right">119 </td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.5.1-1-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.5.1-1-any.pkg.tar.zst</a></td><td align="right">2020-05-25 10:42  </td><td align="right">743K</td><td>&nbsp;</td></tr>
+    ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.5.1-1-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.5.1-1-any.pkg.tar.zst.sig</a></td><td align="right">2020-05-25 10:42  </td><td align="right">119 </td><td>&nbsp;</td></tr>
     ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst">mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst</a></td><td align="right">2020-12-06 13:52  </td><td align="right">732K</td><td>&nbsp;</td></tr>
     ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst.sig">mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst.sig</a></td><td align="right">2020-12-06 13:57  </td><td align="right">438 </td><td>&nbsp;</td></tr>
     ... <tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz">mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz</a></td><td align="right">2018-01-17 16:34  </td><td align="right">112K</td><td>&nbsp;</td></tr>
@@ -264,7 +264,7 @@ def find_hrefs(text):
     mingw-w64-x86_64-libarchive-3.4.2-1-any.pkg.tar.xz
     mingw-w64-x86_64-libarchive-3.4.2-2-any.pkg.tar.xz
     mingw-w64-x86_64-libarchive-3.4.2-3-any.pkg.tar.zst
-    mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst
+    mingw-w64-x86_64-libarchive-3.5.1-1-any.pkg.tar.zst
     mingw-w64-x86_64-libarchive-3.5.0-1-any.pkg.tar.zst
     mingw-w64-x86_64-libart_lgpl-2.3.21-2-any.pkg.tar.xz
     """
@@ -369,7 +369,7 @@ class PackageName:
         ... mingw-w64-x86_64-gcc-libs-10.2.0-3-any.pkg.tar.zst
         ... mingw-w64-x86_64-gettext-0.19.8.1-9-any.pkg.tar.zst
         ... mingw-w64-x86_64-gmp-6.2.0-1-any.pkg.tar.xz
-        ... mingw-w64-x86_64-libarchive-3.4.3-1-any.pkg.tar.zst
+        ... mingw-w64-x86_64-libarchive-3.5.1-1-any.pkg.tar.zst
         ... mingw-w64-x86_64-libffi-3.3-1-any.pkg.tar.xz
         ... mingw-w64-x86_64-libiconv-1.16-1-any.pkg.tar.xz
         ... mingw-w64-x86_64-libsystre-1.0.1-4-any.pkg.tar.xz
@@ -389,7 +389,7 @@ class PackageName:
         ... mingw-w64-gcc-10.2.0-3.src.tar.gz
         ... mingw-w64-gettext-0.19.8.1-9.src.tar.gz
         ... mingw-w64-gmp-6.2.0-1.src.tar.gz
-        ... mingw-w64-libarchive-3.4.3-1.src.tar.gz
+        ... mingw-w64-libarchive-3.5.1-1.src.tar.gz
         ... mingw-w64-libffi-3.3-1.src.tar.gz
         ... mingw-w64-libiconv-1.16-1.src.tar.gz
         ... mingw-w64-libsystre-1.0.1-4.src.tar.gz
@@ -1501,8 +1501,8 @@ def update_package(
 
     root_package = repo.get_binary_package(name, version)
     if not root_package:
-        raise Exception(repo.binaries_by_name[name])
-    assert root_package, f'Unable to find package: {name} @ {version}'
+        available = '\n'.join(map(repr, repo.binaries_by_name[name]))
+        raise Exception(f'Unable to find package: {name}@{version}\nbut got:\n{available}')
 
     if TRACE_FETCH: print(f'Processing package: {root_package}')
     extracted_locs = []
@@ -1540,13 +1540,13 @@ def update_package(
 
 
 def main():
-    update_package(name='mingw-w64-x86_64-libarchive', version='3.4.3-1', repo_name='mingw64')
+    update_package(name='mingw-w64-x86_64-libarchive', version='3.5.1-1', repo_name='mingw64')
     update_package(name='mingw-w64-x86_64-file', version='5.39-1', repo_name='mingw64')
 
 
 PRESETS = {
     ('mingw-w64-x86_64-libarchive', 'mingw64') : {
-        'version': '3.4.3-1',
+        'version': '3.5.1-1',
         'install_dir': 'builtins/extractcode_libarchive-win64/src/extractcode_libarchive',
 
         'deletes': ['licenses', 'lib', 'doc', 'include', 'man', 'build', ],
