@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 from glob import glob
 from os.path import basename
 from os.path import join
@@ -17,7 +14,7 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native sevenzip 
 
 setup(
     name='extractcode_7z',
-    version='16.5',
+    version='16.5.210122',
     license='lgpl-2.1 and unrar and brian-gladman-3-clause',
     description=desc,
     long_description=desc,

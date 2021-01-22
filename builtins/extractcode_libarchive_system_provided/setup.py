@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 from glob import glob
 from os.path import basename
 from os.path import join
@@ -17,7 +14,7 @@ desc = '''A ScanCode path provider plugin to provide a system package provided l
 
 setup(
     name='extractcode_libarchive_system_provided',
-    version='3.4.3.1',
+    version='3.4.3.210122',
     license='bsd-simplified',
     description=desc,
     long_description=desc,
@@ -34,9 +31,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         #'TODO'
-        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Topic :: Utilities',
     ],
     keywords=[

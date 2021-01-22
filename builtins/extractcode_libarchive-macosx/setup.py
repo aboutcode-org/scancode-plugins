@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 from glob import glob
 from os.path import basename
 from os.path import join
@@ -17,7 +14,7 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native libarchiv
 
 setup(
     name='extractcode_libarchive',
-    version='3.4.3.1',
+    version='3.4.3.210122',
     license='bsd-simplified',
     description=desc,
     long_description=desc,
