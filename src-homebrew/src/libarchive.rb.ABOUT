@@ -1,6 +1,6 @@
 about_resource: libarchive.rb
 name: libarchive
-version: 3.4.3
-download_url: https://homebrew.bintray.com/bottles/libarchive-3.4.3.mojave.bottle.tar.gz
+version: 3.5.1_1
+download_url: https://homebrew.bintray.com/bottles/libarchive-3.5.1_1.mojave.bottle.tar.gz
 type: homebrew
 notes: This is a brew formula used to create this package.

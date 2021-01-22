@@ -1,6 +1,0 @@
-about_resource: libbsd-0.10.0.tar.xz
-name: libbsd
-version: 0.10.0
-download_url: https://libbsd.freedesktop.org/releases/libbsd-0.10.0.tar.xz
-type: homebrew
-notes: This is a source archive or patch used to create this package with brew.

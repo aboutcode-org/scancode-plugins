@@ -1,9 +1,0 @@
-about_resource: mingw-w64-libffi-3.3-1.src.tar.gz
-name: mingw-w64-libffi
-version: 3.3-1
-download_url: http://repo.msys2.org/mingw/sources/mingw-w64-libffi-3.3-1.src.tar.gz
-type: msys2
-description: A portable, high level programming interface to various calling conventions (mingw-w64)
-homepage_url: https://sourceware.org/libffi
-declared_license:
-  - MIT

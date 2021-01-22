@@ -1,0 +1,10 @@
+about_resource: mingw-w64-x86_64-lz4-1.9.3-1-any.pkg.tar.zst
+name: mingw-w64-x86_64-lz4
+version: 1.9.3-1
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-lz4-1.9.3-1-any.pkg.tar.zst
+type: msys2
+description: Very fast lossless compression algorithm (mingw-w64)
+homepage_url: https://lz4.github.io/lz4/
+declared_license:
+  - BSD
+  - GPL2

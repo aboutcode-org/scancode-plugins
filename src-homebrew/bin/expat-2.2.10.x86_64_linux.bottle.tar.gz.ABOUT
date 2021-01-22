@@ -1,5 +1,0 @@
-about_resource: expat-2.2.10.x86_64_linux.bottle.tar.gz
-name: expat
-version: 2.2.10
-download_url: https://linuxbrew.bintray.com/bottles/expat-2.2.10.x86_64_linux.bottle.tar.gz
-type: homebrew

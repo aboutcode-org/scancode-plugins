@@ -1,0 +1,6 @@
+about_resource: libarchive-3.5.1.tar.xz
+name: libarchive
+version: 3.5.1_1
+download_url: https://www.libarchive.org/downloads/libarchive-3.5.1.tar.xz
+type: homebrew
+notes: This is a source archive or patch used to create this package with brew.

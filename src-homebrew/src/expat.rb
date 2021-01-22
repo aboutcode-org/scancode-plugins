@@ -4,9 +4,11 @@ class Expat < Formula
   url "https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.xz"
   sha256 "5dfe538f8b5b63f03e98edac520d7d9a6a4d22e482e5c96d4d06fcc5485c25f2"
   license "MIT"
+  revision 1 unless OS.mac?
 
   livecheck do
-    url "https://github.com/libexpat/libexpat/releases/latest"
+    url :stable
+    strategy :github_latest
     regex(/href=.*?expat[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
@@ -20,15 +22,11 @@ class Expat < Formula
 
   keg_only :provided_by_macos
 
-  # On Ubuntu 14, fix the error: You do not have support for any sources of high quality entropy
-  depends_on "libbsd" unless OS.mac?
-
   def install
     cd "expat" if build.head?
     system "autoreconf", "-fiv" if build.head?
     args = ["--prefix=#{prefix}", "--mandir=#{man}"]
     args << "--with-docbook" if build.head?
-    args << "--with-libbsd" unless OS.mac?
     system "./configure", *args
     system "make", "install"
   end

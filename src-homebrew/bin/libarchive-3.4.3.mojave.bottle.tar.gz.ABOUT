@@ -1,5 +1,0 @@
-about_resource: libarchive-3.4.3.mojave.bottle.tar.gz
-name: libarchive
-version: 3.4.3
-download_url: https://homebrew.bintray.com/bottles/libarchive-3.4.3.mojave.bottle.tar.gz
-type: homebrew

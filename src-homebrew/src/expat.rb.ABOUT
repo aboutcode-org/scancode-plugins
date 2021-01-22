@@ -1,6 +1,6 @@
 about_resource: expat.rb
 name: expat
-version: 2.2.10
-download_url: https://linuxbrew.bintray.com/bottles/expat-2.2.10.x86_64_linux.bottle.tar.gz
+version: 2.2.10_1
+download_url: https://linuxbrew.bintray.com/bottles/expat-2.2.10_1.x86_64_linux.bottle.tar.gz
 type: homebrew
 notes: This is a brew formula used to create this package.

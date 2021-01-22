@@ -1,0 +1,9 @@
+about_resource: mingw-w64-x86_64-mpc-1.2.1-1-any.pkg.tar.zst
+name: mingw-w64-x86_64-mpc
+version: 1.2.1-1
+download_url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-mpc-1.2.1-1-any.pkg.tar.zst
+type: msys2
+description: Multiple precision complex arithmetic library (mingw-w64)
+homepage_url: http://www.multiprecision.org
+declared_license:
+  - LGPL

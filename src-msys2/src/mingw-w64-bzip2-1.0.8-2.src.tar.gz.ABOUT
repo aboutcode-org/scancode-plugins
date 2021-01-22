@@ -1,0 +1,9 @@
+about_resource: mingw-w64-bzip2-1.0.8-2.src.tar.gz
+name: mingw-w64-bzip2
+version: 1.0.8-2
+download_url: http://repo.msys2.org/mingw/sources/mingw-w64-bzip2-1.0.8-2.src.tar.gz
+type: msys2
+description: A high-quality data compression program (mingw-w64)
+homepage_url: http://www.bzip.org
+declared_license:
+  - custom
