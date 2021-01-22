@@ -23,7 +23,8 @@ for root in builtins misc binary-analysis
         rm -rf dist build
         # build and copy up
         python setup.py release
-        cp dist/* $dist
+        mv dist/* $dist
+        rm -rf build
         popd
       done
   done
