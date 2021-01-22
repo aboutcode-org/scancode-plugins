@@ -17,8 +17,11 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native libmagic 
 
 setup(
     name='typecode_libmagic',
-    version='5.39.1.1',
-    license='bsd-simplified',
+    version='5.39.210122',
+    license=(
+        'bsd-simplified-darwin AND (bsd-simplified AND public-domain AND '
+        'bsd-new AND isc AND (bsd-new OR gpl-1.0-plus) AND bsd-original)'
+    ),
     description=desc,
     long_description=desc,
     author='nexB',
@@ -33,10 +36,7 @@ setup(
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        #'TODO'
-        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Topic :: Utilities',
     ],
     keywords=[

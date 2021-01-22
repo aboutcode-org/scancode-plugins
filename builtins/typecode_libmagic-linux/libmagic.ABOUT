@@ -27,8 +27,8 @@ copyright: |
   Copyright by GARMIN Corporation. or http://www.openstreetmap.org
   Copyright by the Massachusetts Institute of Technology
 
-notice_file: file-5.39.tar.gz.NOTICE
-redistribute: yes
+notice_file: libmagic.NOTICE
+redistribute: no
 attribute: yes
 track_changes: yes
 

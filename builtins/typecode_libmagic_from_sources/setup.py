@@ -47,10 +47,10 @@ class DevelopLibMagic(setuptools_develop):
 
 setup(
     name='typecode_libmagic_from_sources',
-    version='5.39.1.1',
+    version='5.39.210122',
     license=(
-        'bsd-simplified-darwin AND bsd-simplified AND public-domain AND '
-        'bsd-new AND isc AND (bsd-new OR gpl-1.0-plus) AND bsd-original'
+        'bsd-simplified-darwin AND (bsd-simplified AND public-domain AND '
+        'bsd-new AND isc AND (bsd-new OR gpl-1.0-plus) AND bsd-original)'
     ),
     description=desc,
     long_description=desc,

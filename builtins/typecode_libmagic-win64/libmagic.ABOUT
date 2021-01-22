@@ -1,0 +1,12 @@
+about_resource: .
+version: 5.39
+homepage_url: http://www.darwinsys.com/file/
+name: libmagic
+owner: Ian Darwin
+download_url: ftp://ftp.astron.com/pub/file/file-5.39.tar.gz
+copyright: Copyright (c) 1986-1995 Ian F. Darwin
+ Software written by Ian F. Darwin and others.
+ maintained 1994- Christos Zoulas.
+license_expression: bsd-simplified-darwin AND (bsd-simplified AND public-domain
+    AND bsd-new AND isc AND (bsd-new OR gpl-1.0-plus) AND bsd-original)
+notice_file: libmagic.NOTICE
