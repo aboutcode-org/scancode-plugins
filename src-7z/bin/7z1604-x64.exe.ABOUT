@@ -1,0 +1,5 @@
+about_resource: 7z1604-x64.exe
+name: 7zip
+version: '16.04'
+download_url: https://master.dl.sourceforge.net/project/sevenzip/7-Zip/16.04/7z1604-src.7z
+type: generic
