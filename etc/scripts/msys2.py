@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) nexB Inc.
 # Copyright (c) 2016-2019 Christoph Reiter
+# SPDX-License-Identifier: MIT
 #
 # Based on MSYS2 web application code.
 # download_url: https://raw.githubusercontent.com/msys2/msys2-web/628ec96975ab84b4e13567c8d4bdc25ad1a8f937/main.py

@@ -1,4 +1,7 @@
-# Copyright (c) 2020 nexB Inc.
+#!/usr/bin/env python3
+
+# Copyright (c) nexB Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 import cgi
 import hashlib

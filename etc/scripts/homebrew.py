@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-# Copyright (c) 2020 nexB Inc.
+
+# Copyright (c) nexB Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 """
 Utility to keep linux and macOS prebuilt ScanCode toolkit plugins up to date.

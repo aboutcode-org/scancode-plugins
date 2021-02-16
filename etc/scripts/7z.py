@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# Copyright (c) 2020 nexB Inc.
-# Copyright (c) 2016-2019 Christoph Reiter
+
+# Copyright (c) nexB Inc.
+# SPDX-License-Identifier: Apache-2.0
 #
 
 """
-Utility to keep Windows prebuilt ScanCode toolkit plugins for 7zip on Windows up
-to date.
+Utility to keep Windows prebuilt ScanCode toolkit plugins for 7zip on Windows up to date.
 """
 
 from distutils.dir_util import copy_tree
