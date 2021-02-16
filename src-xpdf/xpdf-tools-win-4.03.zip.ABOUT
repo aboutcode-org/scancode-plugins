@@ -1,0 +1,5 @@
+about_resource: xpdf-tools-win-4.03.zip
+name: pdf2text
+version: '4.03'
+download_url: https://dl.xpdfreader.com/xpdf-4.03.tar.gz
+type: generic
