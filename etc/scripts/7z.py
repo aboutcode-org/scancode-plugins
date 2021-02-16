@@ -36,19 +36,20 @@ def install_files(extracted_dir, install_dir, copies):
         isdir = dst.endswith('/')
         src = os.path.join(extracted_dir, src)
         dst = os.path.join(install_dir, dst)
-        if os.path.exists(src):
-            if TRACE: print('copying:', src, dst)
-            if os.path.isdir(src):
-                copy_tree(src, dst)
-            else:
-                parent = os.path.dirname(dst)
-                os.makedirs(parent, exist_ok=True)
-                if isdir:
-                    os.makedirs(dst, exist_ok=True)
-                shutil.copy2(src, dst)
+        if not os.path.exists(src):
+            raise Exception(f'File not found: {src}')
+        if TRACE: print('copying:', src, dst)
+        if os.path.isdir(src):
+            copy_tree(src, dst)
+        else:
+            parent = os.path.dirname(dst)
+            os.makedirs(parent, exist_ok=True)
+            if isdir:
+                os.makedirs(dst, exist_ok=True)
+            shutil.copy2(src, dst)
 
 
-def fetch_package(name, cache_dir='src-7z'):
+def fetch_and_install_package(name, cache_dir='src-7z'):
     """
     Fetch and install a 7z package with `name` using `cache_dir` directory for cache.
     """
@@ -87,9 +88,9 @@ def fetch_package(name, cache_dir='src-7z'):
     about_dir = os.path.dirname(fetched_binary_loc)
     shared_utils.create_about_file(
         about_resource=about_resource,
+        type='generic',
         name=presets['name'],
         version=presets['version'],
-        type='generic',
         download_url=src_url,
         target_directory=about_dir,
     )
@@ -105,9 +106,9 @@ def fetch_package(name, cache_dir='src-7z'):
     about_dir = os.path.dirname(fetched_src_loc)
     shared_utils.create_about_file(
         about_resource=about_resource,
+        type='generic',
         name=presets['name'],
         version=presets['version'],
-        type='generic',
         download_url=src_url,
         target_directory=about_dir,
     )
@@ -116,7 +117,7 @@ def fetch_package(name, cache_dir='src-7z'):
 
 
 def main():
-    fetch_package(name='7zip-64')
+    fetch_and_install_package(name='7zip-64')
 
 
 PACKAGES = {
