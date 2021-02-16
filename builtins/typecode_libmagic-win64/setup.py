@@ -16,7 +16,7 @@ setup(
     name='typecode_libmagic',
     version='5.39.210122',
     license=(
-        'bsd-simplified-darwin AND (bsd-simplified AND public-domain AND '
+        'apache-2.0 AND bsd-simplified-darwin AND (bsd-simplified AND public-domain AND '
         'bsd-new AND isc AND (bsd-new OR gpl-1.0-plus) AND bsd-original) '
         'AND other-permissive AND other-copyleft'
     ),

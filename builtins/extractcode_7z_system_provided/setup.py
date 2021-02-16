@@ -18,7 +18,7 @@ desc = '''A ScanCode path provider plugin to provide system package provided sev
 setup(
     name='extractcode_7z_system_provided',
     version='16.5.210122',
-    license='lgpl-2.1 and unrar and brian-gladman-3-clause',
+    license='apache-2.0 AND lgpl-2.1 and unrar and brian-gladman-3-clause',
     description=desc,
     long_description=desc,
     author='nexB',

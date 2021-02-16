@@ -14,7 +14,7 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native libarchiv
 setup(
     name='extractcode_libarchive',
     version='3.5.1.210122',
-    license='bsd-simplified AND other-permissive AND other-copyleft',
+    license='apache-2.0 AND bsd-simplified AND other-permissive AND other-copyleft',
     description=desc,
     long_description=desc,
     author='nexB',
@@ -29,8 +29,6 @@ setup(
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Topic :: Utilities',
     ],
     keywords=[
