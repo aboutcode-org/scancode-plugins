@@ -1,0 +1,13 @@
+about_resource: .
+homepage_url: https://github.com/nexB/scancode-plugins/tree/develop/builtins
+name: textcode-pdf2text
+owner: nexB Inc.
+copyright: Copyright (c) nexB Inc. and others.
+ Copyright (c) Glyph & Cog, LLC.
+description: A pdf2text plugin for TextCode and ScanCode
+license_expression: apache-2.0 AND (gpl-2.0 OR gpl-3.0)
+notice_file: pdf2text.NOTICE
+redistribute: yes
+attribute: yes
+track_changes: yes
+package_url: pkg:pypi/textcode-pdf2text

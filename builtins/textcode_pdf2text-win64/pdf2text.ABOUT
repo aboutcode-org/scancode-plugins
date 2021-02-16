@@ -1,0 +1,9 @@
+about_resource: .
+version: 4.03
+homepage_url: http://www.xpdfreader.com/
+name: pdf2text
+owner: Glyph & Cog, LLC.
+download_url: https://dl.xpdfreader.com/xpdf-4.03.tar.gz
+copyright: Copyright (c) Glyph & Cog, LLC.
+license_expression: gpl-2.0 OR gpl-3.0
+notice_file: pdf2text.NOTICE
