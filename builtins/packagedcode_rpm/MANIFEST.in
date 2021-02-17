@@ -1,0 +1,13 @@
+graft src
+graft lib-src
+
+include build.sh
+include setup.*
+include *.rst
+include .gitignore
+include *.cfg
+include *LICENSE*
+include *NOTICE*
+include *ABOUT
+
+global-exclude *.py[co] __pycache__ *.*~
