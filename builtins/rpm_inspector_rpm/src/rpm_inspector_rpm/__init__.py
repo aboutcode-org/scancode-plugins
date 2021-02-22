@@ -32,7 +32,7 @@ class RpmPaths(LocationProviderPlugin):
         curr_dir = dirname(abspath(__file__))
         bin_dir = join(curr_dir, 'bin')
         locations = {
-            'packagedcode_rpm.rpm.bindir': bin_dir,
-            'packagedcode_rpm.rpm.exe': join(bin_dir, 'rpmdb'),
+            'rpm_inspector_rpm.rpm.bindir': bin_dir,
+            'rpm_inspector_rpm.rpm.exe': join(bin_dir, 'rpmdb'),
         }
         return locations

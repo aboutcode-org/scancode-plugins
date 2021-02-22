@@ -28,10 +28,11 @@ cd $base_name/
 
 make
 
-cp .libs/rpm  ../../src/packagedcode_rpm/bin/
-cp .libs/rpmdb  ../../src/packagedcode_rpm/bin/
-cp lib/.libs/librpm.so.9.1.2  ../../src/packagedcode_rpm/bin/librpm.so.9
-cp rpmio/.libs/librpmio.so.9.1.2  ../../src/packagedcode_rpm/bin/librpmio.so.9
+cp .libs/rpm  ../../src/rpm_inspector_rpm/bin/
+cp .libs/rpmdb  ../../src/rpm_inspector_rpm/bin/
+cp lib/.libs/librpm.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpm.so.9
+cp rpmio/.libs/librpmio.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpmio.so.9
+strip  ../../src/rpm_inspector_rpm/bin/*
 cd ..
 
 #rm -rf $base_name/

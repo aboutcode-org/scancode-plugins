@@ -44,7 +44,7 @@ class DevelopRPM(setuptools_develop):
 
 
 setup(
-    name='packagedcode-rpm',
+    name='rpm-inspector-rpm',
     version='4.16.1.2.210216',
     license=' apache-2.0 AND (gpl-2.0 AND lgpl-2.0)',
     description=desc,
@@ -71,7 +71,7 @@ setup(
     ],
     entry_points={
         'scancode_location_provider': [
-            'packagedcode_rpm = packagedcode_rpm:RpmPaths',
+            'rpm_inspector_rpm = rpm_inspector_rpm:RpmPaths',
         ],
     },
     cmdclass={'build': BuildRPM, 'develop': DevelopRPM}
