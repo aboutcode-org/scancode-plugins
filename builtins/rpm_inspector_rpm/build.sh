@@ -14,6 +14,7 @@ cd $base_name/
 
 
 # This is to ensure we support ndb, bdb-ro and sqlite formats.
+echo Configure RPM 
 ./autogen.sh \
   --enable-static \
   --disable-openmp \
@@ -25,14 +26,19 @@ cd $base_name/
   --without-lua  \
   --with-crypto=openssl
 
-
+echo Build RPM
 make
-echo Done building RPM
 cp .libs/rpm  ../../src/rpm_inspector_rpm/bin/
 cp .libs/rpmdb  ../../src/rpm_inspector_rpm/bin/
 cp lib/.libs/librpm.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpm.so.9
 cp rpmio/.libs/librpmio.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpmio.so.9
-strip  ../../src/rpm_inspector_rpm/bin/*
-cd ..
+strip \
+  ../../src/rpm_inspector_rpm/bin/librpmio.so.9 \
+  ../../src/rpm_inspector_rpm/bin/librpm.so.9 \
+  ../../src/rpm_inspector_rpm/bin/rpm \
+  ../../src/rpm_inspector_rpm/bin/rpmdb
+cd ../..
+echo Done building RPM
 
 #rm -rf $base_name/
+
