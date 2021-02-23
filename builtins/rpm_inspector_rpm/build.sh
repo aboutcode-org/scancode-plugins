@@ -27,7 +27,7 @@ cd $base_name/
 
 
 make
-
+echo Done building RPM
 cp .libs/rpm  ../../src/rpm_inspector_rpm/bin/
 cp .libs/rpmdb  ../../src/rpm_inspector_rpm/bin/
 cp lib/.libs/librpm.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpm.so.9
