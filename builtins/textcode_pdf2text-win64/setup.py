@@ -14,7 +14,7 @@ desc = '''A ScanCode path provider plugin to provide a prebuilt native libmagic 
 
 setup(
     name='textcode_pdf2text',
-    version='4.03.210216',
+    version='4.03.210217',
     license=' apache-2.0 AND (gpl-2.0 OR gpl-3.0)',
     description=desc,
     long_description=desc,
