@@ -45,7 +45,7 @@ class DevelopRPM(setuptools_develop):
 
 setup(
     name='rpm-inspector-rpm',
-    version='4.16.1.3.210330',
+    version='4.16.1.3.210330.1',
     license=' apache-2.0 AND (gpl-2.0 AND lgpl-2.0)',
     description=desc,
     long_description=desc,
