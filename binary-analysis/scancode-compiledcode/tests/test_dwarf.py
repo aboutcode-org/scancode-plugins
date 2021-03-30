@@ -25,7 +25,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from collections import OrderedDict
 import json
 import os
 
@@ -73,7 +72,7 @@ class TestDwarf(FileBasedTesting):
                 json.dump(result, exc, indent=2, encoding='utf-8')
 
         with open(expected_file, 'rb') as exc:
-            expected = json.load(exc, encoding='utf-8', object_pairs_hook=OrderedDict)
+            expected = json.load(exc, encoding='utf-8', object_pairs_hook=dict)
 
         assert sorted(expected['original_source_files']) == sorted(result['original_source_files'])
         assert sorted(expected['included_source_files']) == sorted(result['included_source_files'])

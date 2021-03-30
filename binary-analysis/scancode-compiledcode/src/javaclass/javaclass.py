@@ -1,11 +1,8 @@
 
-from __future__ import absolute_import
-
 import sys
 import os
 from struct import unpack
-from StringIO import StringIO
-
+from io import StringIO
 
 """
 A python lib for parsing Java class files, suitable for static
@@ -20,7 +17,7 @@ All Rights Reserved
 """
 
 __author__ = 'Jason Petrone <jp_py@demonseed.net>'
-__version__ = '1.0'
+__version__ = '21.3'
 
 # Class file format documented at:
 # http://java.sun.com/docs/books/vmspec/html/ClassFile.doc.html
@@ -141,6 +138,7 @@ def getAccessFromFlags(flags):
 
 
 class MethodDesc:
+
     def __init__(self, descStr):
         self.args = []
         self.descStr = descStr
@@ -218,6 +216,7 @@ class Method:
     Represents a Java method.
     The bytecode for the method is stored under the key "Code" in attrs.
     """
+
     def __init__(self, klass, access, name, desc, attrs):
         self.klass = klass
         self.access = access
@@ -258,7 +257,7 @@ class Method:
 class Field:
 
     def __init__(self, klass, access, name, desc, attrs):
-        # print 'FIELD ' + str([klass, access, name, desc, attrs])
+        # print('FIELD ' + str([klass, access, name, desc, attrs]))
         self.klass = klass
         self.access = access
         self.name = name
@@ -287,6 +286,7 @@ class Field:
 
 
 class FieldRef:
+
     def __init__(self, klass, name, desc):
         self.klass = klass
         self.name = name
@@ -294,6 +294,7 @@ class FieldRef:
 
 
 class MethodRef:
+
     def __init__(self, _class, name, desc):
         self._class = _class
         self.name = name
@@ -305,6 +306,7 @@ class MethodRef:
 
 
 class Class:
+
     def __init__(self, f):
         """
         Load a java class from file object "f"
@@ -312,7 +314,7 @@ class Class:
         print(f.read(4))  # magic
         self.version = unpack('>HH', f.read(4))
 
-        # print unpack('>H', f.read(2))
+        # print(unpack('>H', f.read(2)))
 
         [constCount] = unpack('>H', f.read(2))
         self.constants = [[CONSTANT_Utf8, 'reserved']]
@@ -348,7 +350,7 @@ class Class:
             elif tag == CONSTANT_Long:
                 [hi] = unpack('>l', f.read(4))
                 [lo] = unpack('>l', f.read(4))
-                self.constants.append([tag, ((long(hi) << 4) + lo)])
+                self.constants.append([tag, ((int(hi) << 4) + lo)])
                 # takes up 2 constant pool spots
                 self.constants.append(None)  # this needs to be considered in dumpClass!
                 i += 1
@@ -366,9 +368,8 @@ class Class:
         [className] = unpack('>H', f.read(2))
         self.name = self.constants[self.constants[className][1]][1]
         self.package = os.path.dirname(self.name).replace('/', '.')
-        # print self.version
+        # print(self.version)
         [className] = unpack('>H', f.read(2))
-
 
         # added as part of #711: java.lang.Object is an exceptional case
         if self.name != 'java/lang/Object':
@@ -493,12 +494,11 @@ def dumpClass(path):
     data = open(path, 'rb').read()
     f = StringIO(data)
     c = Class(f)
-    # print file name
-    print 'Version: %i.%i (%s)' \
-       % (c.version[1], c.version[0], getJavacVersion(c.version))
+    # print(file name)
+    print('Version: %i.%i (%s)' % (c.version[1], c.version[0], getJavacVersion(c.version),))
 
     if SHOW_CONSTS:
-        print 'Constants Pool: ' + str(len(c.constants))
+        print('Constants Pool: ' + str(len(c.constants)))
         for i in range(1, len(c.constants)):
             const = c.constants[i]
 
@@ -507,48 +507,46 @@ def dumpClass(path):
             # double and long constants take 2 slots, we must skip the 'None' one
             if not const: continue
 
-
             sys.stdout.write('  ' + str(i) + '\t')
             if const[0] == CONSTANT_Fieldref:
-                print 'Field\t\t' + str(c.constants[const[1]][1])
+                print('Field\t\t' + str(c.constants[const[1]][1]))
 
             elif const[0] == CONSTANT_Methodref:
-                print 'Method\t\t' + str(c.constants[const[1]][1])
+                print('Method\t\t' + str(c.constants[const[1]][1]))
 
             elif const[0] == CONSTANT_InterfaceMethodref:
-                print 'InterfaceMethod\t\t' + str(c.constants[const[1]][1])
+                print('InterfaceMethod\t\t' + str(c.constants[const[1]][1]))
 
             elif const[0] == CONSTANT_String:
-                print 'String\t\t' + str(const[1])
+                print('String\t\t' + str(const[1]))
             elif const[0] == CONSTANT_Float:
-                print 'Float\t\t' + str(const[1])
+                print('Float\t\t' + str(const[1]))
 
             elif const[0] == CONSTANT_Integer:
-                print 'Integer\t\t' + str(const[1])
+                print('Integer\t\t' + str(const[1]))
 
             elif const[0] == CONSTANT_Double:
-                print 'Double\t\t' + str(const[1])
+                print('Double\t\t' + str(const[1]))
 
             elif const[0] == CONSTANT_Long:
-                print 'Long\t\t' + str(const[1])
+                print('Long\t\t' + str(const[1]))
 
             # elif const[0] == CONSTANT_NameAndType:
-            #   print 'NameAndType\t\t FIXME!!!'
+            #   print('NameAndType\t\t FIXME!!!')
 
             elif const[0] == CONSTANT_Utf8:
-                print 'Utf8\t\t' + str(const[1])
+                print('Utf8\t\t' + str(const[1]))
 
             elif const[0] == CONSTANT_Class:
-                print 'Class\t\t' + str(c.constants[const[1]][1])
+                print('Class\t\t' + str(c.constants[const[1]][1]))
 
             elif const[0] == CONSTANT_NameAndType:
-                print 'NameAndType\t\t' + str(const[1]) + '\t\t' + str(const[2])
+                print('NameAndType\t\t' + str(const[1]) + '\t\t' + str(const[2]))
 
             else:
-                print 'Unknown(' + str(const[0]) + ')\t\t' + str(const[1])
+                print('Unknown(' + str(const[0]) + ')\t\t' + str(const[1]))
 
-
-    print 'Attributes: '
+    print('Attributes: ')
 
     sys.stdout.write('Interfaces: ')
 
@@ -564,25 +562,24 @@ def dumpClass(path):
         sys.stdout.write('Public ')
     if c.access & ACC_ABSTRACT:
         sys.stdout.write('Abstract ')
-    print ']'
+    print(']')
 
-    print 'Methods: '
+    print('Methods: ')
     for meth in c.methods:
-        print '    ' + str(meth)
+        print('    ' + str(meth))
 
-    print 'Class: ' + c.name
+    print('Class: ' + c.name)
 
-    print 'Super Class: ' + c.superClass
+    print('Super Class: ' + c.superClass)
 
-    print 'Interfaces: ',
+    print('Interfaces: ',)
     for inter in c.interfaces:
-        print inter + ", ",
-
+        print(inter + ", ",)
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print 'Usage %s: <a.class> [b.class] ...' % (sys.argv[0])
+        print('Usage %s: <a.class> [b.class] ...' % (sys.argv[0]))
         sys.exit(-1)
 
     for x in sys.argv[1:]:

@@ -22,10 +22,6 @@
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
@@ -46,8 +42,8 @@ class LKMClueScanner(ScanPlugin):
     """
     Scan lkm-clue information from the resource.
     """
-    resource_attributes = OrderedDict(
-        lkm_clue=attr.ib(default=attr.Factory(OrderedDict), repr=False),
+    resource_attributes = dict(
+        lkm_clue=attr.ib(default=attr.Factory(dict), repr=False),
     )
 
     options = [
@@ -71,7 +67,7 @@ def get_lkm_clues(location, **kwargs):
         key: lkm_clue_type and 
         value: list of lkm_clue
     """
-    clues = OrderedDict()
+    clues = dict()
     for type, clue in kernel.find_lkms(location):
         if not type or not clue:
             continue
@@ -79,6 +75,6 @@ def get_lkm_clues(location, **kwargs):
             clues[type] = clues.get(type).append(clue)
         else:
             clues[type] = [clue]
-    return OrderedDict(
+    return dict(
         lkm_clue=clues,
     )

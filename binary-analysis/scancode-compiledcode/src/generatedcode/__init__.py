@@ -26,7 +26,6 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 
-from collections import OrderedDict
 from collections import namedtuple
 from functools import partial
 from itertools import chain
@@ -50,7 +49,7 @@ class GeneratedCodeScanner(ScanPlugin):
     """
     Parse the snippet that is possibly generated code.
     """
-    resource_attributes = OrderedDict(
+    resource_attributes = dict(
         generatedcode=attr.ib(default=attr.Factory(list), repr=False),
     )
 

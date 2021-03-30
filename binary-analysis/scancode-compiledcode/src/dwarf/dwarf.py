@@ -31,7 +31,6 @@ DWARF debug data.
 from __future__ import absolute_import
 from __future__ import print_function
 
-from collections import OrderedDict
 import posixpath
 import re
 
@@ -141,7 +140,7 @@ class Dwarf(object):
             if x not in self.original_source_files)
 
     def asdict(self):
-        return OrderedDict([
+        return dict([
             ('original_source_files', self.original_source_files),
             ('included_source_files', self.included_source_files)
         ])

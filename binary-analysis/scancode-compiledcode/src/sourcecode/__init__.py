@@ -25,7 +25,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
@@ -47,7 +46,7 @@ class CodeCommentLinesScanner(ScanPlugin):
     """
     Scan the number of lines of code and lines of the comments.
     """
-    resource_attributes = OrderedDict(
+    resource_attributes = dict(
         codelines=attr.ib(default=attr.Factory(int), repr=False),
         commentlines=attr.ib(default=attr.Factory(int), repr=False),
 
@@ -76,7 +75,7 @@ def get_codecommentlines(location, **kwargs):
     codelines = 0
     commentlines = 0
     codelines, commentlines = file_lines_count(location)
-    return OrderedDict(
+    return dict(
         codelines=codelines,
         commentlines=commentlines
     )

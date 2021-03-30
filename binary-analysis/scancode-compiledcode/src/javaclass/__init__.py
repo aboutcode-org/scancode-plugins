@@ -25,9 +25,8 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from StringIO import StringIO
+from io import StringIO
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 from struct import unpack
@@ -36,11 +35,12 @@ import sys
 
 import attr
 
+from commoncode.cliutils import PluggableCommandLineOption as CommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+
 from typecode import contenttype
 
 from sourcecode import kernel
@@ -54,8 +54,8 @@ class JavaClassScanner(ScanPlugin):
     """
     Scan java class information from the resource.
     """
-    resource_attributes = OrderedDict(
-        javaclass=attr.ib(default=attr.Factory(OrderedDict), repr=False),
+    resource_attributes = dict(
+        javaclass=attr.ib(default=attr.Factory(dict), repr=False),
     )
 
     options = [
@@ -81,17 +81,17 @@ def scan_javaclass(location, **kwargs):
     if not T.is_java_class:
         return
 
-    javaclass_data = OrderedDict()
+    javaclass_data = dict()
     SHOW_CONSTS = 1
     data = open(location, 'rb').read()
     f = StringIO(data)
     c = javaclass.Class(f)
-    
-    javaclass_data['Version'] = 'Version: %i.%i (%s)' % ( c.version[1], c.version[0], getJavacVersion(c.version))
+
+    javaclass_data['Version'] = 'Version: %i.%i (%s)' % (c.version[1], c.version[0], getJavacVersion(c.version))
 
     if SHOW_CONSTS:
         javaclass_data['Constants Pool'] = str(len(c.constants))
-        constants = OrderedDict()
+        constants = dict()
         for i in range(1, len(c.constants)):
             const = c.constants[i]
 
@@ -100,7 +100,7 @@ def scan_javaclass(location, **kwargs):
             # double and long constants take 2 slots, we must skip the 'None' one
             if not const: continue
 
-            constant_data = OrderedDict()
+            constant_data = dict()
             if const[0] == CONSTANT_Fieldref:
                 constant_data['Field'] = str(c.constants[const[1]][1])
 
@@ -111,40 +111,39 @@ def scan_javaclass(location, **kwargs):
                 constant_data['InterfaceMethod'] = str(c.constants[const[1]][1])
 
             elif const[0] == CONSTANT_String:
-                constant_data['String'] =  str(const[1])
+                constant_data['String'] = str(const[1])
 
             elif const[0] == CONSTANT_Float:
-                constant_data['Float'] =  str(const[1])
+                constant_data['Float'] = str(const[1])
 
             elif const[0] == CONSTANT_Integer:
-                constant_data['Integer'] =  str(const[1])
+                constant_data['Integer'] = str(const[1])
 
             elif const[0] == CONSTANT_Double:
-                constant_data['Double'] =  str(const[1])
+                constant_data['Double'] = str(const[1])
 
             elif const[0] == CONSTANT_Long:
-                constant_data['Long'] =  str(const[1])
+                constant_data['Long'] = str(const[1])
 
             # elif const[0] == CONSTANT_NameAndType:
             #   print 'NameAndType\t\t FIXME!!!'
 
             elif const[0] == CONSTANT_Utf8:
-                constant_data['Utf8'] =  str(const[1])
+                constant_data['Utf8'] = str(const[1])
 
             elif const[0] == CONSTANT_Class:
-                constant_data['Class'] =  str(c.constants[const[1]][1])
+                constant_data['Class'] = str(c.constants[const[1]][1])
 
             elif const[0] == CONSTANT_NameAndType:
-                constant_data['NameAndType'] =  str(const[1]) + ', ' + str(const[2])
+                constant_data['NameAndType'] = str(const[1]) + ', ' + str(const[2])
             else:
                 constant_data['Unknown(' + str(const[0]) + ')'] = str(const[1])
-            
+
             constants[i] = constant_data
-        
+
         javaclass_data['Constants'] = constants
 
-
-    access =[]
+    access = []
     if c.access & ACC_INTERFACE:
         access.append('Interface ')
     if c.access & ACC_SUPER_OR_SYNCHRONIZED:
@@ -173,7 +172,7 @@ def scan_javaclass(location, **kwargs):
         interfaces.append(str(inter))
     if interfaces:
         javaclass_data['Interfaces'] = interfaces
-        
-    return OrderedDict(
+
+    return dict(
         javaclass=javaclass_data,
     )
