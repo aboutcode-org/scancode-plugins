@@ -41,7 +41,7 @@ strip \
   ../../src/rpm_inspector_rpm/bin/librpm.so.9 \
   ../../src/rpm_inspector_rpm/bin/rpm \
   ../../src/rpm_inspector_rpm/bin/rpmdb
-cd ../..
+cd ..
 echo Done building RPM
 
 rm -rf $base_name/
