@@ -25,7 +25,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 from collections import namedtuple
 from functools import partial
 from itertools import chain
@@ -48,7 +47,7 @@ class GWTScanner(ScanPlugin):
     symbols. Used to infer the relationship between the compiled JavaScript and
     the original Java Source code.
     """
-    resource_attributes = OrderedDict(
+    resource_attributes = dict(
         gwt=attr.ib(default=attr.Factory(list), repr=False),
     )
 

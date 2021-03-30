@@ -25,7 +25,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
@@ -46,7 +45,7 @@ class ELFScanner(ScanPlugin):
     """
     Collect the names of shared objects/libraries needed by an Elf binary file.
     """
-    resource_attributes = OrderedDict(
+    resource_attributes = dict(
         elf_needed_library=attr.ib(default=attr.Factory(list), repr=False),
     )
 

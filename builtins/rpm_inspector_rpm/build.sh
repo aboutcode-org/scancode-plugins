@@ -4,7 +4,11 @@
 #
 
 set -e
-base_name=rpm-rpm-4.16.1.2-release
+
+base_name=rpm-rpm-4.16.1.3
+so_version=9.1.3
+
+
 cd lib-src/
 
 rm -rf $base_name
@@ -30,8 +34,8 @@ echo Build RPM
 make
 cp .libs/rpm  ../../src/rpm_inspector_rpm/bin/
 cp .libs/rpmdb  ../../src/rpm_inspector_rpm/bin/
-cp lib/.libs/librpm.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpm.so.9
-cp rpmio/.libs/librpmio.so.9.1.2  ../../src/rpm_inspector_rpm/bin/librpmio.so.9
+cp lib/.libs/librpm.so.$so_version  ../../src/rpm_inspector_rpm/bin/librpm.so.9
+cp rpmio/.libs/librpmio.so.$so_version  ../../src/rpm_inspector_rpm/bin/librpmio.so.9
 strip \
   ../../src/rpm_inspector_rpm/bin/librpmio.so.9 \
   ../../src/rpm_inspector_rpm/bin/librpm.so.9 \
@@ -40,5 +44,5 @@ strip \
 cd ../..
 echo Done building RPM
 
-#rm -rf $base_name/
+rm -rf $base_name/
 

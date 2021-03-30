@@ -22,11 +22,7 @@
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import re
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
@@ -45,7 +41,7 @@ class CPPIncludesScanner(ScanPlugin):
     """
     Collect the #includes statements in a C/C++ file.
     """
-    resource_attributes = OrderedDict(
+    resource_attributes = dict(
         cpp_includes=attr.ib(default=attr.Factory(list), repr=False),
     )
 

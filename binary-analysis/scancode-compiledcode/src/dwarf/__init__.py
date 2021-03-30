@@ -27,7 +27,6 @@ from __future__ import unicode_literals
 
 import os
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 

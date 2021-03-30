@@ -26,7 +26,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
@@ -45,8 +44,8 @@ class MakeDependScanner(ScanPlugin):
     """
     Parse generated make depend files to find sources corresponding binaries.
     """
-    resource_attributes = OrderedDict(
-        makedepend=attr.ib(default=attr.Factory(OrderedDict), repr=False),
+    resource_attributes = dict(
+        makedepend=attr.ib(default=attr.Factory(dict), repr=False),
     )
 
     options = [
@@ -129,7 +128,7 @@ def makedepend_scan(location, **kwargs):
                         for p in line.split():
                             src_paths.append(p)
     if obj_path and src_paths:
-        makedepend_result = OrderedDict()
+        makedepend_result = dict()
         makedepend_result[obj_path] = src_paths
-        return OrderedDict(makedepend=makedepend_result)
+        return dict(makedepend=makedepend_result)
                         
