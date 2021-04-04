@@ -21,26 +21,22 @@ cd $base_name/
 echo Configure RPM 
 ./autogen.sh \
   --enable-static \
+  --enable-shared=no \
   --disable-openmp \
   --enable-bdb=no \
   --enable-bdb-ro=yes \
   --enable-ndb \
   --enable-sqlite=yes \
+  --enable-zstd=yes \
   --disable-plugins \
   --without-lua  \
-  --with-crypto=openssl
+  --with-crypto=libgcrypt \
+  --disable-rpath
 
 echo Build RPM
 make
-cp .libs/rpm  ../../src/rpm_inspector_rpm/bin/
-cp .libs/rpmdb  ../../src/rpm_inspector_rpm/bin/
-cp lib/.libs/librpm.so.$so_version  ../../src/rpm_inspector_rpm/bin/librpm.so.9
-cp rpmio/.libs/librpmio.so.$so_version  ../../src/rpm_inspector_rpm/bin/librpmio.so.9
-strip \
-  ../../src/rpm_inspector_rpm/bin/librpmio.so.9 \
-  ../../src/rpm_inspector_rpm/bin/librpm.so.9 \
-  ../../src/rpm_inspector_rpm/bin/rpm \
-  ../../src/rpm_inspector_rpm/bin/rpmdb
+strip rpm
+cp rpm  ../../src/rpm_inspector_rpm/bin/
 cd ..
 echo Done building RPM
 
