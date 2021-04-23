@@ -7,8 +7,9 @@
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
-from os import path
 import platform
+from os import environ
+from os import path
 
 from plugincode.location_provider import LocationProviderPlugin
 
@@ -20,30 +21,35 @@ class LibarchivePaths(LocationProviderPlugin):
         locations of the libarchive shared library as installed on various Linux
         distros or on FreeBSD.
         """
-        system_arch = platform.machine()
-        mainstream_system = platform.system().lower()
-        if mainstream_system == 'linux':
-            distribution = platform.linux_distribution()[0].lower()
-            debian_based_distro = ['ubuntu', 'mint', 'debian']
-            rpm_based_distro = ['fedora', 'redhat']
+        lib_archive = environ.get('EXTRACTCODE_LIBARCHIVE_PATH')
+        if not lib_archive:
+            system_arch = platform.machine()
+            mainstream_system = platform.system().lower()
+            if mainstream_system == 'linux':
+                distribution = platform.linux_distribution()[0].lower()
+                debian_based_distro = ['ubuntu', 'mint', 'debian']
+                rpm_based_distro = ['fedora', 'redhat']
 
-            if distribution in debian_based_distro:
-                lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
+                if distribution in debian_based_distro:
+                    lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
 
-            elif distribution in rpm_based_distro:
-                lib_dir = '/usr/lib64'
+                elif distribution in rpm_based_distro:
+                    lib_dir = '/usr/lib64'
 
-            else:
-                raise Exception('Unsupported system: {}'.format(distribution))
+                else:
+                    raise Exception('Unsupported system: {}'.format(distribution))
 
-        elif mainstream_system == 'freebsd':
-            if path.isdir('/usr/local/'):
-                lib_dir = '/usr/local/lib'
-            else:
-                lib_dir = '/usr/lib'
+            elif mainstream_system == 'freebsd':
+                if path.isdir('/usr/local/'):
+                    lib_dir = '/usr/local/lib'
+                else:
+                    lib_dir = '/usr/lib'
+            lib_archive = path.join(lib_dir, 'libarchive.so')
+        else:
+            lib_dir = path.dirname(lib_archive)
 
         locations = {
             'extractcode.libarchive.libdir': lib_dir,
-            'extractcode.libarchive.dll': path.join(lib_dir, 'libarchive.so'),
+            'extractcode.libarchive.dll': lib_archive,
         }
         return locations
