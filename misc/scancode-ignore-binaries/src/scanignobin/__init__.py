@@ -29,8 +29,8 @@ from functools import partial
 
 from plugincode.pre_scan import PreScanPlugin
 from plugincode.pre_scan import pre_scan_impl
-from scancode import CommandLineOption
-from scancode import PRE_SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import PRE_SCAN_GROUP
 from typecode.contenttype import get_type
 
 
@@ -41,7 +41,7 @@ class IgnoreBinaries(PreScanPlugin):
     """
 
     options = [
-        CommandLineOption(('--ignore-binaries',),
+        PluggableCommandLineOption(('--ignore-binaries',),
            is_flag=True,
            help='Ignore binary files.',
            sort_order=10,

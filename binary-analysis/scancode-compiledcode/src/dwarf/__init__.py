@@ -35,8 +35,8 @@ import attr
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 from dwarf import dwarf
@@ -52,7 +52,7 @@ class DwarfScanner(ScanPlugin):
         dwarf_source_path=attr.ib(default=attr.Factory(list), repr=False))
 
     options = [
-        CommandLineOption(('--dwarf',),
+        PluggableCommandLineOption(('--dwarf',),
             is_flag=True, default=False,
             help='Collect source code path from compilation units found in '
                  'ELF DWARFs.',

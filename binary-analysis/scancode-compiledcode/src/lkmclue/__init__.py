@@ -30,8 +30,8 @@ import attr
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 from sourcecode import kernel
@@ -47,7 +47,7 @@ class LKMClueScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--lkmclue',),
+        PluggableCommandLineOption(('--lkmclue',),
             is_flag=True, default=False,
             help='Collect LKM module clues and type indicating a possible Linux Kernel Module. (formerly lkm_hint and lkm_line).',
             help_group=SCAN_GROUP,

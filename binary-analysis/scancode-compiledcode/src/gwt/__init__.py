@@ -34,8 +34,8 @@ import attr
 
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from textcode import analysis
 from typecode import contenttype
 
@@ -52,7 +52,7 @@ class GWTScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--gwt',),
+        PluggableCommandLineOption(('--gwt',),
                           is_flag=True, default=False,
                           help='Parse GWT (Google Web Toolkit) ".symbolMap" files to extract compilation/debug symbols. Used to infer the relationship between the compiled JavaScript and the original Java Source code.',
                           help_group=SCAN_GROUP,

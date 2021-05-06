@@ -38,8 +38,8 @@ import commoncode.text
 
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from textcode import analysis
 from typecode import contenttype
 
@@ -54,7 +54,7 @@ class GeneratedCodeScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--generatedcode',),
+        PluggableCommandLineOption(('--generatedcode',),
                           is_flag=True, default=False,
                           help='Get the snippet that is possibly generated code.',
                           help_group=SCAN_GROUP,

@@ -33,8 +33,8 @@ import attr
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 from elf.elf import Elf
@@ -50,7 +50,7 @@ class ELFScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--elf',),
+        PluggableCommandLineOption(('--elf',),
             is_flag=True, default=False,
             help='Collect the names of shared objects/libraries needed by an Elf binary file.',
             help_group=SCAN_GROUP,

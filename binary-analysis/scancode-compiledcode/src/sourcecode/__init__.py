@@ -33,8 +33,8 @@ import attr
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 from sourcecode import kernel
@@ -53,7 +53,7 @@ class CodeCommentLinesScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--codecommentlines',),
+        PluggableCommandLineOption(('--codecommentlines',),
             is_flag=True, default=False,
             help='  Scan the number of lines of code and lines of the comments.',
             help_group=SCAN_GROUP,

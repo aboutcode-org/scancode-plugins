@@ -31,9 +31,9 @@ import attr
 
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import OTHER_SCAN_GROUP
-from scancode import SCAN_OPTIONS_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import OTHER_SCAN_GROUP
+from commoncode.cliutils import SCAN_OPTIONS_GROUP
 from plugin_fingerprint.fingerprint import Simhash
 
 @scan_impl
@@ -46,7 +46,7 @@ class FingerprintScanner(ScanPlugin):
     sort_order = 1
 
     options = [
-        CommandLineOption(('-f', '--fingerprint'),
+        PluggableCommandLineOption(('-f', '--fingerprint'),
                           is_flag=True, default=False,
                           help='Scan <input> to generate simhash fingerprints for similarity matching.',
                           help_group=OTHER_SCAN_GROUP)

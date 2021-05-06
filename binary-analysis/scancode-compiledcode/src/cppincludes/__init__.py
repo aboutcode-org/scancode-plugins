@@ -31,8 +31,8 @@ import attr
 from textcode import analysis
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 
@@ -46,7 +46,7 @@ class CPPIncludesScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--cpp-includes',),
+        PluggableCommandLineOption(('--cpp-includes',),
             is_flag=True, default=False,
             help='Collect the #includes statements in a C/C++ file.',
             help_group=SCAN_GROUP,
