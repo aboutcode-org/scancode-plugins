@@ -18,7 +18,7 @@ cd $base_name/
 echo Build skopeo
 make bin/skopeo
 strip bin/skopeo
-cp bin/skopeo  ../../src/fetchcode_container/bin/
+cp bin/skopeo default-policy.json ../../src/fetchcode_container/bin/
 cd ..
 echo Done building skopeo
 
