@@ -1,0 +1,9 @@
+about_resource: skopeo-1.2.3.tar.gz
+version:  1.2.3
+homepage_url: https://github.com/containers/skopeo
+name: skopeo
+owner: Red Hat
+download_url: https://github.com/containers/skopeo/archive/refs/tags/v1.2.3.tar.gz
+copyright: Copyright (c) Red Hat
+license_expression: apache-2.0 AND other-permissive
+notes: skopeo binaries embed several thir-party packages that are not listed here
