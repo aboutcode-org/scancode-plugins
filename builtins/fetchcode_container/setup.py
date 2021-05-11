@@ -70,7 +70,7 @@ setup(
     ],
     entry_points={
         "scancode_location_provider": [
-            "fetchcode_container= fetchcode_container:SkopeoPaths",
+            "fetchcode_container=fetchcode_container:SkopeoPaths",
         ],
     },
     cmdclass={"build": BuildNative, "develop": DevelopNative}
