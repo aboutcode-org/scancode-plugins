@@ -44,7 +44,7 @@ class DevelopNative(setuptools_develop):
 
 setup(
     name="fetchcode-container",
-    version="1.2.3.210511",
+    version="1.2.3.210512",
     license=" apache-2.0 AND other-permissive",
     description=desc,
     long_description=desc,
