@@ -35,6 +35,8 @@ class LibmagicPaths(LocationProviderPlugin):
         data_dir = join(curr_dir, 'data')
         lib_dir = join(curr_dir, 'lib')
         locations = {
+            # typecode.libmagic.libdir is not used anymore and deprecated
+            # but we are keeping it around for now for backward compatibility
             'typecode.libmagic.libdir': lib_dir,
             'typecode.libmagic.dll': join(lib_dir, 'libmagic.dylib'),
             'typecode.libmagic.db': join(data_dir, 'magic.mgc'),

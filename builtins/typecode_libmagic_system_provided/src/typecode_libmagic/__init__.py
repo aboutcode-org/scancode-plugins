@@ -36,46 +36,43 @@ class LibmagicPaths(LocationProviderPlugin):
         locations of the libmagic shared library as installed on various Linux
         distros or on FreeBSD.
         """
-        lib_dll = environ.get('TYPECODE_LIBMAGIC_PATH')
-        if not lib_dll:
-            system_arch = platform.machine()
-            mainstream_system = platform.system().lower()
-            if mainstream_system == 'linux':
-                distribution = platform.linux_distribution()[0].lower()
-                debian_based_distro = ['ubuntu', 'mint', 'debian']
-                rpm_based_distro = ['fedora', 'redhat']
 
-                if distribution in debian_based_distro:
-                    data_dir = '/usr/lib/file'
-                    lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
+        system_arch = platform.machine()
+        mainstream_system = platform.system().lower()
+        if mainstream_system == 'linux':
+            distribution = platform.linux_distribution()[0].lower()
+            debian_based_distro = ['ubuntu', 'mint', 'debian']
+            rpm_based_distro = ['fedora', 'redhat']
 
-                elif distribution in rpm_based_distro:
-                    data_dir = '/usr/share/misc'
-                    lib_dir = '/usr/lib64'
+            if distribution in debian_based_distro:
+                db_dir = '/usr/lib/file'
+                lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
 
-                else:
-                    raise Exception('Unsupported system: {}'.format(distribution))
+            elif distribution in rpm_based_distro:
+                db_dir = '/usr/share/misc'
+                lib_dir = '/usr/lib64'
 
-                lib_dll = path.join(lib_dir, 'libmagic.so')
+            else:
+                raise Exception('Unsupported system: {}'.format(distribution))
 
-            elif mainstream_system == 'freebsd':
-                if path.isdir('/usr/local/'):
-                    lib_dir = '/usr/local'
-                else:
-                    lib_dir = '/usr'
+            dll_loc = path.join(lib_dir, 'libmagic.so')
 
-                lib_dll = path.join(lib_dir, 'lib/libmagic.so')
-                data_dir = path.join(lib_dir,'share/file')
-        else:
-            lib_dir = path.dirname(lib_dll)
+        elif mainstream_system == 'freebsd':
+            if path.isdir('/usr/local/'):
+                lib_dir = '/usr/local'
+            else:
+                lib_dir = '/usr'
 
-        file_magic_data = environ.get('TYPECODE_LIBMAGIC_DB_PATH')
-        if not file_magic_data:
-            file_magic_data = path.join(data_dir, 'magic.mgc')
+            dll_loc = path.join(lib_dir, 'lib/libmagic.so')
+            db_dir = path.join(lib_dir,'share/file')
+
+        magicdb_loc = path.join(db_dir, 'magic.mgc')
 
         locations = {
+            # typecode.libmagic.libdir is not used anymore and deprecated
+            # but we are keeping it around for now for backward compatibility
             'typecode.libmagic.libdir': lib_dir,
-            'typecode.libmagic.dll': lib_dll,
-            'typecode.libmagic.db': file_magic_data,
+            'typecode.libmagic.dll': dll_loc,
+            'typecode.libmagic.db': magicdb_loc,
             }
         return locations
