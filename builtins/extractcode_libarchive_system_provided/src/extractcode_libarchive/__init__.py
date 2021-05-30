@@ -49,7 +49,6 @@ class LibarchivePaths(LocationProviderPlugin):
             lib_dir = path.dirname(lib_archive)
 
         locations = {
-            'extractcode.libarchive.libdir': lib_dir,
             'extractcode.libarchive.dll': lib_archive,
         }
         return locations

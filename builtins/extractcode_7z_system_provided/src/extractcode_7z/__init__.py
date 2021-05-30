@@ -23,6 +23,7 @@ class SevenzipPaths(LocationProviderPlugin):
         locations of the 7zip exe and shared libraries as installed on various
         Linux distros or on FreeBSD.
         """
+        lib_dir = None
         lib_7z = environ.get('EXTRACTCODE_7Z_PATH')
         if not lib_7z:
             mainstream_system = platform.system().lower()
@@ -46,6 +47,8 @@ class SevenzipPaths(LocationProviderPlugin):
             lib_dir = path.dirname(lib_7z)
 
         locations = {
+            # extractcode.sevenzip.libdir is not used anymore and deprecated
+            # but we are keeping it around for now for backward compatibility
             'extractcode.sevenzip.libdir': lib_dir,
             'extractcode.sevenzip.exe': lib_7z,
         }

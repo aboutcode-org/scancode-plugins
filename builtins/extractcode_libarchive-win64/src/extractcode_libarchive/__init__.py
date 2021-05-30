@@ -20,6 +20,8 @@ class LibarchivePaths(LocationProviderPlugin):
         curr_dir = dirname(abspath(__file__))
         lib_dir = join(curr_dir, 'lib')
         locations = {
+            # extractcode.libarchive.libdir is not used anymore and deprecated
+            # but we are keeping it around for now for backward compatibility
             'extractcode.libarchive.libdir': lib_dir,
             'extractcode.libarchive.dll': join(lib_dir, 'libarchive-13.dll'),
         }

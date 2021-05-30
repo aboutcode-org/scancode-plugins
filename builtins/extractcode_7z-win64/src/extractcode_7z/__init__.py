@@ -20,6 +20,8 @@ class SevenzipPaths(LocationProviderPlugin):
         curr_dir = dirname(abspath(__file__))
         lib_dir = join(curr_dir, 'bin')
         locations = {
+            # extractcode.sevenzip.libdir is not used anymore and deprecated
+            # but we are keeping it around for now for backward compatibility
             'extractcode.sevenzip.libdir': lib_dir,
             'extractcode.sevenzip.exe': join(lib_dir, '7z.exe'),
         }
