@@ -35,7 +35,7 @@ class BuildNative(distutils_build):
 
 
 setup(
-    name="packagedb-msitools",
+    name="packagedcode-msitools",
     version="0.101",
     license="lgpl-2.1-plus",
     description=desc,
@@ -62,7 +62,7 @@ setup(
     ],
     entry_points={
         "scancode_location_provider": [
-            "packagedb_msitools=packagedb_msitools:MsitoolsPaths",
+            "packagedcode_msitools=packagedcode_msitools:MsitoolsPaths",
         ],
     },
     cmdclass={"build": BuildNative}
