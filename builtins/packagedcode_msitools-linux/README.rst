@@ -1,6 +1,7 @@
 A ScanCode Toolkit plugin to provide pre-built binary libraries and utilities
 and their locations. This is for the executable binaries from msitools, which is
-built from source.
+built from source. Only msiinfo is packaged and exposed in this LocationProvider
+plugin.
 
 
 This is built on Debian/Ubuntu in a Python virtualenv with these dependencies::

@@ -24,8 +24,8 @@ cd $base_name/
 echo Build msitools
 meson build
 ninja -C build
-strip build/tools/msibuild build/tools/msiextract build/tools/msiinfo
-cp build/tools/msibuild build/tools/msidiff build/tools/msidump build/tools/msiextract build/tools/msiinfo ../../src/packagedcode_msitools/bin/
+strip build/tools/msiinfo
+cp build/tools/msiinfo ../../src/packagedcode_msitools/bin/
 cd ..
 echo Done building msitools
 

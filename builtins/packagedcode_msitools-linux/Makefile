@@ -14,6 +14,6 @@ build:
 	rm -f src/packagedcode_msitools/bin/msi*
 	python setup.py clean --all sdist
 	rm -f src/packagedcode_msitools/bin/msi*
-	GOOS=linux GOARCH=amd64 python setup.py clean --all bdist_wheel --python-tag py3 --plat-name manylinux1_x86_64
+	python setup.py clean --all bdist_wheel --python-tag py3 --plat-name manylinux1_x86_64
 
 .PHONY: clean build

@@ -20,10 +20,6 @@ class MsitoolsPaths(LocationProviderPlugin):
         curr_dir = dirname(abspath(__file__))
         bin_dir = join(curr_dir, 'bin')
         locations = {
-            'packagedcode_msitools.msibuild': join(bin_dir, 'msibuild'),
-            'packagedcode_msitools.msidiff': join(bin_dir, 'msidiff'),
-            'packagedcode_msitools.msidump': join(bin_dir, 'msidump'),
-            'packagedcode_msitools.msiextract': join(bin_dir, 'msiextract'),
             'packagedcode_msitools.msiinfo': join(bin_dir, 'msiinfo'),
         }
         return locations

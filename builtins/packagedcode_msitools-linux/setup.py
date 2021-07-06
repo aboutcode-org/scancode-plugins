@@ -36,8 +36,8 @@ class BuildNative(distutils_build):
 
 setup(
     name="packagedcode-msitools",
-    version="0.101",
-    license="lgpl-2.1-plus",
+    version="0.101.210706",
+    license="apache-2.0 AND lgpl-2.1-plus AND gpl-2.0-plus AND mit",
     description=desc,
     long_description=desc,
     author="nexB",
