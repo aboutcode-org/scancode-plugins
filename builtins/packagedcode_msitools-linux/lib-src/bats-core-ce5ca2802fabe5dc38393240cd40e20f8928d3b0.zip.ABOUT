@@ -1,0 +1,9 @@
+about_resource: bats-core-ce5ca2802fabe5dc38393240cd40e20f8928d3b0.zip
+version: ce5ca2802fabe5dc38393240cd40e20f8928d3b0
+homepage_url: https://gitlab.gnome.org/GNOME/msitools
+name: bats-core
+owner: bats-core organization
+download_url: https://github.com/bats-core/bats-core/archive/ce5ca2802fabe5dc38393240cd40e20f8928d3b0.zip
+copyright: Copyright (c) bats-core organization
+license_expression: mit
+notes: A git submodule of bats-core ce5ca2802fabe5dc38393240cd40e20f8928d3b0 is used in msitools v 0.101

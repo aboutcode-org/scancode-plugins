@@ -1,0 +1,8 @@
+about_resource: msitools-0.101.tar.gz
+version: 0.101
+homepage_url: https://gitlab.gnome.org/GNOME/msitools
+name: msitools
+owner: GNOME Project
+download_url: https://gitlab.gnome.org/GNOME/msitools/-/archive/v0.101/msitools-v0.101.tar.gz
+copyright: Copyright (c) GNOME Project
+license_expression: lgpl-2.1-plus AND gpl-2.0-plus
