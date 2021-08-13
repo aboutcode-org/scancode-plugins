@@ -22,14 +22,10 @@
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
 
-
 """
 A set of functions and objects to extract information from binary Elf files
 DWARF debug data.
 """
-
-from __future__ import absolute_import
-from __future__ import print_function
 
 import posixpath
 import re
@@ -38,10 +34,8 @@ from commoncode import command
 from plugincode.location_provider import get_location
 from typecode import contenttype
 
-
 SCANCODE_DWARFDUMP_EXE = 'scancode.dwarfdump.exe'
 SCANCODE_DWARFDUMP_LIB = 'scancode.dwarfdump.lib'
-
 
 
 ################################################################
@@ -50,17 +44,22 @@ SCANCODE_DWARFDUMP_LIB = 'scancode.dwarfdump.lib'
 def EMPTY_LINE_RE():
     return re.compile('^\s*$')
 
+
 def DCOMP_UNIT_START_RE():
-    return re.compile('^COMPILE_UNIT<header overall offset =.*$')
+    return re.compile(r'^COMPILE_UNIT<header overall offset =.*$')
+
 
 def DCMPDIR_RE():
     return re.compile(r'^DW_AT_comp_dir\s*(.*)$')
 
+
 def DCMPDIR_FILE_RE():
     return re.compile(r'^DW_AT_name\s*(.*)$')
 
+
 def DLOCAL_SYMBOLS_RE():
     return re.compile(r'^LOCAL_SYMBOLS:$')
+
 
 def DWARF_FILES_RE():
     return re.compile(r'^DW_AT_(?:decl|call)_file\s*\d*\s*(.*)$')
@@ -75,7 +74,7 @@ class Dwarf(object):
     def __init__(self, location):
 
         self.cmd_loc = get_location(SCANCODE_DWARFDUMP_EXE)
-        
+
         self.lib_loc = get_location(SCANCODE_DWARFDUMP_LIB)
 
         # The elf location
@@ -93,15 +92,13 @@ class Dwarf(object):
         self.included_source_files = []
 
         self._files = []
-        
+
         self.parse_errors = []
 
         # now parse thyself
         self._parseinfo()
         # and cleanup thyself
         self.cleanup()
-        
-        
 
     def _parseinfo(self):
         """
@@ -120,10 +117,10 @@ class Dwarf(object):
                 if 'bin/dwarfdump2' in error:
                     self.parse_errors.append(error[error.index('bin/dwarfdump2'):])
                 else:
-                     self.parse_errors.append(error)
+                    self.parse_errors.append(error)
 
         # loop through each returned line passing control to a handler
-        with open(out, 'rb') as lines:
+        with open(out) as lines:
             for line in lines:
                 line = line.strip()
                 if DCOMP_UNIT_START_RE().match(line):
@@ -231,6 +228,7 @@ class DwarfInfo(object):
     <3>< 1449>      DW_TAG_formal_parameter
                     DW_AT_abstract_origin       <1147>
     """
+
     def __init__(self):
         self.dwarfdump_option = "-l"
         self.start_re = DCOMP_UNIT_START_RE()
