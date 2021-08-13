@@ -34,8 +34,8 @@ import attr
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-from scancode import CommandLineOption
-from scancode import SCAN_GROUP
+from commoncode.cliutils import PluggableCommandLineOption
+from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 
@@ -49,7 +49,7 @@ class MakeDependScanner(ScanPlugin):
     )
 
     options = [
-        CommandLineOption(('--makedepend',),
+        PluggableCommandLineOption(('--makedepend',),
                           is_flag=True, default=False,
                           help='Parse generated make depend files to find sources corresponding binaries.',
                           help_group=SCAN_GROUP,
