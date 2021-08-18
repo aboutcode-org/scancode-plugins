@@ -36,8 +36,7 @@ def next_line(file_desc):
         return None
 
 
-def EMPTY_LINE_RE():
-    return re.compile("^\s*$")
+EMPTY_LINE_RE = re.compile("^\s*$")
 
 #################################################
 # READELF PARSING
@@ -127,18 +126,18 @@ class Elf(object):
 # - a start_re that matches a start lines that it can parse onward
 # - a parse method that accept an elf object, a file like object and the lastline processed
 ###################################
-def DYNAMIC_START_RE():
-    return re.compile("^Dynamic section at offset")
+DYNAMIC_START_RE = re.compile("^Dynamic section at offset")
 
 
 # 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
 # 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
-def DYNAMIC_NEEDED_RE():
-    return re.compile(r'^.*'
-                      r'\(NEEDED\)'
-                      r'\s*'
-                      r'Shared library:\s*'
-                      r'\[(.*)\]')
+DYNAMIC_NEEDED_RE = re.compile(
+    r'^.*'
+    r'\(NEEDED\)'
+    r'\s*'
+    r'Shared library:\s*'
+    r'\[(.*)\]'
+)
 
 
 class ElfDynamicSection(object):
@@ -172,8 +171,8 @@ class ElfDynamicSection(object):
 
     def __init__(self):
         self.readelf_option = '--dynamic'
-        self.start_re = DYNAMIC_START_RE()
-        self.end_re = EMPTY_LINE_RE()
+        self.start_re = DYNAMIC_START_RE
+        self.end_re = EMPTY_LINE_RE
         self.needed_libs = set()
 
     def parse(self, elf, file_like):
@@ -182,7 +181,7 @@ class ElfDynamicSection(object):
             if not line or re.match(self.end_re, line):
                 break
             line = line.strip()
-            match = DYNAMIC_NEEDED_RE().match(line)
+            match = DYNAMIC_NEEDED_RE.match(line)
             if match:
                 name = match.groups()[0]
                 self.needed_libs.add(name)
@@ -204,7 +203,7 @@ def demangle(symbols, max_symbols=50):
     demangled = set()
     symbols = list(symbols)
     chunks = (symbols[i:i + max_symbols]
-              for i in xrange(0, len(symbols), max_symbols))
+              for i in range(0, len(symbols), max_symbols))
     for chunk in chunks:
         demang = set(demangle_chunk(chunk))
         demangled.update(demang)
@@ -219,16 +218,17 @@ def demangle_chunk(symbols):
     if not symbols:
         return []
 
-    cppfilt_command = 'c++filt'
-
     args = ['--no-strip-underscores',
             '--no-verbose',
             '--no-params'] + symbols
 
     cmd_loc = get_location(SCANCODE_CPLUSPLUSFILT_EXE)
     lib_loc = get_location(SCANCODE_CPLUSPLUSFILT_LIB)
-    rc, out, err = command.execute2(cmd_loc, args,
-                                    lib_dir=lib_loc, to_files=True)
+    rc, out, err = command.execute(
+        cmd_loc, args,
+        lib_dir=lib_loc, 
+        to_files=True,
+    )
     if rc != 0:
         raise Exception(open(err).read())
 

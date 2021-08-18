@@ -21,6 +21,7 @@ from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
 from elf.elf import Elf
+from elf import elfng
 
 
 @scan_impl
@@ -44,7 +45,15 @@ class ELFScanner(ScanPlugin):
         return elf
 
     def get_scanner(self, **kwargs):
-        return get_elf_needed_library
+        return get_elf_needed_library_ng
+
+
+def get_elf_needed_library_ng(location, **kwargs):
+    """
+    Return a list of needed_libraries
+    """
+    results = [enl for enl in  elfng.get_elf_needed_library(location)]
+    return dict(elf_needed_library=results)
 
 
 def get_elf_needed_library(location, **kwargs):
@@ -55,7 +64,7 @@ def get_elf_needed_library(location, **kwargs):
     T = contenttype.get_type(location)
     if not T.is_elf:
         return
-    elfie = elf.Elf(location)
+    elfie = Elf(location)
     results = []
     for needed_library in  elfie.needed_libraries:
         results.append(needed_library)

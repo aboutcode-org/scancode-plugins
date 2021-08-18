@@ -25,6 +25,6 @@ class TestScanPluginELFScan(FileBasedTesting):
         result_file = self.get_temp_file('json')
         args = ['--elf', test_dir, '--json', result_file]
         run_scan_click(args)
-        test_loc = self.get_test_loc('elf/expected.json')
+        test_loc = self.get_test_loc('elf_needed_library-expected.json')
         check_json_scan(test_loc, result_file, regen=False)
 
