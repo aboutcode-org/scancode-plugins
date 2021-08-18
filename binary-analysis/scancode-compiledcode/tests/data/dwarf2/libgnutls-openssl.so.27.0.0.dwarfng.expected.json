@@ -1,0 +1,12 @@
+[
+  "/tmp/buildd/gnutls26-2.12.20/libextra/gnutls_openssl.c",
+  "/tmp/buildd/gnutls26-2.12.20/libextra/openssl_compat.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/c-ctype.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/fd-hook.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/read-file.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/sockets.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/asnprintf.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/printf-args.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/printf-parse.c",
+  "/tmp/buildd/gnutls26-2.12.20/lib/gl/vasnprintf.c"
+]
