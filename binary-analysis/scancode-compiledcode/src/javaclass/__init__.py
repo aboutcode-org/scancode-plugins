@@ -1,29 +1,12 @@
+# -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 nexB Inc. and others. All rights reserved.
-# http://nexb.com and https://github.com/nexB/scancode-toolkit/
-# The ScanCode software is licensed under the Apache License version 2.0.
-# Data generated with ScanCode require an acknowledgment.
+# Copyright (c) nexB Inc. and others. All rights reserved.
 # ScanCode is a trademark of nexB Inc.
+# SPDX-License-Identifier: Apache-2.0
+# See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
+# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://aboutcode.org for more information about nexB OSS projects.
 #
-# You may not use this software except in compliance with the License.
-# You may obtain a copy of the License at: http://apache.org/licenses/LICENSE-2.0
-# Unless required by applicable law or agreed to in writing, software distributed
-# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-# CONDITIONS OF ANY KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations under the License.
-#
-# When you publish or redistribute any data created with ScanCode or any ScanCode
-# derivative work, you must accompany this data with the following acknowledgment:
-#
-#  Generated with ScanCode and provided on an "AS IS" BASIS, WITHOUT WARRANTIES
-#  OR CONDITIONS OF ANY KIND, either express or implied. No content created from
-#  ScanCode should be considered or used as legal advice. Consult an Attorney
-#  for any legal advice.
-#  ScanCode is a free software code scanning tool from nexB Inc. and others.
-#  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
-
-from __future__ import absolute_import
-from __future__ import unicode_literals
 
 from io import StringIO
 
@@ -34,19 +17,15 @@ import os
 import sys
 
 import attr
-
 from commoncode.cliutils import PluggableCommandLineOption as CommandLineOption
 from commoncode.cliutils import SCAN_GROUP
 from commoncode import fileutils
 from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
-
 from typecode import contenttype
 
-from sourcecode import kernel
-
 from javaclass import javaclass
-from javaclass.javaclass import *
+from sourcecode import kernel
 
 
 @scan_impl
@@ -87,7 +66,7 @@ def scan_javaclass(location, **kwargs):
     f = StringIO(data)
     c = javaclass.Class(f)
 
-    javaclass_data['Version'] = 'Version: %i.%i (%s)' % (c.version[1], c.version[0], getJavacVersion(c.version))
+    javaclass_data['Version'] = 'Version: %i.%i (%s)' % (c.version[1], c.version[0], javaclass.getJavacVersion(c.version))
 
     if SHOW_CONSTS:
         javaclass_data['Constants Pool'] = str(len(c.constants))
@@ -101,40 +80,40 @@ def scan_javaclass(location, **kwargs):
             if not const: continue
 
             constant_data = dict()
-            if const[0] == CONSTANT_Fieldref:
+            if const[0] == javaclass.CONSTANT_Fieldref:
                 constant_data['Field'] = str(c.constants[const[1]][1])
 
-            elif const[0] == CONSTANT_Methodref:
+            elif const[0] == javaclass.CONSTANT_Methodref:
                 constant_data['Method'] = str(c.constants[const[1]][1])
 
-            elif const[0] == CONSTANT_InterfaceMethodref:
+            elif const[0] == javaclass.CONSTANT_InterfaceMethodref:
                 constant_data['InterfaceMethod'] = str(c.constants[const[1]][1])
 
-            elif const[0] == CONSTANT_String:
+            elif const[0] == javaclass.CONSTANT_String:
                 constant_data['String'] = str(const[1])
 
-            elif const[0] == CONSTANT_Float:
+            elif const[0] == javaclass.CONSTANT_Float:
                 constant_data['Float'] = str(const[1])
 
-            elif const[0] == CONSTANT_Integer:
+            elif const[0] == javaclass.CONSTANT_Integer:
                 constant_data['Integer'] = str(const[1])
 
-            elif const[0] == CONSTANT_Double:
+            elif const[0] == javaclass.CONSTANT_Double:
                 constant_data['Double'] = str(const[1])
 
-            elif const[0] == CONSTANT_Long:
+            elif const[0] == javaclass.CONSTANT_Long:
                 constant_data['Long'] = str(const[1])
 
             # elif const[0] == CONSTANT_NameAndType:
             #   print 'NameAndType\t\t FIXME!!!'
 
-            elif const[0] == CONSTANT_Utf8:
+            elif const[0] == javaclass.CONSTANT_Utf8:
                 constant_data['Utf8'] = str(const[1])
 
-            elif const[0] == CONSTANT_Class:
+            elif const[0] == javaclass.CONSTANT_Class:
                 constant_data['Class'] = str(c.constants[const[1]][1])
 
-            elif const[0] == CONSTANT_NameAndType:
+            elif const[0] == javaclass.CONSTANT_NameAndType:
                 constant_data['NameAndType'] = str(const[1]) + ', ' + str(const[2])
             else:
                 constant_data['Unknown(' + str(const[0]) + ')'] = str(const[1])
@@ -144,15 +123,15 @@ def scan_javaclass(location, **kwargs):
         javaclass_data['Constants'] = constants
 
     access = []
-    if c.access & ACC_INTERFACE:
+    if c.access & javaclass.ACC_INTERFACE:
         access.append('Interface ')
-    if c.access & ACC_SUPER_OR_SYNCHRONIZED:
+    if c.access & javaclass.ACC_SUPER_OR_SYNCHRONIZED:
         access.append('Superclass ')
-    if c.access & ACC_FINAL:
+    if c.access & javaclass.ACC_FINAL:
         access.append('Final ')
-    if c.access & ACC_PUBLIC:
+    if c.access & javaclass.ACC_PUBLIC:
         access.append('Public ')
-    if c.access & ACC_ABSTRACT:
+    if c.access & javaclass.ACC_ABSTRACT:
         access.append('Abstract ')
     if access:
         javaclass_data['Access'] = ', '.join(access)
