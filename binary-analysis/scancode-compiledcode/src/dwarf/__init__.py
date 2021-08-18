@@ -24,6 +24,7 @@ from typecode import contenttype
 
 from dwarf import dwarf
 from dwarf import dwarf2
+from dwarf import dwarfng
 
 
 @scan_impl
@@ -32,7 +33,8 @@ class DwarfScanner(ScanPlugin):
     Scan a dwarf infos for URLs.
     """
     resource_attributes = dict(
-        dwarf_source_path=attr.ib(default=attr.Factory(list), repr=False))
+        dwarf_source_path=attr.ib(default=attr.Factory(list), repr=False)
+    )
 
     options = [
         PluggableCommandLineOption(('--dwarf',),
@@ -40,7 +42,8 @@ class DwarfScanner(ScanPlugin):
             help='Collect source code path from compilation units found in '
                  'ELF DWARFs.',
             help_group=SCAN_GROUP,
-            sort_order=100),
+            sort_order=100
+        ),
     ]
 
     def is_enabled(self, dwarf, **kwargs):
@@ -55,7 +58,36 @@ def get_dwarfs(location, **kwargs):
     Return a mapping with original_source_files and included_source_files or None.
     """
     return dict(
-        dwarf_source_path=list(dwarf_source_path(location)))
+        dwarf_source_path=list(dwarf_source_path(location))
+        # dwarf_source_path=list(dwarf_source_path_ng(location))
+    )
+
+
+def dwarf_source_path_ng(location, **kwargs):
+    """
+    Collect unique paths to compiled source code found in Elf binaries DWARF
+    sections for D2D.
+    """
+    seen_paths = set()
+    path_file_names = set()
+    bare_file_names = set()
+    for dpath in dwarfng.get_compilation_units_fullpath(location):
+        if dpath in seen_paths:
+            continue
+        fn = fileutils.file_name(dpath)
+        if fn == dpath:
+            bare_file_names.add(fn)
+            continue
+        else:
+            path_file_names.add(fn)
+        seen_paths.add(dpath)
+        yield dpath
+
+    # only yield filename that do not exist as full paths
+    for bfn in sorted(bare_file_names):
+        if bfn not in path_file_names and bfn not in seen_paths:
+            yield bfn
+            seen_paths.add(bfn)
 
 
 def dwarf_source_path(location):
