@@ -18,6 +18,7 @@ import re
 from collections import namedtuple
 
 from commoncode import command
+from commoncode.text import toascii
 from plugincode.location_provider import get_location
 from typecode import contenttype
 
@@ -25,13 +26,12 @@ SCANCODE_BINUTILS_NM_EXE = 'scancode.nm.exe'
 
 logger = logging.getLogger(__name__)
 
-
 ################################################################
 # NM PARSING
 ################################################################
 # 0804871c<space>T<space>_init<tab>/usr/src//glibc-2.6.1/cc-nptl/csu/crti.S:15
-def LINE_WITH_SOURCE_PATH():
-    return re.compile(
+
+LINE_WITH_SOURCE_PATH = re.compile(
     r'^'
     # the line starts with 8 or 16 hex chars
     r'([0-9a-fA-F]{8}|[0-9a-fA-F]{16})'
@@ -47,11 +47,10 @@ def LINE_WITH_SOURCE_PATH():
     r'(?P<path>.*)'
     r':'
     r'(?P<linenum>\d*)'
-    r'$').match
+    r'$'
+).match
 
-
-def POSSIBLE_SOURCE_PATH():
-    return re.compile(
+POSSIBLE_SOURCE_PATH = re.compile(
     r'^'
     # the line starts with 8 or 16 hex chars
     r'([0-9a-fA-F]{8}|[0-9a-fA-F]{16})'
@@ -61,7 +60,8 @@ def POSSIBLE_SOURCE_PATH():
     r'\s'
     # symbol name which is a path possibly
     r'(?P<path>.*\.(c|cc|cpp|cxx|h|hh|hpp|hxx|i|m|y|s)?)'
-    r'$', re.IGNORECASE).match
+    r'$', re.IGNORECASE
+).match
 
 
 def call_nm(elffile):
@@ -72,9 +72,11 @@ def call_nm(elffile):
     logger.debug('Executing nm command on %(elffile)r' % locals())
 
     nm_command = get_location(SCANCODE_BINUTILS_NM_EXE)
-    return command.execute2(
+    return command.execute(
         cmd_loc=nm_command,
-        args=['-al', elffile], to_files=True)
+        args=['-al', elffile],
+        to_files=True,
+    )
 
 
 Entry = namedtuple('Entry', ['type', 'symbol', 'path', 'linenum'])
@@ -88,13 +90,14 @@ def parse(location):
     seen = set()
 
     # We loop through each line passing control to a handler as needed
-    with open(location, 'r') as lines:
+    with open(location, 'rb') as lines:
         for line in lines:
             line = line.strip()
+            line = toascii(line)
             if not line:
                 continue
 
-            withpath = LINE_WITH_SOURCE_PATH()(line)
+            withpath = LINE_WITH_SOURCE_PATH(line)
             if withpath:
                 logger.debug('Processing path line     : %(line)r' % locals())
                 symbol_type = withpath.group('type')
@@ -107,7 +110,7 @@ def parse(location):
                     seen.add(entry)
                 continue
 
-            possible_path = POSSIBLE_SOURCE_PATH()(line)
+            possible_path = POSSIBLE_SOURCE_PATH(line)
             if possible_path:
                 logger.debug('Processing path-like line: %(line)r' % locals())
                 symbol_type = possible_path.group('type')
