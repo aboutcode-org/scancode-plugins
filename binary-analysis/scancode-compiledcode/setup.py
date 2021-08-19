@@ -49,6 +49,9 @@ setup(
             'scancode-ctags',
             'scancode-dwarfdump',
             'scancode-readelf',
+        ],
+        'testing': [
+            'pytest',
         ]
     },
     entry_points={
