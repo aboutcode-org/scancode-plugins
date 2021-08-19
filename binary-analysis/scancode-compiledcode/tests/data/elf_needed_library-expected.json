@@ -11,7 +11,7 @@
       "message": null,
       "errors": [],
       "extra_data": {
-        "files_count": 8
+        "files_count": 7
       }
     }
   ],
@@ -24,12 +24,6 @@
     },
     {
       "path": "elf/corrupt.o",
-      "type": "file",
-      "elf_needed_library": [],
-      "scan_errors": []
-    },
-    {
-      "path": "elf/expected.json",
       "type": "file",
       "elf_needed_library": [],
       "scan_errors": []

@@ -33,60 +33,60 @@
       "type": "file",
       "gwt": [
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "33",
-          "memberName": "",
           "jsName": "GXT",
+          "jsniIdent": "",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": ""
+          "memberName": "",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "33"
         },
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "33",
-          "memberName": "$clinit",
           "jsName": "qc",
+          "jsniIdent": "com.extjs.gxt.ui.client.GXT::$clinit()V",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": "com.extjs.gxt.ui.client.GXT::$clinit()V"
+          "memberName": "$clinit",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "33"
         },
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "39",
-          "memberName": "BLANK_IMAGE_URL",
           "jsName": "Nb",
+          "jsniIdent": "com.extjs.gxt.ui.client.GXT::BLANK_IMAGE_URL",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": "com.extjs.gxt.ui.client.GXT::BLANK_IMAGE_URL"
+          "memberName": "BLANK_IMAGE_URL",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "39"
         },
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "44",
-          "memberName": "IMAGES",
           "jsName": "Ob",
+          "jsniIdent": "com.extjs.gxt.ui.client.GXT::IMAGES",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": "com.extjs.gxt.ui.client.GXT::IMAGES"
+          "memberName": "IMAGES",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "44"
         },
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "180",
-          "memberName": "SSL_SECURE_URL",
           "jsName": "Pb",
+          "jsniIdent": "com.extjs.gxt.ui.client.GXT::SSL_SECURE_URL",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": "com.extjs.gxt.ui.client.GXT::SSL_SECURE_URL"
+          "memberName": "SSL_SECURE_URL",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "180"
         },
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "186",
-          "memberName": "ariaEnabled",
           "jsName": "Qb",
+          "jsniIdent": "com.extjs.gxt.ui.client.GXT::ariaEnabled",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": "com.extjs.gxt.ui.client.GXT::ariaEnabled"
+          "memberName": "ariaEnabled",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "186"
         },
         {
-          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
-          "sourceLine": "187",
-          "memberName": "defaultTheme",
           "jsName": "Rb",
+          "jsniIdent": "com.extjs.gxt.ui.client.GXT::defaultTheme",
           "className": "com.extjs.gxt.ui.client.GXT",
-          "jsniIdent": "com.extjs.gxt.ui.client.GXT::defaultTheme"
+          "memberName": "defaultTheme",
+          "clean_path": "/Views/zoro/lib/lib/gxt/gxt-2.2.6-gwt22.jar!/com/extjs/gxt/ui/client/GXT.java",
+          "sourceLine": "187"
         }
       ],
       "scan_errors": []
