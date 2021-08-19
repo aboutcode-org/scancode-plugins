@@ -1,5 +1,14 @@
 [
-  "/usr/src/packages/BUILD/glibc-2.6.1/csu/init.c",
-  "/usr/src/packages/BUILD/glibc-2.6.1/cc-nptl/csu/crti.S",
-  "/usr/src/packages/BUILD/glibc-2.6.1/cc-nptl/csu/crtn.S"
+  [
+    "primary",
+    "/usr/src/packages/BUILD/glibc-2.6.1/csu/init.c"
+  ],
+  [
+    "primary",
+    "/usr/src/packages/BUILD/glibc-2.6.1/cc-nptl/csu/crti.S"
+  ],
+  [
+    "primary",
+    "/usr/src/packages/BUILD/glibc-2.6.1/cc-nptl/csu/crtn.S"
+  ]
 ]

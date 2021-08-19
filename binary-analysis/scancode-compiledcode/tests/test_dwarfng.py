@@ -28,7 +28,7 @@ class TestDwarfNg(FileBasedTesting):
         test_loc = self.get_test_loc(test_file)
         emsg1 = 'File format is ambiguous'
         try:
-            list(dwarfng.get_compilation_units_fullpath(test_loc))
+            list(dwarfng.get_dwarf_cu_and_die_paths(test_loc))
         except Exception as e:
             assert emsg1 in str(e)
 
@@ -40,7 +40,7 @@ class TestDwarfNg(FileBasedTesting):
         test_loc = self.get_test_loc(test_file)
         emsg1 = 'File format is ambiguous'
         try:
-            list(dwarfng.get_compilation_units_fullpath(test_loc))
+            list(dwarfng.get_dwarf_cu_and_die_paths(test_loc))
         except Exception as e:
             assert emsg1 in str(e)
 
@@ -52,7 +52,7 @@ class TestDwarfNg(FileBasedTesting):
         test_loc = self.get_test_loc(test_file)
         emsg1 = 'File format is ambiguous'
         try:
-            list(dwarfng.get_compilation_units_fullpath(test_loc))
+            list(dwarfng.get_dwarf_cu_and_die_paths(test_loc))
         except Exception as e:
             assert emsg1 in str(e)
 
@@ -64,24 +64,24 @@ class TestDwarfNg(FileBasedTesting):
         test_loc = self.get_test_loc(test_file)
         emsg1 = 'File format is ambiguous'
         try:
-            list(dwarfng.get_compilation_units_fullpath(test_loc))
+            list(dwarfng.get_dwarf_cu_and_die_paths(test_loc))
         except Exception as e:
             assert emsg1 in str(e)
 
     def check_dwarfng(self, test_file, expected_file, regen=False):
         test_loc = self.get_test_loc(test_file)
-        result = list(dwarfng.get_compilation_units_fullpath(test_loc))
+        result = [list(r) for r in dwarfng.get_dwarf_cu_and_die_paths(test_loc)]
 
         expected_loc = self.get_test_loc(expected_file, must_exist=False)
 
-        if True:
+        if regen:
             with open(expected_loc, 'w') as exc:
                 json.dump(result, exc, indent=2)
 
         with open(expected_loc) as exc:
             expected = json.load(exc)
 
-        assert sorted(expected) == sorted(result)
+        assert result == expected
 
     def test_dwarfng_corrupted_malformed_stringtable(self):
         test_file = 'elf-corrupted/malformed_stringtable'
@@ -90,7 +90,7 @@ class TestDwarfNg(FileBasedTesting):
 
     def test_dwarfng_empty_on_non_existing_file(self):
         test_file = 'dwarf/32.fsize.chgg_DOES_NOT_EXIST'
-        assert list(dwarfng.get_compilation_units_fullpath(test_file)) == []
+        assert list(dwarfng.get_dwarf_cu_and_die_paths(test_file)) == []
 
     def test_dwarfng_misc_elfs_null_elf(self):
         self.check_dwarfng('misc_elfs/null_elf', 'misc_elfs/null_elf.dwarfng.expected.json')
@@ -100,7 +100,6 @@ class TestDwarfNg(FileBasedTesting):
 
     def test_dwarfng_misc_elfs_mips64_exec(self):
         self.check_dwarfng('misc_elfs/mips64_exec', 'misc_elfs/mips64_exec.dwarfng.expected.json')
-
 
     def test_dwarfng_corrupted_corrupt_o(self):
         self.check_dwarfng('elf-corrupted/corrupt.o', 'elf-corrupted/corrupt.o.dwarfng.expected.json')
