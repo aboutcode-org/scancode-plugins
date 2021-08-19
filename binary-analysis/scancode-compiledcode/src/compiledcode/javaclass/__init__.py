@@ -8,13 +8,12 @@
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
-from io import StringIO
-
-from functools import partial
-from itertools import chain
-from struct import unpack
 import os
 import sys
+from functools import partial
+from io import BytesIO
+from itertools import chain
+from struct import unpack
 
 import attr
 from commoncode.cliutils import PluggableCommandLineOption as CommandLineOption
@@ -25,7 +24,6 @@ from plugincode.scan import scan_impl
 from typecode import contenttype
 
 from compiledcode.javaclass import javaclass
-from compiledcode.sourcecode import kernel
 
 
 @scan_impl
@@ -62,11 +60,12 @@ def scan_javaclass(location, **kwargs):
 
     javaclass_data = dict()
     SHOW_CONSTS = 1
-    data = open(location, 'rb').read()
-    f = StringIO(data)
+    with open(location, 'rb') as data:
+        f = BytesIO(data.read())
     c = javaclass.Class(f)
 
-    javaclass_data['Version'] = 'Version: %i.%i (%s)' % (c.version[1], c.version[0], javaclass.getJavacVersion(c.version))
+    javaclass_data['Version'] = 'Version: %i.%i (%s)' % (
+        c.version[1], c.version[0], javaclass.getJavacVersion(c.version))
 
     if SHOW_CONSTS:
         javaclass_data['Constants Pool'] = str(len(c.constants))

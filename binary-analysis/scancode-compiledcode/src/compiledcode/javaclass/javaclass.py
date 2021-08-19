@@ -1,8 +1,8 @@
 
-import sys
 import os
+import sys
 from struct import unpack
-from io import StringIO
+from io import BytesIO
 
 """
 A python lib for parsing Java class files, suitable for static
@@ -98,6 +98,11 @@ def _canonicalize(name, package=''):
     """
     If name is in package, will strip package component.
     """
+    if not isinstance(name, str):
+        name = name.decode('utf-8')
+    if not isinstance(package, str):
+        package = package.decode('utf-8')
+
     name = name.replace('/', '.')
     if name.startswith('java.lang.'):
         return name[len('java.lang.'):]
@@ -222,11 +227,15 @@ def _fmtType(desc, pkg=''):
         # class
         pass
 
+    if not isinstance(desc, str):
+        desc = desc.decode('utf-8')
+
     if desc.startswith('L'):
         name = desc[1:]
         name = name[:-1]  # strip ;
         name = _canonicalize(name, pkg)
         return '%s%s' % (name, array)
+
     else:
         raise Exception('UNKNOWN TYPE: ' + desc)
 
@@ -283,7 +292,7 @@ class Field:
         self.name = name
         self.desc = desc
         self.attrs = attrs
-        if attrs.has_key('ConstantValue'):
+        if 'ConstantValue' in attrs:
             self.value = attrs['ConstantValue']
         else:
             self.value = None
@@ -386,9 +395,10 @@ class Class:
 
         [self.access] = unpack('>H', f.read(2))
         [className] = unpack('>H', f.read(2))
-        self.name = self.constants[self.constants[className][1]][1]
+        self.name = self.constants[self.constants[className][1]][1].decode('utf-8', errors='ignore')
+
         self.package = os.path.dirname(self.name).replace('/', '.')
-        # print(self.version)
+
         [className] = unpack('>H', f.read(2))
 
         # added as part of #711: java.lang.Object is an exceptional case
@@ -511,10 +521,9 @@ def dumpClass(path):
     Print out information about a class.
     """
     SHOW_CONSTS = 1
-    data = open(path, 'rb').read()
-    f = StringIO(data)
+    with open(path, 'rb') as data:
+        f = BytesIO(data.read())
     c = Class(f)
-    # print(file name)
     print('Version: %i.%i (%s)' % (c.version[1], c.version[0], getJavacVersion(c.version),))
 
     if SHOW_CONSTS:
