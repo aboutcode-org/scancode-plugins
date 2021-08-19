@@ -12,7 +12,7 @@ from setuptools import setup
 desc = '''A ScanCode scan plugin to get lkmclue, dwarf, gwt, cpp includes, code/comments lines generated code and elf info.'''
 
 setup(
-    name='scancode-compiledcode',
+    name='compiledcode',
     version='2.0.0',
     license='Apache-2.0',
     description=desc,
@@ -53,14 +53,14 @@ setup(
     },
     entry_points={
         'scancode_scan': [
-            'scancode-lkmclue = lkmclue:LKMClueScanner',
-            'scancode-elf = elf:ELFScanner',
-            'scancode-cppincludes = cppincludes:CPPIncludesScanner',
-            'scancode-dwarf = dwarf:DwarfScanner',
-            'scancode-gwt = gwt:GWTScanner',
-            'scancode-makedepend = makedepend:MakeDependScanner',
-            'scancode-javaclass = javaclass:JavaClassScanner',
-            'scancode-codecommentlines = sourcecode:CodeCommentLinesScanner',
+            'scancode-lkmclue = compiledcode.lkmclue:LKMClueScanner',
+            'scancode-elf = compiledcode.elf:ELFScanner',
+            'scancode-cppincludes = compiledcode.cppincludes:CPPIncludesScanner',
+            'scancode-dwarf = compiledcode.dwarf:DwarfScanner',
+            'scancode-gwt = compiledcode.gwt:GWTScanner',
+            'scancode-makedepend = compiledcode.makedepend:MakeDependScanner',
+            'scancode-javaclass = compiledcode.javaclass:JavaClassScanner',
+            'scancode-codecommentlines = compiledcode.sourcecode:CodeCommentLinesScanner',
         ],
     }
 )

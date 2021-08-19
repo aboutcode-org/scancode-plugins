@@ -15,7 +15,7 @@ from commoncode.testcase import FileBasedTesting
 from scancode.cli_test_utils import check_json_scan
 from scancode.cli_test_utils import run_scan_click
 
-from dwarf.dwarf import Dwarf
+from compiledcode.dwarf.dwarf import Dwarf
 
 
 class TestDwarf(FileBasedTesting):

@@ -10,11 +10,11 @@
 
 import json
 import os
+from unittest.case import expectedFailure
 
 from commoncode.testcase import FileBasedTesting
 
-from dwarf import dwarfng
-from unittest.case import expectedFailure
+from compiledcode.dwarf import dwarfng
 
 
 class TestDwarfNg(FileBasedTesting):

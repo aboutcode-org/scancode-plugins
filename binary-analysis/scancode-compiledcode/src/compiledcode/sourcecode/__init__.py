@@ -20,8 +20,8 @@ from commoncode.cliutils import PluggableCommandLineOption
 from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
-from sourcecode import kernel
-from sourcecode.metrics import file_lines_count
+from compiledcode.sourcecode import kernel
+from compiledcode.sourcecode.metrics import file_lines_count
 
 
 @scan_impl

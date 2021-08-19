@@ -20,7 +20,7 @@ from commoncode.cliutils import PluggableCommandLineOption
 from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
-from sourcecode import kernel
+from compiledcode.sourcecode import kernel
 
 
 @scan_impl

@@ -22,9 +22,9 @@ from commoncode.cliutils import PluggableCommandLineOption
 from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
-from dwarf import dwarf
-from dwarf import dwarf2
-from dwarf import dwarfng
+from compiledcode.dwarf import dwarf
+from compiledcode.dwarf import dwarf2
+from compiledcode.dwarf import dwarfng
 
 
 @scan_impl

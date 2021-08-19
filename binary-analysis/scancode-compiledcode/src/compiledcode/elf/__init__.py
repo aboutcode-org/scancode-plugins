@@ -20,8 +20,8 @@ from commoncode.cliutils import PluggableCommandLineOption
 from commoncode.cliutils import SCAN_GROUP
 from typecode import contenttype
 
-from elf.elf import Elf
-from elf import elfng
+from compiledcode.elf.elf import Elf
+from compiledcode.elf import elfng
 
 
 @scan_impl

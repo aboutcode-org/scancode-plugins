@@ -24,8 +24,8 @@ from plugincode.scan import ScanPlugin
 from plugincode.scan import scan_impl
 from typecode import contenttype
 
-from javaclass import javaclass
-from sourcecode import kernel
+from compiledcode.javaclass import javaclass
+from compiledcode.sourcecode import kernel
 
 
 @scan_impl
