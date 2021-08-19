@@ -58,8 +58,8 @@ def get_dwarfs(location, **kwargs):
     Return a mapping with original_source_files and included_source_files or None.
     """
     return dict(
-        dwarf_source_path=list(dwarf_source_path(location))
-        # dwarf_source_path=list(dwarf_source_path_ng(location))
+#         dwarf_source_path=list(dwarf_source_path(location))
+        dwarf_source_path=list(dwarf_source_path_ng(location))
     )
 
 
@@ -68,26 +68,7 @@ def dwarf_source_path_ng(location, **kwargs):
     Collect unique paths to compiled source code found in Elf binaries DWARF
     sections for D2D.
     """
-    seen_paths = set()
-    path_file_names = set()
-    bare_file_names = set()
-    for dpath in dwarfng.get_compilation_units_fullpath(location):
-        if dpath in seen_paths:
-            continue
-        fn = fileutils.file_name(dpath)
-        if fn == dpath:
-            bare_file_names.add(fn)
-            continue
-        else:
-            path_file_names.add(fn)
-        seen_paths.add(dpath)
-        yield dpath
-
-    # only yield filename that do not exist as full paths
-    for bfn in sorted(bare_file_names):
-        if bfn not in path_file_names and bfn not in seen_paths:
-            yield bfn
-            seen_paths.add(bfn)
+    return dwarfng.get_dwarf_cu_and_die_paths(location)
 
 
 def dwarf_source_path(location):
