@@ -19,15 +19,15 @@
     {
       "path": "input",
       "type": "directory",
-      "commentlines": 0,
       "codelines": 0,
+      "commentlines": 0,
       "scan_errors": []
     },
     {
       "path": "input/if_ath.c",
       "type": "file",
-      "commentlines": 2532,
       "codelines": 6586,
+      "commentlines": 2532,
       "scan_errors": []
     }
   ]
