@@ -15,10 +15,10 @@ import re
 
 import attr
 
-from plugincode.scan import ScanPlugin
-from plugincode.scan import scan_impl
 from commoncode.cliutils import PluggableCommandLineOption
 from commoncode.cliutils import SCAN_GROUP
+from plugincode.scan import ScanPlugin
+from plugincode.scan import scan_impl
 from textcode import analysis
 from typecode import contenttype
 

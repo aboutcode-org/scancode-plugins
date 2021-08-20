@@ -13,7 +13,7 @@ desc = '''A ScanCode scan plugin to get lkmclue, dwarf, gwt, cpp includes, code/
 
 setup(
     name='compiledcode',
-    version='2.0.0',
+    version='2.1.0',
     license='Apache-2.0',
     description=desc,
     long_description=desc,
@@ -39,12 +39,17 @@ setup(
         'open source', 'scancode', 'dwarf', 'lkmclue', 'elf', 'cpp includes', 'gwt',
     ],
     install_requires=[
-        'scancode-toolkit',
-        'attr',
+        'commoncode',
+        'plugincode',
+        'typecode',
+        'attrs',
         'pyelftools',
     ],
 
     extra_requires={
+        'full': [
+            'scancode-toolkit',
+        ],
         'binary': [
             'scancode-ctags',
             'scancode-dwarfdump',

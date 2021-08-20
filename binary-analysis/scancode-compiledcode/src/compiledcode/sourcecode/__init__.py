@@ -14,10 +14,10 @@ from itertools import chain
 import attr
 
 from commoncode import fileutils
-from plugincode.scan import ScanPlugin
-from plugincode.scan import scan_impl
 from commoncode.cliutils import PluggableCommandLineOption
 from commoncode.cliutils import SCAN_GROUP
+from plugincode.scan import ScanPlugin
+from plugincode.scan import scan_impl
 from typecode import contenttype
 
 from compiledcode.sourcecode import kernel
