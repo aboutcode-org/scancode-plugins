@@ -42,6 +42,9 @@ class SevenzipPaths(LocationProviderPlugin):
                     raise Exception('Unsupported system: {}'.format(distribution))
             elif mainstream_system == 'freebsd':
                 lib_dir = '/usr/local/libexec/p7zip'
+            elif mainstream_system == 'darwin':
+                # We are assuming that Homebrew was used to install p7zip
+                lib_dir = '/opt/homebrew/opt/p7zip/lib/p7zip'
             lib_7z = path.join(lib_dir, '7z')
         else:
             lib_dir = path.dirname(lib_7z)

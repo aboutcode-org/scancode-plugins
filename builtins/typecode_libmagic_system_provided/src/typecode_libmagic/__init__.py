@@ -65,6 +65,12 @@ class LibmagicPaths(LocationProviderPlugin):
 
             dll_loc = path.join(lib_dir, 'lib/libmagic.so')
             db_dir = path.join(lib_dir,'share/file')
+        
+        elif mainstream_system == 'darwin':
+            # We are assuming that Homebrew was used to install libmagic
+            lib_dir = '/opt/homebrew/opt/libmagic'
+            dll_loc = path.join(lib_dir, 'lib/libmagic.dylib')
+            db_dir = '/opt/homebrew/opt/libmagic/share/misc'
 
         magicdb_loc = path.join(db_dir, 'magic.mgc')
 

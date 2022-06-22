@@ -25,26 +25,31 @@ class LibarchivePaths(LocationProviderPlugin):
         if not lib_archive:
             system_arch = platform.machine()
             mainstream_system = platform.system().lower()
-            if mainstream_system == 'linux':
-                distribution = platform.linux_distribution()[0].lower()
-                debian_based_distro = ['ubuntu', 'mint', 'debian']
-                rpm_based_distro = ['fedora', 'redhat']
+            if mainstream_system in ('linux', 'freebsd'):
+                if mainstream_system == 'linux':
+                    distribution = platform.linux_distribution()[0].lower()
+                    debian_based_distro = ['ubuntu', 'mint', 'debian']
+                    rpm_based_distro = ['fedora', 'redhat']
 
-                if distribution in debian_based_distro:
-                    lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
+                    if distribution in debian_based_distro:
+                        lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
 
-                elif distribution in rpm_based_distro:
-                    lib_dir = '/usr/lib64'
+                    elif distribution in rpm_based_distro:
+                        lib_dir = '/usr/lib64'
 
-                else:
-                    raise Exception('Unsupported system: {}'.format(distribution))
+                    else:
+                        raise Exception('Unsupported system: {}'.format(distribution))
 
-            elif mainstream_system == 'freebsd':
-                if path.isdir('/usr/local/'):
-                    lib_dir = '/usr/local/lib'
-                else:
-                    lib_dir = '/usr/lib'
-            lib_archive = path.join(lib_dir, 'libarchive.so')
+                elif mainstream_system == 'freebsd':
+                    if path.isdir('/usr/local/'):
+                        lib_dir = '/usr/local/lib'
+                    else:
+                        lib_dir = '/usr/lib'
+                lib_archive = path.join(lib_dir, 'libarchive.so')
+
+            elif mainstream_system == 'darwin':
+                # We are assuming that Homebrew was used to install libarchive
+                lib_archive = '/opt/homebrew/opt/libarchive/lib/libarchive.dylib'
         else:
             lib_dir = path.dirname(lib_archive)
 
