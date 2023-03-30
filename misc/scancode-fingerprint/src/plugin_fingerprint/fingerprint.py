@@ -24,7 +24,7 @@
 
 import binascii
 from bitarray import bitarray
-from bitarray import bitdiff
+from bitarray.util import count_xor
 import hashlib
 
 from commoncode.text import toascii
@@ -141,7 +141,7 @@ class Simhash:
         Hamming distance is the difference in the bits of two binary string.
         Files with fingerprints whose hamming distance are less tends to be more similar.
         """
-        distance = bitdiff(fingerprint1, fingerprint2)
+        distance = count_xor(fingerprint1, fingerprint2)
         result = int(distance)
 
         return result

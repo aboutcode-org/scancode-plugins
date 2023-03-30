@@ -43,12 +43,11 @@ setup(
     ],
     install_requires=[
         'scancode-toolkit',
+        'bitarray==2.7.3'
     ],
     entry_points={
      'scancode_scan': [
          'fingerprint = plugin_fingerprint.plugin_fingerprint:FingerprintScanner',
         ],
     }
-
-
 )
