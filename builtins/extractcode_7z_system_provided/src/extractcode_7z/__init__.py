@@ -17,6 +17,15 @@ from plugincode.location_provider import LocationProviderPlugin
 
 class SevenzipPaths(LocationProviderPlugin):
 
+    def get_like_distro(self):
+        info = platform.freedesktop_os_release()
+        ids = [info["ID"]]
+        if "ID_LIKE" in info:
+            # ids are space separated and ordered by precedence
+            ids.extend(info["ID_LIKE"].split())
+        return ids
+
+
     def get_locations(self):
         """
         Return a mapping of {location key: location} providing the installation
@@ -28,14 +37,14 @@ class SevenzipPaths(LocationProviderPlugin):
         if not lib_7z:
             mainstream_system = platform.system().lower()
             if mainstream_system == 'linux':
-                distribution = platform.linux_distribution()[0].lower()
+                distribution = self.get_like_distro()
                 debian_based_distro = ['ubuntu', 'mint', 'debian']
-                rpm_based_distro = ['fedora', 'redhat']
+                rpm_based_distro = ['fedora', 'rhel']
 
-                if distribution in debian_based_distro:
+                if any(dist in debian_based_distro for dist in distribution):
                     lib_dir = '/usr/lib/p7zip'
 
-                elif distribution in rpm_based_distro:
+                elif any(dist in rpm_based_distro for dist in distribution):
                     lib_dir = '/usr/libexec/p7zip'
 
                 else:
