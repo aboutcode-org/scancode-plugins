@@ -51,15 +51,17 @@ class LibmagicPaths(LocationProviderPlugin):
             else:
                 raise Exception('Unsupported system: {}'.format(distribution))
 
-            dll_loc = path.join(lib_dir, 'libmagic.so')
+            dll_loc = path.join(lib_dir, 'libmagic.so.1')
         elif mainstream_system == 'freebsd':
-            if path.isdir('/usr/local/'):
-                lib_dir = '/usr/local'
-            else:
-                lib_dir = '/usr'
-
-            dll_loc = path.join(lib_dir, 'lib/libmagic.so')
-            db_dir = path.join(lib_dir, 'share/file')
+            dll_loc = ''
+            db_dir = ''
+            for lib_dir in ('/usr/local/', '/usr'):
+                possible_dll_loc = path.join(lib_dir, 'lib/libmagic.so')
+                possible_db_loc = path.join(lib_dir, 'share/misc/magic.mgc')
+                if path.exists(possible_dll_loc) and path.exists(possible_db_loc):
+                    dll_loc = possible_dll_loc
+                    db_dir =  path.dirname(possible_db_loc)
+                    break
         elif mainstream_system == 'darwin':
             # This assumes that libmagic was installed using Homebrew
             lib_dir = '/opt/homebrew'
@@ -71,12 +73,12 @@ class LibmagicPaths(LocationProviderPlugin):
         # Check that paths exist
         if not path.exists(dll_loc):
             raise Exception(
-                'libmagic not found on system, please install using `brew install libmagic`'
+                'libmagic not found on system.'
             )
 
         if not path.exists(magicdb_loc):
             raise Exception(
-                'magic.mgc not found on system, please install using `brew install libmagic`'
+                'magic.mgc not found on system.'
             )
 
         locations = {

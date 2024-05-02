@@ -38,14 +38,14 @@ class LibarchivePaths(LocationProviderPlugin):
                 else:
                     raise Exception('Unsupported system: {}'.format(distribution))
 
-                lib_archive = path.join(lib_dir, 'libarchive.so')
+                lib_archive = path.join(lib_dir, 'libarchive.so.13')
             elif mainstream_system == 'freebsd':
-                if path.isdir('/usr/local/'):
-                    lib_dir = '/usr/local/lib'
-                else:
-                    lib_dir = '/usr/lib'
-
-                lib_archive = path.join(lib_dir, 'libarchive.so')
+                lib_archive = ''
+                for lib_dir in ('/usr/local/lib', '/usr/lib'):
+                    possible_lib_archive = path.join(lib_dir, 'libarchive.so')
+                    if path.exists(possible_lib_archive):
+                        lib_archive = possible_lib_archive
+                        break
             elif mainstream_system == 'darwin':
                 # This assumes that libarchive was installed using Homebrew
                 lib_dir = '/opt/homebrew/opt/libarchive/lib'
@@ -55,7 +55,7 @@ class LibarchivePaths(LocationProviderPlugin):
 
         # Check that path exists
         if not path.exists(lib_archive):
-            raise Exception('libarchive not found on system, please install using `brew install libarchive`')
+            raise Exception('libarchive not found on system.')
 
         locations = {
             'extractcode.libarchive.dll': lib_archive,
