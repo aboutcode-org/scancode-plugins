@@ -2,14 +2,14 @@
 # Copyright (c) nexB Inc. and others.
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-# 
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or
 # other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -23,7 +23,6 @@
 
 
 import platform
-from os import environ
 from os import path
 
 from plugincode.location_provider import LocationProviderPlugin
@@ -36,10 +35,9 @@ class LibmagicPaths(LocationProviderPlugin):
         locations of the libmagic shared library as installed on various Linux
         distros or on FreeBSD.
         """
-
-        system_arch = platform.machine()
         mainstream_system = platform.system().lower()
         if mainstream_system == 'linux':
+            system_arch = platform.machine()
             distribution = platform.linux_distribution()[0].lower()
             debian_based_distro = ['ubuntu', 'mint', 'debian']
             rpm_based_distro = ['fedora', 'redhat']
@@ -47,16 +45,13 @@ class LibmagicPaths(LocationProviderPlugin):
             if distribution in debian_based_distro:
                 db_dir = '/usr/lib/file'
                 lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
-
             elif distribution in rpm_based_distro:
                 db_dir = '/usr/share/misc'
                 lib_dir = '/usr/lib64'
-
             else:
                 raise Exception('Unsupported system: {}'.format(distribution))
 
             dll_loc = path.join(lib_dir, 'libmagic.so')
-
         elif mainstream_system == 'freebsd':
             if path.isdir('/usr/local/'):
                 lib_dir = '/usr/local'
@@ -64,7 +59,12 @@ class LibmagicPaths(LocationProviderPlugin):
                 lib_dir = '/usr'
 
             dll_loc = path.join(lib_dir, 'lib/libmagic.so')
-            db_dir = path.join(lib_dir,'share/file')
+            db_dir = path.join(lib_dir, 'share/file')
+        elif mainstream_system == 'darwin':
+            # This assumes that libmagic was installed using Homebrew
+            lib_dir = '/opt/homebrew'
+            dll_loc = path.join(lib_dir, 'lib/libmagic.dylib')
+            db_dir = path.join(lib_dir, 'share/misc')
 
         magicdb_loc = path.join(db_dir, 'magic.mgc')
 

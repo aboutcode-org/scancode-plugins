@@ -13,7 +13,7 @@ from setuptools import setup
 desc = '''A ScanCode path provider plugin to provide a system package provided libmagic binary and database.'''
 
 setup(
-    name='typecode_libmagic-system-provided',
+    name='typecode_libmagic_system_provided',
     version='5.39.210531',
     license=(
         'apache-2.0 AND bsd-simplified-darwin AND (bsd-simplified AND public-domain AND '

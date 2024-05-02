@@ -20,7 +20,7 @@ fi
 
 
 if [[ "$PYTHON_EXE" == "" ]]; then
-    PYTHON_EXE=python3.6
+    PYTHON_EXE=python3
 fi
 
 

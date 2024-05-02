@@ -27,6 +27,7 @@ class SevenzipPaths(LocationProviderPlugin):
         lib_7z = environ.get('EXTRACTCODE_7Z_PATH')
         if not lib_7z:
             mainstream_system = platform.system().lower()
+
             if mainstream_system == 'linux':
                 distribution = platform.linux_distribution()[0].lower()
                 debian_based_distro = ['ubuntu', 'mint', 'debian']
@@ -34,14 +35,16 @@ class SevenzipPaths(LocationProviderPlugin):
 
                 if distribution in debian_based_distro:
                     lib_dir = '/usr/lib/p7zip'
-
                 elif distribution in rpm_based_distro:
                     lib_dir = '/usr/libexec/p7zip'
-
                 else:
                     raise Exception('Unsupported system: {}'.format(distribution))
             elif mainstream_system == 'freebsd':
                 lib_dir = '/usr/local/libexec/p7zip'
+            elif mainstream_system == 'darwin':
+                # This assumes that p7zip was installed using Homebrew
+                lib_dir = '/opt/homebrew/lib/p7zip'
+
             lib_7z = path.join(lib_dir, '7z')
         else:
             lib_dir = path.dirname(lib_7z)
@@ -52,5 +55,4 @@ class SevenzipPaths(LocationProviderPlugin):
             'extractcode.sevenzip.libdir': lib_dir,
             'extractcode.sevenzip.exe': lib_7z,
         }
-
         return locations
