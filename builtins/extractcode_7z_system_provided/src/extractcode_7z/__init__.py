@@ -35,24 +35,26 @@ class SevenzipPaths(LocationProviderPlugin):
 
                 if distribution in debian_based_distro:
                     lib_dir = '/usr/lib/p7zip'
+                    lib_7z = path.join(lib_dir, '7zr')
                 elif distribution in rpm_based_distro:
                     lib_dir = '/usr/libexec/p7zip'
+                    lib_7z = path.join(lib_dir, '7za')
                 else:
                     raise Exception('Unsupported system: {}'.format(distribution))
             elif mainstream_system == 'freebsd':
-                lib_dir = '/usr/local/libexec/p7zip'
+                lib_dir = '/usr/local/bin'
+                lib_7z = path.join(lib_dir, '7z')
             elif mainstream_system == 'darwin':
                 # This assumes that p7zip was installed using Homebrew
                 lib_dir = '/opt/homebrew/lib/p7zip'
-
-            lib_7z = path.join(lib_dir, '7z')
+                lib_7z = path.join(lib_dir, '7z')
         else:
             lib_dir = path.dirname(lib_7z)
 
         # Check that path exist
         if not path.exists(lib_7z):
             raise Exception(
-                'p7zip not found on system, please install using `brew install p7zip`'
+                'p7zip not found on system.'
             )
 
         locations = {
