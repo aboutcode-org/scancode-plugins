@@ -68,6 +68,17 @@ class LibmagicPaths(LocationProviderPlugin):
 
         magicdb_loc = path.join(db_dir, 'magic.mgc')
 
+        # Check that paths exist
+        if not path.exists(dll_loc):
+            raise Exception(
+                'libmagic not found on system, please install using `brew install libmagic`'
+            )
+
+        if not path.exists(magicdb_loc):
+            raise Exception(
+                'magic.mgc not found on system, please install using `brew install libmagic`'
+            )
+
         locations = {
             # typecode.libmagic.libdir is not used anymore and deprecated
             # but we are keeping it around for now for backward compatibility

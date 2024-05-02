@@ -53,6 +53,10 @@ class LibarchivePaths(LocationProviderPlugin):
         else:
             lib_dir = path.dirname(lib_archive)
 
+        # Check that path exists
+        if not path.exists(lib_archive):
+            raise Exception('libarchive not found on system, please install using `brew install libarchive`')
+
         locations = {
             'extractcode.libarchive.dll': lib_archive,
         }

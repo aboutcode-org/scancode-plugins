@@ -49,6 +49,12 @@ class SevenzipPaths(LocationProviderPlugin):
         else:
             lib_dir = path.dirname(lib_7z)
 
+        # Check that path exist
+        if not path.exists(lib_7z):
+            raise Exception(
+                'p7zip not found on system, please install using `brew install p7zip`'
+            )
+
         locations = {
             # extractcode.sevenzip.libdir is not used anymore and deprecated
             # but we are keeping it around for now for backward compatibility
