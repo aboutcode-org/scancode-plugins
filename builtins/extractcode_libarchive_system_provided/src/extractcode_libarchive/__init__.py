@@ -25,6 +25,7 @@ class LibarchivePaths(LocationProviderPlugin):
         if not lib_archive:
             system_arch = platform.machine()
             mainstream_system = platform.system().lower()
+
             if mainstream_system == 'linux':
                 distribution = platform.linux_distribution()[0].lower()
                 debian_based_distro = ['ubuntu', 'mint', 'debian']
@@ -32,21 +33,32 @@ class LibarchivePaths(LocationProviderPlugin):
 
                 if distribution in debian_based_distro:
                     lib_dir = '/usr/lib/'+system_arch+'-linux-gnu'
-
                 elif distribution in rpm_based_distro:
                     lib_dir = '/usr/lib64'
-
                 else:
                     raise Exception('Unsupported system: {}'.format(distribution))
 
+                lib_archive = path.join(lib_dir, 'libarchive.so.13')
             elif mainstream_system == 'freebsd':
-                if path.isdir('/usr/local/'):
-                    lib_dir = '/usr/local/lib'
-                else:
-                    lib_dir = '/usr/lib'
-            lib_archive = path.join(lib_dir, 'libarchive.so')
+                lib_archive = ''
+                for lib_dir in ('/usr/local/lib', '/usr/lib'):
+                    possible_lib_archive = path.join(lib_dir, 'libarchive.so')
+                    if path.exists(possible_lib_archive):
+                        lib_archive = possible_lib_archive
+                        break
+            elif mainstream_system == 'darwin':
+                # This assumes that libarchive was installed using Homebrew
+                lib_dir = '/opt/homebrew/opt/libarchive/lib'
+                lib_archive = path.join(lib_dir, 'libarchive.dylib')
         else:
             lib_dir = path.dirname(lib_archive)
+
+        # Check that path exists
+        if not path.exists(lib_archive):
+            raise Exception(
+                'libarchive not found. Please refer to the scancode-toolkit '
+                'documentation on how to install libarchive for your system.'
+            )
 
         locations = {
             'extractcode.libarchive.dll': lib_archive,
