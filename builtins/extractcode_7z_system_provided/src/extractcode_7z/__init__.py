@@ -54,7 +54,8 @@ class SevenzipPaths(LocationProviderPlugin):
         # Check that path exist
         if not path.exists(lib_7z):
             raise Exception(
-                'p7zip not found on system.'
+                'p7zip not found. Please refer to the scancode-toolkit '
+                'documentation on how to install p7zip for your system.'
             )
 
         locations = {

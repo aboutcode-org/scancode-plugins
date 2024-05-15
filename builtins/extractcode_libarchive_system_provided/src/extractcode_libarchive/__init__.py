@@ -55,7 +55,10 @@ class LibarchivePaths(LocationProviderPlugin):
 
         # Check that path exists
         if not path.exists(lib_archive):
-            raise Exception('libarchive not found on system.')
+            raise Exception(
+                'libarchive not found. Please refer to the scancode-toolkit '
+                'documentation on how to install libarchive for your system.'
+            )
 
         locations = {
             'extractcode.libarchive.dll': lib_archive,

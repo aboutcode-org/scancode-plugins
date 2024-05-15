@@ -73,12 +73,14 @@ class LibmagicPaths(LocationProviderPlugin):
         # Check that paths exist
         if not path.exists(dll_loc):
             raise Exception(
-                'libmagic not found on system.'
+                'libmagic not found. Please refer to the scancode-toolkit '
+                'documentation on how to install libmagic for your operating system.'
             )
 
         if not path.exists(magicdb_loc):
             raise Exception(
-                'magic.mgc not found on system.'
+                'magic.mgc not found. Please refer to the scancode-toolkit '
+                'documentation on how to install libmagic for your system.'
             )
 
         locations = {
