@@ -5,7 +5,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -86,7 +86,7 @@ class Source(object):
                     splitted = line.split('\t')
 
                     if (line.endswith('function\tfile:')
-                        or line.endswith('prototype\tfile:')):
+                            or line.endswith('prototype\tfile:')):
                         self.local_functions.append(splitted[0])
 
                     elif (line.endswith('function')

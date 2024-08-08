@@ -1,5 +1,5 @@
 about_resource: .
-homepage_url: https://github.com/nexB/scancode-plugins/tree/develop/builtins
+homepage_url: https://github.com/aboutcode-org/scancode-plugins/tree/develop/builtins
 name: typecode-libmagic
 owner: nexB Inc.
 copyright: Copyright (c) nexB Inc. and others.

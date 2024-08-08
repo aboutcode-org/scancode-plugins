@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -89,7 +89,8 @@ def get_dwarf_cu_and_die_paths(location):
                 file_entry = die_lineprogram.header.file_entry[decl_file_attrib.value - 1]
                 fname = bytes2str(file_entry.name)
                 try:
-                    file_dir = bytes2str(die_lineprogram['include_directory'][file_entry.dir_index - 1])
+                    file_dir = bytes2str(
+                        die_lineprogram['include_directory'][file_entry.dir_index - 1])
                 except:
                     continue
 
@@ -99,7 +100,8 @@ def get_dwarf_cu_and_die_paths(location):
                     seen.add(path)
 
                 comp_dir_attr = die.attributes.get('DW_AT_comp_dir', None)
-                comp_dir = bytes2str(comp_dir_attr.value) if comp_dir_attr else ''
+                comp_dir = bytes2str(
+                    comp_dir_attr.value) if comp_dir_attr else ''
                 fname_attr = die.attributes.get('DW_AT_name', None)
                 fname = bytes2str(fname_attr.value) if fname_attr else ''
                 if comp_dir:

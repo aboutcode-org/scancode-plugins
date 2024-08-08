@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -35,10 +35,10 @@ class ELFScanner(ScanPlugin):
 
     options = [
         PluggableCommandLineOption(('--elf',),
-            is_flag=True, default=False,
-            help='Collect dependent libraries names needed by an Elf file.',
-            help_group=SCAN_GROUP,
-            sort_order=100),
+                                   is_flag=True, default=False,
+                                   help='Collect dependent libraries names needed by an Elf file.',
+                                   help_group=SCAN_GROUP,
+                                   sort_order=100),
     ]
 
     def is_enabled(self, elf, **kwargs):
@@ -52,7 +52,7 @@ def get_elf_needed_library_ng(location, **kwargs):
     """
     Return a list of needed_libraries
     """
-    results = [enl for enl in  elfng.get_elf_needed_library(location)]
+    results = [enl for enl in elfng.get_elf_needed_library(location)]
     return dict(elf_needed_library=results)
 
 
@@ -66,6 +66,6 @@ def get_elf_needed_library(location, **kwargs):
         return
     elfie = Elf(location)
     results = []
-    for needed_library in  elfie.needed_libraries:
+    for needed_library in elfie.needed_libraries:
         results.append(needed_library)
     return dict(elf_needed_library=results)

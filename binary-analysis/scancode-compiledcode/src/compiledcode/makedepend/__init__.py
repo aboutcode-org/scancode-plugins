@@ -5,7 +5,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -33,10 +33,10 @@ class MakeDependScanner(ScanPlugin):
 
     options = [
         PluggableCommandLineOption(('--makedepend',),
-                          is_flag=True, default=False,
-                          help='Parse generated make depend files to find sources corresponding binaries.',
-                          help_group=SCAN_GROUP,
-                          sort_order=100),
+                                   is_flag=True, default=False,
+                                   help='Parse generated make depend files to find sources corresponding binaries.',
+                                   help_group=SCAN_GROUP,
+                                   sort_order=100),
     ]
 
     def is_enabled(self, makedepend, **kwargs):
@@ -83,7 +83,7 @@ def makedepend_scan(location, **kwargs):
                             if (f not in left_files
                                 and f != file_name
                                 and not f.endswith(file_name)
-                                and not f.endswith('.d')):
+                                    and not f.endswith('.d')):
                                 left_files.append(f)
 
                         lenf = len(left_files)
@@ -114,4 +114,3 @@ def makedepend_scan(location, **kwargs):
         makedepend_result = dict()
         makedepend_result[obj_path] = src_paths
         return dict(makedepend=makedepend_result)
-

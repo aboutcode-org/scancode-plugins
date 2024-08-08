@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -34,10 +34,10 @@ class LKMClueScanner(ScanPlugin):
 
     options = [
         PluggableCommandLineOption(('--lkmclue',),
-            is_flag=True, default=False,
-            help='Collect LKM module clues and type indicating a possible Linux Kernel Module. (formerly lkm_hint and lkm_line).',
-            help_group=SCAN_GROUP,
-            sort_order=100),
+                                   is_flag=True, default=False,
+                                   help='Collect LKM module clues and type indicating a possible Linux Kernel Module. (formerly lkm_hint and lkm_line).',
+                                   help_group=SCAN_GROUP,
+                                   sort_order=100),
     ]
 
     def is_enabled(self, lkmclue, **kwargs):

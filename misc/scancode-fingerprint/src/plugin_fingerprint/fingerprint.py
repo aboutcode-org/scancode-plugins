@@ -1,6 +1,6 @@
 #
 # Copyright (c) nexB Inc. and others. All rights reserved.
-# http://nexb.com and https://github.com/nexB/scancode-toolkit/
+# http://nexb.com and https://github.com/aboutcode-org/scancode-toolkit/
 # The ScanCode software is licensed under the Apache License version 2.0.
 # Data generated with ScanCode require an acknowledgment.
 # ScanCode is a trademark of nexB Inc.
@@ -20,7 +20,7 @@
 #  ScanCode should be considered or used as legal advice. Consult an Attorney
 #  for any legal advice.
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
-#  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
+#  Visit https://github.com/aboutcode-org/scancode-toolkit/ for support and download.
 
 import binascii
 from bitarray import bitarray
@@ -33,10 +33,12 @@ from licensedcode.tokenize import ngrams
 HASH_LENGTH = 128
 SHINGLE_LENGTH = 3
 
+
 class Simhash:
     """
     Fingerprint class to generate fingerprints for files used for similarity matching
     """
+
     def __init__(self):
         self.tokens = []
 
@@ -107,7 +109,7 @@ class Simhash:
         """
         # convert other encodings to ascii. See #1690.
         shingle = toascii(shingle)
-        
+
         hash = hashlib.md5(shingle.encode()).digest()
         result = self.bitarray_from_bytes(hash)
 

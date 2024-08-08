@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -37,10 +37,10 @@ class JavaClassScanner(ScanPlugin):
 
     options = [
         CommandLineOption(('--javaclass',),
-            is_flag=True, default=False,
-            help='Collect java class metadata',
-            help_group=SCAN_GROUP,
-            sort_order=100),
+                          is_flag=True, default=False,
+                          help='Collect java class metadata',
+                          help_group=SCAN_GROUP,
+                          sort_order=100),
     ]
 
     def is_enabled(self, javaclass, **kwargs):
@@ -76,7 +76,8 @@ def scan_javaclass(location, **kwargs):
             # part of #711
             # this may happen because of "self.constants.append(None)" in Class.__init__:
             # double and long constants take 2 slots, we must skip the 'None' one
-            if not const: continue
+            if not const:
+                continue
 
             constant_data = dict()
             if const[0] == javaclass.CONSTANT_Fieldref:
@@ -86,7 +87,8 @@ def scan_javaclass(location, **kwargs):
                 constant_data['Method'] = str(c.constants[const[1]][1])
 
             elif const[0] == javaclass.CONSTANT_InterfaceMethodref:
-                constant_data['InterfaceMethod'] = str(c.constants[const[1]][1])
+                constant_data['InterfaceMethod'] = str(
+                    c.constants[const[1]][1])
 
             elif const[0] == javaclass.CONSTANT_String:
                 constant_data['String'] = str(const[1])
@@ -113,7 +115,8 @@ def scan_javaclass(location, **kwargs):
                 constant_data['Class'] = str(c.constants[const[1]][1])
 
             elif const[0] == javaclass.CONSTANT_NameAndType:
-                constant_data['NameAndType'] = str(const[1]) + ', ' + str(const[2])
+                constant_data['NameAndType'] = str(
+                    const[1]) + ', ' + str(const[2])
             else:
                 constant_data['Unknown(' + str(const[0]) + ')'] = str(const[1])
 

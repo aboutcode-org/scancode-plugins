@@ -1,7 +1,7 @@
-ScanCode plugins 
+ScanCode plugins
 ================
 
-https://github.com/nexB/scancode-plugins
+https://github.com/aboutcode-org/scancode-plugins
 
 These are various scancode plugins, some are builtins and some are extras.
 Several of them contain pre-built binaries.
@@ -17,14 +17,14 @@ native binaries.
 
 See also:
 
- - https://github.com/nexB/scancode-toolkit
+ - https://github.com/aboutcode-org/scancode-toolkit
  - https://github.com/nexB/scancode-thirdparty-src (source for some plugins
    being transitioned)
 
 
 To re-provision pre-built binaries, follow these instructions (only on Linux):
 
-- install the system package for clamav, zstd and p7zip 
+- install the system package for clamav, zstd and p7zip
 - install the patchelf from sources (provided here in src/). This is done for
   you automatically below with a configure run. Older versions may be  buggy.
 
@@ -33,7 +33,7 @@ To re-provision pre-built binaries, follow these instructions (only on Linux):
     ./configure
     etc/scripts/fetch-plugins.sh
     clamscan -v *
-        
+
 In all cases, run clamscan or an up to date antivirus scanner before pushing
 a new release.
 

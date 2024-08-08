@@ -1,6 +1,6 @@
 #
 # Copyright (c) nexB Inc. and others. All rights reserved.
-# http://nexb.com and https://github.com/nexB/scancode-toolkit/
+# http://nexb.com and https://github.com/aboutcode-org/scancode-toolkit/
 # The ScanCode software is licensed under the Apache License version 2.0.
 # Data generated with ScanCode require an acknowledgment.
 # ScanCode is a trademark of nexB Inc.
@@ -20,7 +20,7 @@
 #  ScanCode should be considered or used as legal advice. Consult an Attorney
 #  for any legal advice.
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
-#  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
+#  Visit https://github.com/aboutcode-org/scancode-toolkit/ for support and download.
 
 from __future__ import absolute_import
 from __future__ import division
@@ -36,6 +36,7 @@ from commoncode.cliutils import OTHER_SCAN_GROUP
 from commoncode.cliutils import SCAN_OPTIONS_GROUP
 from plugin_fingerprint.fingerprint import Simhash
 
+
 @scan_impl
 class FingerprintScanner(ScanPlugin):
     """
@@ -47,9 +48,9 @@ class FingerprintScanner(ScanPlugin):
 
     options = [
         PluggableCommandLineOption(('-f', '--fingerprint'),
-                          is_flag=True, default=False,
-                          help='Scan <input> to generate simhash fingerprints for similarity matching.',
-                          help_group=OTHER_SCAN_GROUP)
+                                   is_flag=True, default=False,
+                                   help='Scan <input> to generate simhash fingerprints for similarity matching.',
+                                   help_group=OTHER_SCAN_GROUP)
     ]
 
     def is_enabled(self, fingerprint, **kwargs):

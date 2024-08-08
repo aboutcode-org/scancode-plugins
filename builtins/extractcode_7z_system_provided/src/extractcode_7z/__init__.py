@@ -3,7 +3,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-toolkit for support or download.
+# See https://github.com/aboutcode-org/scancode-toolkit for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -40,7 +40,8 @@ class SevenzipPaths(LocationProviderPlugin):
                     lib_dir = '/usr/libexec/p7zip'
                     lib_7z = path.join(lib_dir, '7za')
                 else:
-                    raise Exception('Unsupported system: {}'.format(distribution))
+                    raise Exception(
+                        'Unsupported system: {}'.format(distribution))
             elif mainstream_system == 'freebsd':
                 lib_dir = '/usr/local/bin'
                 lib_7z = path.join(lib_dir, '7z')

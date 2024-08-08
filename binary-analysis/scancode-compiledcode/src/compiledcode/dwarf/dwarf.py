@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -101,7 +101,8 @@ class Dwarf(object):
             error = open(err).read()
             if error:
                 if 'bin/dwarfdump2' in error:
-                    self.parse_errors.append(error[error.index('bin/dwarfdump2'):])
+                    self.parse_errors.append(
+                        error[error.index('bin/dwarfdump2'):])
                 else:
                     self.parse_errors.append(error)
 
@@ -117,10 +118,10 @@ class Dwarf(object):
         original, std_includes = cleanup(self._files)
 
         self.included_source_files.extend(x for x in std_includes
-            if x not in self.included_source_files)
+                                          if x not in self.included_source_files)
 
         self.original_source_files.extend(x for x in original
-            if x not in self.original_source_files)
+                                          if x not in self.original_source_files)
 
     def asdict(self):
         return dict([
@@ -240,7 +241,8 @@ class DwarfInfo(object):
         if posixpath.isabs(self.cu_filename):
             dwarf._files.append(self.cu_filename)
         else:
-            dwarf._files.append(posixpath.join(self.cu_comp_dir, self.cu_filename))
+            dwarf._files.append(posixpath.join(
+                self.cu_comp_dir, self.cu_filename))
 
         dwarf._files.extend(self.files)
 
@@ -255,4 +257,5 @@ class DwarfInfo(object):
                 if posixpath.isabs(filename):
                     self.files.append(filename)
                 else:
-                    self.files.append(posixpath.join(self.cu_comp_dir, filename))
+                    self.files.append(posixpath.join(
+                        self.cu_comp_dir, filename))

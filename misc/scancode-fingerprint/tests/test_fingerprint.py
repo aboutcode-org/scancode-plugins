@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) nexB Inc. and others. All rights reserved.
-# http://nexb.com and https://github.com/nexB/scancode-toolkit/
+# http://nexb.com and https://github.com/aboutcode-org/scancode-toolkit/
 # The ScanCode software is licensed under the Apache License version 2.0.
 # Data generated with ScanCode require an acknowledgment.
 # ScanCode is a trademark of nexB Inc.
@@ -21,7 +21,7 @@
 #  ScanCode should be considered or used as legal advice. Consult an Attorney
 #  for any legal advice.
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
-#  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
+#  Visit https://github.com/aboutcode-org/scancode-toolkit/ for support and download.
 
 from __future__ import absolute_import, print_function
 
@@ -32,32 +32,37 @@ from commoncode.testcase import FileBasedTesting
 from plugin_fingerprint.fingerprint import Simhash
 from plugin_fingerprint.fingerprint import HASH_LENGTH
 
+
 class TestFingerprint(FileBasedTesting):
 
     test_data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
     def test_get_weighted_hash1(self):
         simhash = Simhash()
-        test_file = self.get_test_loc('fingerprint/get_weighted_hash-test1.txt')
+        test_file = self.get_test_loc(
+            'fingerprint/get_weighted_hash-test1.txt')
 
         with open(test_file, 'r') as f:
             hashable = f.read()
 
         simhash.update(hashable)
         result = simhash.get_weighted_hash()
-        expected = [0, -2, 2, 0, 0, -2, 2, 2, -2, 0, -2, 0, 0, 0, -2, 0, 2, 0, -2, -2, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, -2, 2, 0, 0, 0, -2, 2, 0, 0, 0, 0, 0, 2, -2, 0, 0, -2, 2, 0, -2, 2, 2, -2, 0, -2, 2, 0, -2, 2, 0, 2, 2, 0, 0, 0, 2, 0, 0, -2, 0, 0, 0, 2, -2, 0, 0, 0, -2, 0, 0, 2, 0, 2, 0, 0, 0, 0, -2, -2, 2, 2, 0, 0, -2, -2, -2, -2, -2, 0, 0, 2, 0, 2, 2, -2, 0, 2, 2, -2, 0, -2, -2, 2, 0, 2, 0, 0, 0, 0, 2, -2, 0, 2, -2, -2, 0, -2]
+        expected = [0, -2, 2, 0, 0, -2, 2, 2, -2, 0, -2, 0, 0, 0, -2, 0, 2, 0, -2, -2, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, -2, 2, 0, 0, 0, -2, 2, 0, 0, 0, 0, 0, 2, -2, 0, 0, -2, 2, 0, -2, 2, 2, -2, 0, -2, 2, 0, -2, 2, 0, 2, 2,
+                    0, 0, 0, 2, 0, 0, -2, 0, 0, 0, 2, -2, 0, 0, 0, -2, 0, 0, 2, 0, 2, 0, 0, 0, 0, -2, -2, 2, 2, 0, 0, -2, -2, -2, -2, -2, 0, 0, 2, 0, 2, 2, -2, 0, 2, 2, -2, 0, -2, -2, 2, 0, 2, 0, 0, 0, 0, 2, -2, 0, 2, -2, -2, 0, -2]
         assert result == expected
 
     def test_get_weighted_hash2(self):
         simhash = Simhash()
-        test_file = self.get_test_loc('fingerprint/get_weighted_hash-test2.txt')
+        test_file = self.get_test_loc(
+            'fingerprint/get_weighted_hash-test2.txt')
 
         with open(test_file, 'r') as f:
             hashable = f.read()
 
         simhash.update(hashable)
         result = simhash.get_weighted_hash()
-        expected = [-1, -1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, 1, 1, 1, -1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, 1, 1, -1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1]
+        expected = [-1, -1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, 1, 1, 1, -1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1, -
+                    1, -1, -1, -1, 1, 1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, 1, 1, -1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1]
         assert result == expected
 
     def test_process_weighted_hash1(self):
@@ -81,21 +86,26 @@ class TestFingerprint(FileBasedTesting):
     def test_process_shingles1(self):
         simhash = Simhash()
         weighted_hash = [1] * HASH_LENGTH
-        expected = [0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0]
+        expected = [0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0, 0,
+                    0, 0, 2, 0, 2, 0, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0]
         result = simhash.process_shingles('Thisisfortesting', weighted_hash)
         assert result == expected
 
     def test_process_shingles2(self):
         simhash = Simhash()
-        weighted_hash = [0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0]
-        expected = [1, 1, 3, 1, -1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, -1, -1, 1, 3, 3, 1, 1, 3, 1, 1, 3, 3, 3, 1, 1, 3, 1, 1, 3, 3, -1, 1, 1, -1, -1, 1, -1, 3, 1, 1, -1, 3, 1, 3, 1, 1, -1, 3, 3, 1, 1, 1, 1, 3, 1, -1, 1, -1, 1, 1, -1, 3, 1, 1, 3, 1, 1, 1, 3, 1, 1, 3, -1, 3, 1, 1, 1, 3, -1, 1, -1, 1, 1, 1, -1, 1, 3, 1, 1, 1, 1, 3, 1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 3, 3, -1, 1, -1, 1, -1, -1, 3, -1, 1, 3, 1, 1, -1, 1, 1, 3, 1, -1]
+        weighted_hash = [0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0,
+                         0, 0, 0, 2, 0, 2, 0, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0]
+        expected = [1, 1, 3, 1, -1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, -1, -1, 1, 3, 3, 1, 1, 3, 1, 1, 3, 3, 3, 1, 1, 3, 1, 1, 3, 3, -1, 1, 1, -1, -1, 1, -1, 3, 1, 1, -1, 3, 1, 3, 1, 1, -1, 3, 3, 1, 1, 1, 1, 3, 1, -1, 1, -1,
+                    1, 1, -1, 3, 1, 1, 3, 1, 1, 1, 3, 1, 1, 3, -1, 3, 1, 1, 1, 3, -1, 1, -1, 1, 1, 1, -1, 1, 3, 1, 1, 1, 1, 3, 1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 3, 3, -1, 1, -1, 1, -1, -1, 3, -1, 1, 3, 1, 1, -1, 1, 1, 3, 1, -1]
         result = simhash.process_shingles('tryforanotherone', weighted_hash)
         assert result == expected
 
     def test_process_shingles3(self):
         simhash = Simhash()
-        weighted_hash = [0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0]
-        expected = [1, -1, 1, 1, -1, -1, 1, 3, 1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 3, 1, 3, 3, 1, 1, 3, -1, 1, 1, 1, 1, 3, 1, 1, 3, 1, 1, -1, 1, -1, 3, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 3, 1, 1, 1, 1, 1, 3, 1, 1, 3, -1, 1, 3, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, 3, 3, 3, 3, 1, 1, -1, 1, 1, -1, 3, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 3, 1, -1, 1, -1, 1, 1, -1, 1]
+        weighted_hash = [0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0,
+                         0, 0, 0, 2, 0, 2, 0, 0, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0]
+        expected = [1, -1, 1, 1, -1, -1, 1, 3, 1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 3, 1, 3, 3, 1, 1, 3, -1, 1, 1, 1, 1, 3, 1, 1, 3, 1, 1, -1, 1, -1, 3, 1, 1, -1, 1, 1, 1, -1, -1, 1,
+                    1, -1, 1, 1, 1, 1, -1, 1, 3, 1, 1, 1, 1, 1, 3, 1, 1, 3, -1, 1, 3, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, 3, 3, 3, 3, 1, 1, -1, 1, 1, -1, 3, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 3, 1, -1, 1, -1, 1, 1, -1, 1]
         result = simhash.process_shingles('for(inti=0;i<n;i++)', weighted_hash)
         assert result == expected
 
@@ -149,25 +159,29 @@ class TestFingerprint(FileBasedTesting):
         assert simhash.tokens == []
 
         simhash.update('This is for testing purpose \n It should work fine')
-        expected = ['This', 'is', 'for', 'testing', 'purpose', 'It', 'should', 'work', 'fine']
+        expected = ['This', 'is', 'for', 'testing',
+                    'purpose', 'It', 'should', 'work', 'fine']
         assert simhash.tokens == expected
 
     def test_generate_fingerprint(self):
         simhash = Simhash()
         simhash.update('This should work')
-        expected = bitarray('11100010001110100111100010101000101110111111110000010011000110000110001110000000100000111011101110111100110001011011110001011100')
+        expected = bitarray(
+            '11100010001110100111100010101000101110111111110000010011000110000110001110000000100000111011101110111100110001011011110001011100')
         assert simhash.generate_fingerprint() == expected
 
         simhash.update('this will get added too!')
-        expected = bitarray('00000010000000000011110010100000101000001111100000000001010110000110101110111000100000110101000000010100100000000010110011010010')
+        expected = bitarray(
+            '00000010000000000011110010100000101000001111100000000001010110000110101110111000100000110101000000010100100000000010110011010010')
         assert simhash.generate_fingerprint() == expected
-    
+
     # Ensure non-ascii characters are handled properly. See #1690.
     def test_generate_fingerprint_non_ascii(self):
         simhash = Simhash()
         simhash.update('Copyright (c) Mário Morgado')
 
-        expected = bitarray('00000001000000010000000001000000110000010011000000001010000001011100111001000001100000000100000000100100000000000000000000000001')
+        expected = bitarray(
+            '00000001000000010000000001000000110000010011000000001010000001011100111001000001100000000100000000100100000000000000000000000001')
         assert simhash.generate_fingerprint() == expected
 
     def test_similarity_matching1(self):
@@ -185,7 +199,8 @@ class TestFingerprint(FileBasedTesting):
 
         simhash1.update(hashable1)
         simhash2.update(hashable2)
-        distance = simhash1.hamming_distance(simhash1.generate_fingerprint(), simhash2.generate_fingerprint())
+        distance = simhash1.hamming_distance(
+            simhash1.generate_fingerprint(), simhash2.generate_fingerprint())
 
         assert distance == 14
 
@@ -204,7 +219,8 @@ class TestFingerprint(FileBasedTesting):
 
         simhash1.update(hashable1)
         simhash2.update(hashable2)
-        distance = simhash1.hamming_distance(simhash1.generate_fingerprint(), simhash2.generate_fingerprint())
+        distance = simhash1.hamming_distance(
+            simhash1.generate_fingerprint(), simhash2.generate_fingerprint())
 
         assert distance == 66
 
@@ -223,6 +239,7 @@ class TestFingerprint(FileBasedTesting):
 
         simhash1.update(hashable1)
         simhash2.update(hashable2)
-        distance = simhash1.hamming_distance(simhash1.generate_fingerprint(), simhash2.generate_fingerprint())
+        distance = simhash1.hamming_distance(
+            simhash1.generate_fingerprint(), simhash2.generate_fingerprint())
 
         assert distance == 13

@@ -1,6 +1,6 @@
 #
 # Copyright (c) 2018 nexB Inc. and others. All rights reserved.
-# http://nexb.com and https://github.com/nexB/scancode-toolkit/
+# http://nexb.com and https://github.com/aboutcode-org/scancode-toolkit/
 # The ScanCode software is licensed under the Apache License version 2.0.
 # Data generated with ScanCode require an acknowledgment.
 # ScanCode is a trademark of nexB Inc.
@@ -20,7 +20,7 @@
 #  ScanCode should be considered or used as legal advice. Consult an Attorney
 #  for any legal advice.
 #  ScanCode is a free software code scanning tool from nexB Inc. and others.
-#  Visit https://github.com/nexB/scancode-toolkit/ for support and download.
+#  Visit https://github.com/aboutcode-org/scancode-toolkit/ for support and download.
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
@@ -42,10 +42,10 @@ class IgnoreBinaries(PreScanPlugin):
 
     options = [
         PluggableCommandLineOption(('--ignore-binaries',),
-           is_flag=True,
-           help='Ignore binary files.',
-           sort_order=10,
-           help_group=PRE_SCAN_GROUP)
+                                   is_flag=True,
+                                   help='Ignore binary files.',
+                                   sort_order=10,
+                                   help_group=PRE_SCAN_GROUP)
     ]
 
     def is_enabled(self, ignore_binaries, **kwargs):
@@ -64,7 +64,7 @@ class IgnoreBinaries(PreScanPlugin):
         for resource in codebase.walk():
             if not resource.is_file:
                 continue
-            
+
             if is_binary(resource.location):
                 resources_to_remove.append(resource)
 
@@ -79,9 +79,9 @@ def is_binary(location):
     """
     t = get_type(location)
     return (
-        t.is_binary 
-        or t.is_archive 
-        or t.is_media 
+        t.is_binary
+        or t.is_archive
+        or t.is_media
         or t.is_office_doc
         or t.is_compressed
         or t.is_filesystem

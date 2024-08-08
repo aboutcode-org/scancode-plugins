@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-toolkit for support or download.
+# See https://github.com/aboutcode-org/scancode-toolkit for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -31,10 +31,10 @@ class CPPIncludesScanner(ScanPlugin):
 
     options = [
         PluggableCommandLineOption(('--cpp-includes',),
-            is_flag=True, default=False,
-            help='Collect the #includes statements in a C/C++ file.',
-            help_group=SCAN_GROUP,
-            sort_order=100),
+                                   is_flag=True, default=False,
+                                   help='Collect the #includes statements in a C/C++ file.',
+                                   help_group=SCAN_GROUP,
+                                   sort_order=100),
     ]
 
     def is_enabled(self, cpp_includes, **kwargs):

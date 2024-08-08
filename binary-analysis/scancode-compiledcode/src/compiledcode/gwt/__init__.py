@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -36,10 +36,10 @@ class GWTScanner(ScanPlugin):
 
     options = [
         PluggableCommandLineOption(('--gwt',),
-                          is_flag=True, default=False,
-                          help='Parse GWT (Google Web Toolkit) ".symbolMap" files to extract compilation/debug symbols. Used to infer the relationship between the compiled JavaScript and the original Java Source code.',
-                          help_group=SCAN_GROUP,
-                          sort_order=100),
+                                   is_flag=True, default=False,
+                                   help='Parse GWT (Google Web Toolkit) ".symbolMap" files to extract compilation/debug symbols. Used to infer the relationship between the compiled JavaScript and the original Java Source code.',
+                                   help_group=SCAN_GROUP,
+                                   sort_order=100),
     ]
 
     def is_enabled(self, gwt, **kwargs):
@@ -103,7 +103,7 @@ def gwt_scan(location, **kwargs):
                 # remove possible c: or drive name from windows paths. they
                 # are useless
                 clean_path = '/'.join([x for x in clean_path.split('/')
-                                             if ':' not in x])
+                                       if ':' not in x])
                 results.append(dict(jsName=gwts.jsName,
                                     jsniIdent=gwts.jsniIdent,
                                     className=gwts.className,

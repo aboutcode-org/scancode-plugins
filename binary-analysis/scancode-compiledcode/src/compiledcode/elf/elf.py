@@ -4,7 +4,7 @@
 # ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/scancode-plugins for support or download.
+# See https://github.com/aboutcode-org/scancode-plugins for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -31,7 +31,7 @@ SCANCODE_CPLUSPLUSFILT_LIB = 'scancode.cplusplusfilt.lib'
 
 def next_line(file_desc):
     try:
-        return  file_desc.next()
+        return file_desc.next()
     except:
         return None
 
@@ -77,11 +77,11 @@ class Elf(object):
 
     def symbols(self):
         return sorted(flatten([list(self.symbols_section.local_functions),
-                        list(self.symbols_section.global_functions)]))
+                               list(self.symbols_section.global_functions)]))
 
     def setup_handlers(self):
         self.readelf_options = set([s.readelf_option
-                                     for s in self.readelf_sections])
+                                    for s in self.readelf_sections])
         for s in self.readelf_sections:
             self.handlers[s.start_re] = s
 
@@ -226,7 +226,7 @@ def demangle_chunk(symbols):
     lib_loc = get_location(SCANCODE_CPLUSPLUSFILT_LIB)
     rc, out, err = command.execute(
         cmd_loc, args,
-        lib_dir=lib_loc, 
+        lib_dir=lib_loc,
         to_files=True,
     )
     if rc != 0:
@@ -255,7 +255,7 @@ def SYMBOLS_START_RE():
 
 
 def SYMBOLS_INTERESTING_RE():
-#                                       51:    0804bf30       0     FUNC                 LOCAL           DEFAULT    14    __do_global_ctors_aux
+    #                                       51:    0804bf30       0     FUNC                 LOCAL           DEFAULT    14    __do_global_ctors_aux
     return re.compile(r"^\d*:\s+[A-Fa-f0-9]+\s+\d+\s+(FILE|FUNC|OBJECT)\s+(LOCAL|GLOBAL)\s+DEFAULT\s+\w+\s+(.*)$")
 
 
@@ -273,14 +273,14 @@ standardfunc = ['__do_global_dtors_aux',
                 'call_gmon_start']
 
 standardobj = ['__CTOR_LIST__',
-                '__DTOR_LIST__',
-                '__JCR_LIST__',
-                '__CTOR_END__',
-                '__DTOR_END__',
-                '__FRAME_END__',
-                '__JCR_END__',
-                '_fp_hw',
-                '_IO_stdin_used']
+               '__DTOR_LIST__',
+               '__JCR_LIST__',
+               '__CTOR_END__',
+               '__DTOR_END__',
+               '__FRAME_END__',
+               '__JCR_END__',
+               '_fp_hw',
+               '_IO_stdin_used']
 
 
 class ElfSymbolsTableSection(object):
@@ -368,17 +368,21 @@ class ElfSymbolsTableSection(object):
         self.local_objects = set()
         self.global_objects = set()
         self.global_functions = set()
-        self.locals = {"FUNC": self.local_functions, "OBJECT": self.local_objects}
-        self.globals = {"FUNC": self.global_functions, "OBJECT": self.global_objects}
+        self.locals = {"FUNC": self.local_functions,
+                       "OBJECT": self.local_objects}
+        self.globals = {"FUNC": self.global_functions,
+                        "OBJECT": self.global_objects}
         self.locglobs = {"LOCAL": self.locals, "GLOBAL": self.globals}
 
         self.external_libs_functions = set()
         self.external_libs_objects = set()
-        self.externals = {"FUNC": self.external_libs_functions, "OBJECT": self.external_libs_objects}
+        self.externals = {"FUNC": self.external_libs_functions,
+                          "OBJECT": self.external_libs_objects}
 
         self.standard_functions = set()
         self.standard_objects = set()
-        self.standards = {"FUNC": self.standard_functions, "OBJECT": self.standard_objects}
+        self.standards = {"FUNC": self.standard_functions,
+                          "OBJECT": self.standard_objects}
 
         self.shared_libs_references = set()
 
@@ -398,14 +402,14 @@ class ElfSymbolsTableSection(object):
                     name, sharedlib = name.split("@@")
                     self.shared_libs_references.add(name)
 
-                if _type == 'FILE' and not name.startswith("<") :
+                if _type == 'FILE' and not name.startswith("<"):
                     if name in standardfiles:
                         self.standard_files.add(name)
                     else:
                         self.files.add(name)
 
                 if ((_type == 'FUNC' or _type == 'OBJECT')
-                    and not name.startswith("$")):
+                        and not name.startswith("$")):
                     if sharedlib:
                         self.externals[_type].add((name, sharedlib))
                     elif name in standardfunc or name in standardobj:
@@ -493,7 +497,8 @@ class ElfSectionHeadersSection(object):
     # starts with start_line
 
     # we need some sections to be able to et anything
-    needed_sections = ['.debug_info', '.debug_line', '.symtab', '.dynsym', '.dynstr']
+    needed_sections = ['.debug_info', '.debug_line',
+                       '.symtab', '.dynsym', '.dynstr']
     """
     $ readelf --wide --section-headers tests/dependencies-testfiles/elf/ssdeep.i686  | more
     There are 39 section headers, starting at offset 0xf5ec:

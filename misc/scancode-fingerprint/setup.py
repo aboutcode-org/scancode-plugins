@@ -23,7 +23,7 @@ setup(
     long_description=desc,
     author='nexB',
     author_email='info@aboutcode.org',
-    url='https://github.com/nexB/scancode-toolkit/plugins/scancode-fingerprint',
+    url='https://github.com/aboutcode-org/scancode-toolkit/plugins/scancode-fingerprint',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -46,8 +46,8 @@ setup(
         'bitarray==2.7.3'
     ],
     entry_points={
-     'scancode_scan': [
-         'fingerprint = plugin_fingerprint.plugin_fingerprint:FingerprintScanner',
+        'scancode_scan': [
+            'fingerprint = plugin_fingerprint.plugin_fingerprint:FingerprintScanner',
         ],
     }
 )
