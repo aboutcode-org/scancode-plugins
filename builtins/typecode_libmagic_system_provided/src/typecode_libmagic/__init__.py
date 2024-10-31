@@ -49,6 +49,7 @@ class LibmagicPaths(LocationProviderPlugin):
             distribution = self.get_like_distro()
             debian_based_distro = ['ubuntu', 'mint', 'debian']
             rpm_based_distro = ['fedora', 'rhel']
+            system_arch = platform.machine()
 
             if any(dist in debian_based_distro for dist in distribution):
                 db_dir = '/usr/lib/file'
