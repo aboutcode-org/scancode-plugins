@@ -32,10 +32,10 @@ class LibmagicPaths(LocationProviderPlugin):
 
     def get_like_distro(self):
         info = platform.freedesktop_os_release()
-        ids = [info["ID"]]
-        if "ID_LIKE" in info:
+        ids = [info['ID']]
+        if 'ID_LIKE' in info:
             # ids are space separated and ordered by precedence
-            ids.extend(info["ID_LIKE"].split())
+            ids.extend(info['ID_LIKE'].split())
         return ids
 
     def get_locations(self):
@@ -53,11 +53,17 @@ class LibmagicPaths(LocationProviderPlugin):
 
             if any(dist in debian_based_distro for dist in distribution):
                 db_dir = '/usr/lib/file'
-                lib_dir = '/usr/lib' if platform.architecture()[0] == '32bit' else '/usr/lib/'+system_arch+'-linux-gnu'
+                lib_dir = (
+                    '/usr/lib' if platform.architecture()[0] == '32bit'
+                    else f'/usr/lib/{system_arch}-linux-gnu'
+                )
 
             elif any(dist in rpm_based_distro for dist in distribution):
                 db_dir = '/usr/share/misc'
-                lib_dir = '/usr/lib' if platform.architecture()[0] == '32bit' else '/usr/lib64'
+                lib_dir = (
+                    '/usr/lib' if platform.architecture()[0] == '32bit'
+                    else '/usr/lib64'
+                )
 
             else:
                 raise Exception('Unsupported system: {}'.format(distribution))
@@ -100,5 +106,5 @@ class LibmagicPaths(LocationProviderPlugin):
             'typecode.libmagic.libdir': lib_dir,
             'typecode.libmagic.dll': dll_loc,
             'typecode.libmagic.db': magicdb_loc,
-            }
+        }
         return locations

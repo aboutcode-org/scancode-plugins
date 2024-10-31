@@ -41,12 +41,16 @@ class LibarchivePaths(LocationProviderPlugin):
                 rpm_based_distro = ['fedora', 'rhel']
 
                 if any(dist in debian_based_distro for dist in distribution):
-                    db_dir = '/usr/lib/file'
-                    lib_dir = '/usr/lib' if platform.architecture()[0] == '32bit' else '/usr/lib/'+system_arch+'-linux-gnu'
+                    lib_dir = (
+                        '/usr/lib' if platform.architecture()[0] == '32bit'
+                        else f'/usr/lib/{system_arch}-linux-gnu'
+                    )
 
                 elif any(dist in rpm_based_distro for dist in distribution):
-                    db_dir = '/usr/share/misc'
-                    lib_dir = '/usr/lib' if platform.architecture()[0] == '32bit' else '/usr/lib64'
+                    lib_dir = (
+                        '/usr/lib' if platform.architecture()[0] == '32bit'
+                        else '/usr/lib64'
+                    )
 
                 else:
                     raise Exception(
