@@ -19,10 +19,10 @@ class SevenzipPaths(LocationProviderPlugin):
 
     def get_like_distro(self):
         info = platform.freedesktop_os_release()
-        ids = [info["ID"]]
-        if "ID_LIKE" in info:
+        ids = [info['ID']]
+        if 'ID_LIKE' in info:
             # ids are space separated and ordered by precedence
-            ids.extend(info["ID_LIKE"].split())
+            ids.extend(info['ID_LIKE'].split())
         return ids
 
 
@@ -46,6 +46,7 @@ class SevenzipPaths(LocationProviderPlugin):
                     lib_dir = '/usr/bin'
                     lib_7z = path.join(lib_dir, '7z')
                 elif any(dist in rpm_based_distro for dist in distribution):
+                    # 7zip proper is not available on dnf
                     lib_dir = '/usr/libexec/p7zip'
                     lib_7z = path.join(lib_dir, '7za')
                 else:
