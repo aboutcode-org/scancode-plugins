@@ -43,8 +43,8 @@ class SevenzipPaths(LocationProviderPlugin):
                 rpm_based_distro = ['fedora', 'rhel']
 
                 if any(dist in debian_based_distro for dist in distribution):
-                    lib_dir = '/usr/lib/p7zip'
-                    lib_7z = path.join(lib_dir, '7zr')
+                    lib_dir = '/usr/bin'
+                    lib_7z = path.join(lib_dir, '7z')
                 elif any(dist in rpm_based_distro for dist in distribution):
                     lib_dir = '/usr/libexec/p7zip'
                     lib_7z = path.join(lib_dir, '7za')
@@ -55,17 +55,17 @@ class SevenzipPaths(LocationProviderPlugin):
                 lib_dir = '/usr/local/bin'
                 lib_7z = path.join(lib_dir, '7z')
             elif mainstream_system == 'darwin':
-                # This assumes that p7zip was installed using Homebrew
-                lib_dir = '/opt/homebrew/lib/p7zip'
-                lib_7z = path.join(lib_dir, '7z')
+                # This assumes that 7zip was installed using Homebrew
+                lib_dir = '/opt/homebrew/bin'
+                lib_7z = path.join(lib_dir, '7zz')
         else:
             lib_dir = path.dirname(lib_7z)
 
         # Check that path exist
         if not path.exists(lib_7z):
             raise Exception(
-                'p7zip not found. Please refer to the scancode-toolkit '
-                'documentation on how to install p7zip for your system.'
+                '7zip not found. Please refer to the scancode-toolkit '
+                'documentation on how to install 7zip for your system.'
             )
 
         locations = {
