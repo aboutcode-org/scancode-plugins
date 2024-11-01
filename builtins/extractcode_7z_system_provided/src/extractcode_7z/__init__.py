@@ -44,7 +44,10 @@ class SevenzipPaths(LocationProviderPlugin):
 
                 if any(dist in debian_based_distro for dist in distribution):
                     lib_dir = '/usr/bin'
-                    lib_7z = path.join(lib_dir, '7z')
+                    for bin_name in ('7z', '7zz'):
+                        lib_7z = path.join(lib_dir, bin_name)
+                        if path.exists(lib_7z):
+                            break
                 elif any(dist in rpm_based_distro for dist in distribution):
                     # 7zip proper is not available on dnf
                     lib_dir = '/usr/libexec/p7zip'
