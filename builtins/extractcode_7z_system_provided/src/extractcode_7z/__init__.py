@@ -42,19 +42,29 @@ class SevenzipPaths(LocationProviderPlugin):
                 debian_based_distro = ['ubuntu', 'mint', 'debian']
                 rpm_based_distro = ['fedora', 'rhel']
 
+                dir_candidates = ("/usr/bin", "/usr/libexec/p7zip")
+                bin_candidates = ("7z", "7zz", "7za")
+
                 if any(dist in debian_based_distro for dist in distribution):
-                    lib_dir = '/usr/bin'
-                    for bin_name in ('7z', '7zz'):
-                        lib_7z = path.join(lib_dir, bin_name)
-                        if path.exists(lib_7z):
-                            break
+                    # take the defaults
+                    pass
                 elif any(dist in rpm_based_distro for dist in distribution):
-                    # 7zip proper is not available on dnf
-                    lib_dir = '/usr/libexec/p7zip'
-                    lib_7z = path.join(lib_dir, '7za')
-                else:
-                    raise Exception(
-                        'Unsupported system: {}'.format(distribution))
+                    # Fedora >= 43 has 7zip proper, in /usr/bin
+                    dir_candidates = ("/usr/libexec/p7zip", "/usr/bin")
+                    bin_candidates = ("7za", "7z", "7zz")
+
+                found = False
+                for lib_dir in dir_candidates:
+                    for bin_candidate in bin_candidates:
+                        lib_7z = path.join(lib_dir, bin_candidate)
+                        if path.exists(lib_7z):
+                            found = True
+                            break
+                    if found:
+                        break
+
+                # If none is found here, lib_7z won’t be found below either.
+
             elif mainstream_system == 'freebsd':
                 lib_dir = '/usr/local/bin'
                 lib_7z = path.join(lib_dir, '7z')
