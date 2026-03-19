@@ -5,7 +5,7 @@
 
 set -e
 
-base_name=skopeo-1.2.3
+base_name=skopeo-1.9.3
 
 cd lib-src/
 
