@@ -84,6 +84,10 @@ class LibmagicPaths(LocationProviderPlugin):
             lib_dir = '/opt/homebrew'
             dll_loc = path.join(lib_dir, 'lib/libmagic.dylib')
             db_dir = path.join(lib_dir, 'share/misc')
+        elif mainstream_system == 'sunos':
+            lib_dir = '/usr'
+            dll_loc = path.join(lib_dir, 'lib/amd64/libmagic.so')
+            db_dir = path.join(lib_dir, 'share/misc')
 
         magicdb_loc = path.join(db_dir, 'magic.mgc')
 

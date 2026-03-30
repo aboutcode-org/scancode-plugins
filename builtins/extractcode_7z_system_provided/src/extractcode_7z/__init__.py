@@ -62,6 +62,9 @@ class SevenzipPaths(LocationProviderPlugin):
                 # This assumes that 7zip was installed using Homebrew
                 lib_dir = '/opt/homebrew/bin'
                 lib_7z = path.join(lib_dir, '7zz')
+            elif mainstream_system == 'sunos':
+                lib_dir = '/usr/bin'
+                lib_7z = path.join(lib_dir, '7z')
         else:
             lib_dir = path.dirname(lib_7z)
 

@@ -68,6 +68,9 @@ class LibarchivePaths(LocationProviderPlugin):
                 # This assumes that libarchive was installed using Homebrew
                 lib_dir = '/opt/homebrew/opt/libarchive/lib'
                 lib_archive = path.join(lib_dir, 'libarchive.dylib')
+            elif mainstream_system == 'sunos':
+                lib_dir = '/usr'
+                lib_archive = path.join(lib_dir, 'lib/amd64/libarchive.so')
         else:
             lib_dir = path.dirname(lib_archive)
 
