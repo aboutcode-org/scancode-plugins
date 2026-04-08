@@ -42,7 +42,7 @@ class LibmagicPaths(LocationProviderPlugin):
         """
         Return a mapping of {location key: location} providing the installation
         locations of the libmagic shared library as installed on various Linux
-        distros or on FreeBSD.
+        distros, FreeBSD, macOS, and other POSIX.
         """
         mainstream_system = platform.system().lower()
         if mainstream_system == 'linux':

@@ -28,7 +28,7 @@ class LibarchivePaths(LocationProviderPlugin):
         """
         Return a mapping of {location key: location} providing the installation
         locations of the libarchive shared library as installed on various Linux
-        distros or on FreeBSD.
+        distros, FreeBSD, macOS, and other POSIX.
         """
         lib_archive = environ.get('EXTRACTCODE_LIBARCHIVE_PATH')
         if not lib_archive:

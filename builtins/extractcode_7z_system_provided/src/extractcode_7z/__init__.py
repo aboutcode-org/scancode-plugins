@@ -30,7 +30,7 @@ class SevenzipPaths(LocationProviderPlugin):
         """
         Return a mapping of {location key: location} providing the installation
         locations of the 7zip exe and shared libraries as installed on various
-        Linux distros or on FreeBSD.
+        Linux distros, FreeBSD, macOS, and other POSIX.
         """
         lib_dir = None
         lib_7z = environ.get('EXTRACTCODE_7Z_PATH')
