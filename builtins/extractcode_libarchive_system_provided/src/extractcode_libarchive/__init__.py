@@ -71,6 +71,9 @@ class LibarchivePaths(LocationProviderPlugin):
             elif mainstream_system == 'sunos':
                 lib_dir = '/usr'
                 lib_archive = path.join(lib_dir, 'lib/amd64/libarchive.so')
+            elif mainstream_system == 'haiku':
+                lib_dir = '/system/lib'
+                lib_archive = path.join(lib_dir, 'libarchive.so.13')
         else:
             lib_dir = path.dirname(lib_archive)
 

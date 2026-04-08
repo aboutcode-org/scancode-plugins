@@ -88,6 +88,10 @@ class LibmagicPaths(LocationProviderPlugin):
             lib_dir = '/usr'
             dll_loc = path.join(lib_dir, 'lib/amd64/libmagic.so')
             db_dir = path.join(lib_dir, 'share/misc')
+        elif mainstream_system == 'haiku':
+            lib_dir = '/system'
+            dll_loc = path.join(lib_dir, 'lib/libmagic.so.1')
+            db_dir = path.join(lib_dir, 'data/misc')
 
         magicdb_loc = path.join(db_dir, 'magic.mgc')
 
