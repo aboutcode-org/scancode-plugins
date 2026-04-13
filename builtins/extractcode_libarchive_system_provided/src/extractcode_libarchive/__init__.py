@@ -28,12 +28,13 @@ class LibarchivePaths(LocationProviderPlugin):
         """
         Return a mapping of {location key: location} providing the installation
         locations of the libarchive shared library as installed on various Linux
-        distros or on FreeBSD.
+        distros, FreeBSD, macOS, and other POSIX.
         """
         lib_archive = environ.get('EXTRACTCODE_LIBARCHIVE_PATH')
         if not lib_archive:
-            system_arch = platform.machine()
             mainstream_system = platform.system().lower()
+            system_arch = platform.machine()
+            system_arch_bit_width = platform.architecture()[0]
 
             if mainstream_system == 'linux':
                 distribution = self.get_like_distro()
@@ -42,16 +43,14 @@ class LibarchivePaths(LocationProviderPlugin):
 
                 if any(dist in debian_based_distro for dist in distribution):
                     lib_dir = (
-                        '/usr/lib' if platform.architecture()[0] == '32bit'
+                        '/usr/lib' if system_arch_bit_width == '32bit'
                         else f'/usr/lib/{system_arch}-linux-gnu'
                     )
-
                 elif any(dist in rpm_based_distro for dist in distribution):
                     lib_dir = (
-                        '/usr/lib' if platform.architecture()[0] == '32bit'
+                        '/usr/lib' if system_arch_bit_width == '32bit'
                         else '/usr/lib64'
                     )
-
                 else:
                     raise Exception(
                         'Unsupported system: {}'.format(distribution))
@@ -68,6 +67,14 @@ class LibarchivePaths(LocationProviderPlugin):
                 # This assumes that libarchive was installed using Homebrew
                 lib_dir = '/opt/homebrew/opt/libarchive/lib'
                 lib_archive = path.join(lib_dir, 'libarchive.dylib')
+            elif mainstream_system == 'sunos':
+                lib_dir = '/usr/lib'
+                if system_arch == 'i86pc' and system_arch_bit_width == '64bit':
+                    lib_dir = path.join(lib_dir, 'amd64')
+                lib_archive = path.join(lib_dir, 'libarchive.so')
+            elif mainstream_system == 'haiku':
+                lib_dir = '/system/lib'
+                lib_archive = path.join(lib_dir, 'libarchive.so.13')
         else:
             lib_dir = path.dirname(lib_archive)
 

@@ -42,29 +42,29 @@ class LibmagicPaths(LocationProviderPlugin):
         """
         Return a mapping of {location key: location} providing the installation
         locations of the libmagic shared library as installed on various Linux
-        distros or on FreeBSD.
+        distros, FreeBSD, macOS, and other POSIX.
         """
         mainstream_system = platform.system().lower()
+        system_arch = platform.machine()
+        system_arch_bit_width = platform.architecture()[0]
+
         if mainstream_system == 'linux':
             distribution = self.get_like_distro()
             debian_based_distro = ['ubuntu', 'mint', 'debian']
             rpm_based_distro = ['fedora', 'rhel']
-            system_arch = platform.machine()
 
             if any(dist in debian_based_distro for dist in distribution):
                 db_dir = '/usr/lib/file'
                 lib_dir = (
-                    '/usr/lib' if platform.architecture()[0] == '32bit'
+                    '/usr/lib' if system_arch_bit_width == '32bit'
                     else f'/usr/lib/{system_arch}-linux-gnu'
                 )
-
             elif any(dist in rpm_based_distro for dist in distribution):
                 db_dir = '/usr/share/misc'
                 lib_dir = (
-                    '/usr/lib' if platform.architecture()[0] == '32bit'
+                    '/usr/lib' if system_arch_bit_width == '32bit'
                     else '/usr/lib64'
                 )
-
             else:
                 raise Exception('Unsupported system: {}'.format(distribution))
 
@@ -72,18 +72,29 @@ class LibmagicPaths(LocationProviderPlugin):
         elif mainstream_system == 'freebsd':
             dll_loc = ''
             db_dir = ''
-            for lib_dir in ('/usr/local/', '/usr'):
-                possible_dll_loc = path.join(lib_dir, 'lib/libmagic.so')
-                possible_db_loc = path.join(lib_dir, 'share/misc/magic.mgc')
+            for usr_dir in ('/usr/local', '/usr'):
+                lib_dir = path.join(usr_dir, 'lib')
+                possible_dll_loc = path.join(lib_dir, 'libmagic.so')
+                possible_db_loc = path.join(usr_dir, 'share/misc/magic.mgc')
                 if path.exists(possible_dll_loc) and path.exists(possible_db_loc):
                     dll_loc = possible_dll_loc
                     db_dir =  path.dirname(possible_db_loc)
                     break
         elif mainstream_system == 'darwin':
             # This assumes that libmagic was installed using Homebrew
-            lib_dir = '/opt/homebrew'
-            dll_loc = path.join(lib_dir, 'lib/libmagic.dylib')
-            db_dir = path.join(lib_dir, 'share/misc')
+            lib_dir = '/opt/homebrew/lib'
+            dll_loc = path.join(lib_dir, 'libmagic.dylib')
+            db_dir = '/opt/homebrew/share/misc'
+        elif mainstream_system == 'sunos':
+            lib_dir = '/usr/lib'
+            if system_arch == 'i86pc' and system_arch_bit_width == '64bit':
+                lib_dir = path.join(lib_dir, 'amd64')
+            dll_loc = path.join(lib_dir, 'libmagic.so')
+            db_dir = '/usr/share/misc'
+        elif mainstream_system == 'haiku':
+            lib_dir = '/system/lib'
+            dll_loc = path.join(lib_dir, 'libmagic.so.1')
+            db_dir = '/system/data/misc'
 
         magicdb_loc = path.join(db_dir, 'magic.mgc')
 

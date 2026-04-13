@@ -30,7 +30,7 @@ class SevenzipPaths(LocationProviderPlugin):
         """
         Return a mapping of {location key: location} providing the installation
         locations of the 7zip exe and shared libraries as installed on various
-        Linux distros or on FreeBSD.
+        Linux distros, FreeBSD, macOS, and other POSIX.
         """
         lib_dir = None
         lib_7z = environ.get('EXTRACTCODE_7Z_PATH')
@@ -62,6 +62,12 @@ class SevenzipPaths(LocationProviderPlugin):
                 # This assumes that 7zip was installed using Homebrew
                 lib_dir = '/opt/homebrew/bin'
                 lib_7z = path.join(lib_dir, '7zz')
+            elif mainstream_system == 'sunos':
+                lib_dir = '/usr/bin'
+                lib_7z = path.join(lib_dir, '7z')
+            elif mainstream_system == 'haiku':
+                lib_dir = '/bin'
+                lib_7z = path.join(lib_dir, '7z')
         else:
             lib_dir = path.dirname(lib_7z)
 
