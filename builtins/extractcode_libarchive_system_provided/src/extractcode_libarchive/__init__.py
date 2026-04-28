@@ -63,6 +63,13 @@ class LibarchivePaths(LocationProviderPlugin):
                     if path.exists(possible_lib_archive):
                         lib_archive = possible_lib_archive
                         break
+            elif mainstream_system == 'openbsd':
+                lib_archive = ''
+                for lib_dir in ('/usr/local/lib', '/usr/lib'):
+                    possible_lib_archive = path.join(lib_dir, 'libarchive.so.13.3')
+                    if path.exists(possible_lib_archive):
+                        lib_archive = possible_lib_archive
+                        break
             elif mainstream_system == 'darwin':
                 # This assumes that libarchive was installed using Homebrew
                 lib_dir = '/opt/homebrew/opt/libarchive/lib'

@@ -80,6 +80,17 @@ class LibmagicPaths(LocationProviderPlugin):
                     dll_loc = possible_dll_loc
                     db_dir =  path.dirname(possible_db_loc)
                     break
+        elif mainstream_system == 'openbsd':
+            dll_loc = ''
+            db_dir = ''
+            for usr_dir in ('/usr/local', '/usr'):
+                lib_dir = path.join(usr_dir, 'lib')
+                possible_dll_loc = path.join(lib_dir, 'libmagic.so.5.1')
+                possible_db_loc = path.join(usr_dir, 'share/misc/magic.mgc')
+                if path.exists(possible_dll_loc) and path.exists(possible_db_loc):
+                    dll_loc = possible_dll_loc
+                    db_dir =  path.dirname(possible_db_loc)
+                    break
         elif mainstream_system == 'darwin':
             # This assumes that libmagic was installed using Homebrew
             lib_dir = '/opt/homebrew/lib'

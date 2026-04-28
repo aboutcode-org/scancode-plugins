@@ -55,7 +55,7 @@ class SevenzipPaths(LocationProviderPlugin):
                 else:
                     raise Exception(
                         'Unsupported system: {}'.format(distribution))
-            elif mainstream_system == 'freebsd':
+            elif mainstream_system in ('freebsd', 'openbsd'):
                 lib_dir = '/usr/local/bin'
                 lib_7z = path.join(lib_dir, '7z')
             elif mainstream_system == 'darwin':
