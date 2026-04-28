@@ -69,23 +69,18 @@ class LibmagicPaths(LocationProviderPlugin):
                 raise Exception('Unsupported system: {}'.format(distribution))
 
             dll_loc = path.join(lib_dir, 'libmagic.so.1')
-        elif mainstream_system == 'freebsd':
+        elif mainstream_system in ('freebsd', 'openbsd'):
             dll_loc = ''
             db_dir = ''
+
+            if mainstream_system == 'freebsd':
+                libmagic_lib_filename = 'libmagic.so'
+            if mainstream_system == 'openbsd':
+                libmagic_lib_filename = 'libmagic.so.5.1'
+
             for usr_dir in ('/usr/local', '/usr'):
                 lib_dir = path.join(usr_dir, 'lib')
-                possible_dll_loc = path.join(lib_dir, 'libmagic.so')
-                possible_db_loc = path.join(usr_dir, 'share/misc/magic.mgc')
-                if path.exists(possible_dll_loc) and path.exists(possible_db_loc):
-                    dll_loc = possible_dll_loc
-                    db_dir =  path.dirname(possible_db_loc)
-                    break
-        elif mainstream_system == 'openbsd':
-            dll_loc = ''
-            db_dir = ''
-            for usr_dir in ('/usr/local', '/usr'):
-                lib_dir = path.join(usr_dir, 'lib')
-                possible_dll_loc = path.join(lib_dir, 'libmagic.so.5.1')
+                possible_dll_loc = path.join(lib_dir, libmagic_lib_filename)
                 possible_db_loc = path.join(usr_dir, 'share/misc/magic.mgc')
                 if path.exists(possible_dll_loc) and path.exists(possible_db_loc):
                     dll_loc = possible_dll_loc
@@ -97,6 +92,7 @@ class LibmagicPaths(LocationProviderPlugin):
             dll_loc = path.join(lib_dir, 'libmagic.dylib')
             db_dir = '/opt/homebrew/share/misc'
         elif mainstream_system == 'sunos':
+            # This assumes that we are on OpenIndiana
             lib_dir = '/usr/lib'
             if system_arch == 'i86pc' and system_arch_bit_width == '64bit':
                 lib_dir = path.join(lib_dir, 'amd64')

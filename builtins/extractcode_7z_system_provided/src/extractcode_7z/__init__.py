@@ -63,6 +63,7 @@ class SevenzipPaths(LocationProviderPlugin):
                 lib_dir = '/opt/homebrew/bin'
                 lib_7z = path.join(lib_dir, '7zz')
             elif mainstream_system == 'sunos':
+                # This assumes that we are on OpenIndiana
                 lib_dir = '/usr/bin'
                 lib_7z = path.join(lib_dir, '7z')
             elif mainstream_system == 'haiku':
