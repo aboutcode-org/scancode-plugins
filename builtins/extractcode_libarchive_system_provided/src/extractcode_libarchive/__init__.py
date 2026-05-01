@@ -56,10 +56,16 @@ class LibarchivePaths(LocationProviderPlugin):
                         'Unsupported system: {}'.format(distribution))
 
                 lib_archive = path.join(lib_dir, 'libarchive.so.13')
-            elif mainstream_system == 'freebsd':
+            elif mainstream_system in ('freebsd', 'openbsd'):
                 lib_archive = ''
+
+                if mainstream_system == 'freebsd':
+                    libarchive_lib_filename = 'libarchive.so'
+                if mainstream_system == 'openbsd':
+                    libarchive_lib_filename = 'libarchive.so.13.3'
+
                 for lib_dir in ('/usr/local/lib', '/usr/lib'):
-                    possible_lib_archive = path.join(lib_dir, 'libarchive.so')
+                    possible_lib_archive = path.join(lib_dir, libarchive_lib_filename)
                     if path.exists(possible_lib_archive):
                         lib_archive = possible_lib_archive
                         break
@@ -68,6 +74,7 @@ class LibarchivePaths(LocationProviderPlugin):
                 lib_dir = '/opt/homebrew/opt/libarchive/lib'
                 lib_archive = path.join(lib_dir, 'libarchive.dylib')
             elif mainstream_system == 'sunos':
+                # This assumes that we are on OpenIndiana
                 lib_dir = '/usr/lib'
                 if system_arch == 'i86pc' and system_arch_bit_width == '64bit':
                     lib_dir = path.join(lib_dir, 'amd64')
